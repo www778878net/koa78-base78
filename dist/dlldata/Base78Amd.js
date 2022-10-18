@@ -30,6 +30,9 @@ function loadjson(filepath) {
 }
 class Base78Amd {
     constructor(ctx) {
+        //����ʱ    
+        this.Config = {}; //config78
+        this.Argv = []; //process.argv
         //��������
         this.mysql2 = new mysql78_1.default(null);
         this.mysql1 = new mysql78_1.default(null);
@@ -303,6 +306,8 @@ class Base78Amd {
     }
 }
 exports.default = Base78Amd;
+Base78Amd.prototype.Argv = process.argv;
+Base78Amd.prototype.Config = Config78;
 Base78Amd.prototype.mysql1 = new mysql78_1.default(Config78.mysql);
 Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
 //# sourceMappingURL=Base78Amd.js.map

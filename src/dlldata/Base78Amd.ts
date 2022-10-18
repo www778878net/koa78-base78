@@ -20,6 +20,9 @@ function loadjson(filepath) {
 
 export default class Base78Amd {
     up: UpInfo;
+    //运行时    
+    Config: {} = {};//config78
+    Argv: string[] = [];//process.argv
 
     //各种连接
     mysql2: Mysql78 = new Mysql78(null);
@@ -339,6 +342,7 @@ export default class Base78Amd {
         });
     }
 }
-
+Base78Amd.prototype.Argv = process.argv;
+Base78Amd.prototype.Config = Config78;
 Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
