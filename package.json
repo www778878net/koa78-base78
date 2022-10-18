@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
-    "@www778878net/mysql78": "^0.0.4",
+    "@www778878net/mysql78": "^0.0.5",
     "dayjs": "^1.11.5",
     "mysql": "^2.18.1",
     "validator": "^13.7.0"
