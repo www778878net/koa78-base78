@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
+    "@www778878net/mysql78": "^0.0.2",
     "dayjs": "^1.11.5"
   },
   "bundleDependencies": []

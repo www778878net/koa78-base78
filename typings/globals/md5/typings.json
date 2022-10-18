@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/bb7f67e2e1026054ab2d2d6d7c253a2478834d7d/md5/md5.d.ts",
+    "raw": "registry:dt/md5#2.1.0+20160521153251",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/bb7f67e2e1026054ab2d2d6d7c253a2478834d7d/md5/md5.d.ts"
+  }
+}

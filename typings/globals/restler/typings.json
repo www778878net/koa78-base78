@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/d075e7c29ebbc24c691693a249d8e223d515b851/restler/restler.d.ts",
+    "raw": "registry:dt/restler#3.1.0+20160509152514",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/d075e7c29ebbc24c691693a249d8e223d515b851/restler/restler.d.ts"
+  }
+}
