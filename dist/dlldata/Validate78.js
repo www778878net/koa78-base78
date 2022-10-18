@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../../typings/index.d.ts'/>
 var Util = require('util');
 const validator = require("validator");
 class Validate78 {

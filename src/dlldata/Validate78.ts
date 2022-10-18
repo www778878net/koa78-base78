@@ -1,4 +1,4 @@
-﻿/// <reference path='../../typings/index.d.ts'/>
+﻿
 var Util = require('util');
 import * as validator from "validator";
 
