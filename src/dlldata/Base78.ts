@@ -13,7 +13,7 @@ export default  class Base78 extends Base78Amd {
 
         return new Promise(async (resolve, reject) => {
             if (typeof self[method] !== 'function') {
-                resolve('apifun not find');
+                resolve('apifun not find:' + method);
                 return;
             }
             let back: any;
