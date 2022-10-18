@@ -1,8 +1,8 @@
-<h1 align="center">koa78-Upinfo</h1>
+<h1 align="center">koa78-base78</h1>
 <div align="center">
 
 
-「koa78-Upinfo」高生产力koa框架。
+「koa78」高生产力koa框架。
 
 [![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Build Status](https://dev.azure.com/www778878net/basic_ts/_apis/build/status/www778878net.koa78-UpInfo?branchName=main)](https://dev.azure.com/www778878net/basic_ts/_build/latest?definitionId=21&branchName=main)
@@ -10,7 +10,7 @@
 
 </div>
 
-## API文档地址：[http://www.778878.net/docs/#/koa78-Upinfo/](http://www.778878.net/docs/#/koa78-Upinfo/)
+## API文档地址：[http://www.778878.net/docs/#/koa78-base78/](http://www.778878.net/docs/#/koa78-base78/)
 ## 反馈qq群(点击加群)：[323397913](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
 ## 背景 
@@ -61,10 +61,20 @@
 
 ## DEMO 
 
-```nodejs
+```ts
 //更多示例 详见文档链接
-let up = new Upinfo(null);
-let newid = up.getNewid()    
+export default class pars_users extends Base7817 {
+    //常量
+
+    constructor(ctx: any) {
+        super(ctx);
+        this.uidcid = "uid";
+        this.tbname = "pars_users";
+        this.colsImp = [ "item", "data", "d2", "d3", "d4", "d5", "d6"
+          ];
+        this.cols = this.colsImp.concat(this.colsremark);
+    }
+}
 
 ```
 

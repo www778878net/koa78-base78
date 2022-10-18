@@ -1,7 +1,7 @@
 {
-  "name": "@www778878net/koa78-upinfo",
-  "version": "0.0.105",
-  "description": "nodejs koa78封装 上传类",
+  "name": "@www778878net/koa78-base78",
+  "version": "0.0.1",
+  "description": "nodejs koa78框架 基类",
   "main": "dist/index.js",
   "types": "src/index.ts",
   "author": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/www778878net/koa78-Upinfo.git"
+    "url": "git+https://github.com/www778878net/koa78-base78.git"
   },
   "license": "Apache-2.0",
   "files": [
