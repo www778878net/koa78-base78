@@ -36,18 +36,18 @@
   },
   "bundledDependencies": false,
   "devDependencies": {
-    "@types/node": "^14.18.31",
-    "chai": "^4.3.4",
+    "@types/node": "^18.11.0",
+    "chai": "^4.3.6",
     "cross-env": "^7.0.3",
-    "fs": "0.0.1-security",
+    "fs": "^0.0.1-security",
     "iconv-lite": "^0.6.3",
-    "mocha": "^9.0.2",
+    "mocha": "^10.1.0",
     "nodemon": "^2.0.20",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
-    "@www778878net/mysql78": "^0.0.2",
+    "@www778878net/mysql78": "^0.0.4",
     "dayjs": "^1.11.5",
     "mysql": "^2.18.1",
     "validator": "^13.7.0"
