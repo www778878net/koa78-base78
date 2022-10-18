@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Base78Amd_1 = require("./Base78Amd");
 const Util = require('util');
 /**
- * ���� ��Ҫ��չʾout�߼�
+ * 基类 主要是展示out逻辑
  * */
 class Base78 extends Base78Amd_1.default {
     constructor(ctx) {
@@ -22,29 +22,29 @@ class Base78 extends Base78Amd_1.default {
         const self = this;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             if (typeof self[method] !== 'function') {
-                resolve('apifun not find');
+                resolve('apifun not find:' + method);
                 return;
             }
             let back;
             const up = self.up;
-            //��ֹ�����طŹ���
-            //���õ���M���� 5����CACHEֵ��ͬ API��ַ��ͬ������
+            //防止网络重放攻击
+            //调用的是M方法 5秒内CACHE值相同 API地址相同不允许
             if (up.v >= 17.2) {
                 if (method.charAt(0) == "m") { //&& up.ip!="127.0.0.1"
                     //back = await self.memcache.get(up.ctx.request.path + up.cache);
                     //if (back) {
-                    //    resolve("err:��ֹ�طŹ���" + up.ctx.request.path + up.cache);
+                    //    resolve("err:防止重放攻击" + up.ctx.request.path + up.cache);
                     //    return;
                     //}
                     //self.memcache.set(up.ctx.request.path + up.cache, 1, 5);
                 }
             }
             try {
-                //������reject ��������res=-N������Ԥ�ڵĴ���
+                //不建议reject 可以设置res=-N来返回预期的错误
                 back = yield self[method]();
             }
             catch (e) {
-                //�����¼����
+                //这里记录错误
                 console.log("doing err log3" + Util.inspect(e));
                 back = e;
                 up.res = -8888;
@@ -83,7 +83,7 @@ class Base78 extends Base78Amd_1.default {
             }
             catch (e) {
                 e = Util.inspect(e);
-                //�����¼����
+                //这里记录错误
                 //self.mysql._addWarn(up.uname + "--" + self.tbname + "--" + up.method + "--" + e, "err" + up.apisys, self.up);
                 if (self.up.jsonp) {
                     e = "_jqjsp({data:" + e + "})";
@@ -92,7 +92,7 @@ class Base78 extends Base78Amd_1.default {
                 //reject(e);
             }
         })).catch(function (e) {
-            //�����ӡ��Ԥ�ڵĴ���
+            //这里打印非预期的错误
             console.log("out err " + Util.inspect(e));
             self.up.ctx.body = Util.inspect(e);
         });

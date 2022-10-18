@@ -1,7 +1,7 @@
-import Base78Amd from "./Base78Amd";
+ï»¿import Base78Amd from "./Base78Amd";
 const Util = require('util');
 /**
- * »ùÀà Ö÷ÒªÊÇÕ¹Ê¾outÂß¼­  
+ * åŸºç±» ä¸»è¦æ˜¯å±•ç¤ºouté€»è¾‘  
  * */
 export default  class Base78 extends Base78Amd {
     constructor(ctx: any) {
@@ -18,14 +18,14 @@ export default  class Base78 extends Base78Amd {
             }
             let back: any;
             const up = self.up;
-            //·ÀÖ¹ÍøÂçÖØ·Å¹¥»÷
-            //µ÷ÓÃµÄÊÇM·½·¨ 5ÃëÄÚCACHEÖµÏàÍ¬ APIµØÖ·ÏàÍ¬²»ÔÊĞí
+            //é˜²æ­¢ç½‘ç»œé‡æ”¾æ”»å‡»
+            //è°ƒç”¨çš„æ˜¯Mæ–¹æ³• 5ç§’å†…CACHEå€¼ç›¸åŒ APIåœ°å€ç›¸åŒä¸å…è®¸
             if (up.v >= 17.2) {
                 if (method.charAt(0) == "m") {//&& up.ip!="127.0.0.1"
                     //back = await self.memcache.get(up.ctx.request.path + up.cache);
                     //if (back) {
 
-                    //    resolve("err:·ÀÖ¹ÖØ·Å¹¥»÷" + up.ctx.request.path + up.cache);
+                    //    resolve("err:é˜²æ­¢é‡æ”¾æ”»å‡»" + up.ctx.request.path + up.cache);
                     //    return;
                     //}
                     //self.memcache.set(up.ctx.request.path + up.cache, 1, 5);
@@ -33,10 +33,10 @@ export default  class Base78 extends Base78Amd {
             }
 
             try {
-                //²»½¨Òéreject ¿ÉÒÔÉèÖÃres=-NÀ´·µ»ØÔ¤ÆÚµÄ´íÎó
+                //ä¸å»ºè®®reject å¯ä»¥è®¾ç½®res=-Næ¥è¿”å›é¢„æœŸçš„é”™è¯¯
                 back = await self[method]();
             } catch (e) {
-                //ÕâÀï¼ÇÂ¼´íÎó
+                //è¿™é‡Œè®°å½•é”™è¯¯
                 console.log("doing err log3" + Util.inspect(e));
                 back = e;
                 up.res = -8888;
@@ -78,7 +78,7 @@ export default  class Base78 extends Base78Amd {
                 resolve(back);
             } catch (e) {
                 e = Util.inspect(e);
-                //ÕâÀï¼ÇÂ¼´íÎó
+                //è¿™é‡Œè®°å½•é”™è¯¯
                 //self.mysql._addWarn(up.uname + "--" + self.tbname + "--" + up.method + "--" + e, "err" + up.apisys, self.up);
                 if (self.up.jsonp) {
                     e = "_jqjsp({data:" + e + "})";
@@ -87,7 +87,7 @@ export default  class Base78 extends Base78Amd {
                 //reject(e);
             }
         }).catch(function (e) {
-            //ÕâÀï´òÓ¡·ÇÔ¤ÆÚµÄ´íÎó
+            //è¿™é‡Œæ‰“å°éé¢„æœŸçš„é”™è¯¯
             console.log("out err " + Util.inspect(e));
             self.up.ctx.body = Util.inspect(e)
         });

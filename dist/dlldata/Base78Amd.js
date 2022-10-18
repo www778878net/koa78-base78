@@ -15,6 +15,7 @@ const Validate78_1 = require("./Validate78");
 //import MemCache78 from "./MemCache78";
 var iconv = require('iconv-lite');
 var fs = require('fs');
+//必须要带参数启动 不然就要报错 
 var fspath = process.argv[3];
 var Config78 = loadjson(fspath);
 function loadjson(filepath) {
@@ -30,20 +31,20 @@ function loadjson(filepath) {
 }
 class Base78Amd {
     constructor(ctx) {
-        //����ʱ    
-        this.Config = {}; //config78
-        this.Argv = []; //process.argv
-        //��������
-        this.mysql2 = new mysql78_1.default(null);
-        this.mysql1 = new mysql78_1.default(null);
-        this.mysql = new mysql78_1.default(null);
+        //运行时    
+        this.Config = Config78; //config78
+        this.Argv = process.argv; //process.argv
+        //各种连接
+        this.mysql2 = new mysql78_1.default(Config78.mysql2); //支持多mysql
+        this.mysql1 = new mysql78_1.default(Config78.mysql); //支持多mysql
+        this.mysql = this.mysql1; //语法糖简化 默认mysql
         //memcache: MemCache78;
-        //���������
+        //表相关属性
         this.tbname = "";
-        this.cols = []; //������
-        this.colsImp = []; //��remark��
-        this.uidcid = "cid"; //cid uid zid(���п���) nid��������)
-        this.colsremark = []; //���б����е�Ĭ���ֶ�
+        this.cols = []; //所有列
+        this.colsImp = []; //除remark外
+        this.uidcid = "cid"; //cid uid zid(都有可能) nid（都不用)
+        this.colsremark = []; //所有表都有的默认字段
         this.up = new koa78_upinfo_1.default(ctx);
     }
     mAdd(colp) {
@@ -59,7 +60,7 @@ class Base78Amd {
         return this._mUpdate(colp);
     }
     /**
-     * �Զ��ж��޸Ļ������� (�Զ����߼�����д���Ǵ˷���)
+     * 自动判断修改还是新增 (自定义逻辑可重写覆盖此方法)
      * */
     m() {
         return this._m();
@@ -68,7 +69,7 @@ class Base78Amd {
         let self = this;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let up = self.up;
-            //��֤
+            //验证
             if (up.errmessage == "ok") {
                 resolve("ok");
                 return;
@@ -104,13 +105,13 @@ class Base78Amd {
             }
             if (up.cols.length === 1 && up.cols[0] === "all")
                 up.cols = self.cols;
-            //���ݿ��ж� ��ȡ�û���Ϣ
+            //数据库判断 获取用户信息
             let tmp = ""; // await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
             let t;
             if (!tmp) {
                 //console.log(up.sid + JSON.stringify(tmp));
                 switch (Config78.location) {
-                    case "qq": //�������http������֤�û�
+                    case "qq": //这里可以http请求验证用户
                         reject("err:get u info err html");
                         break;
                     default:
@@ -152,8 +153,8 @@ class Base78Amd {
         }));
     }
     /**
-     * �Զ��ж��޸Ļ�������
-     * @param colp �Զ����ֶ�
+     * 自动判断修改还是新增
+     * @param colp 自定义字段
      */
     _m(colp) {
         const self = this;
@@ -185,10 +186,10 @@ class Base78Amd {
                     back = yield self._mAdd(colp);
                 //console.log(back)
                 if (back == 0) {
-                    back = "err:û���б��޸�";
+                    back = "err:没有行被修改";
                     if (up.v >= 17.1) {
                         up.res = -8888;
-                        up.errmsg = "û���б��޸�";
+                        up.errmsg = "没有行被修改";
                     }
                 }
                 else if (back == 1)
@@ -204,7 +205,7 @@ class Base78Amd {
         }));
     }
     /**
-     *����
+     *新增
      * @param colp
      */
     _mAdd(colp) {
@@ -218,7 +219,7 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            //Ӧ��Ϊ���ֶζ��������գ����⸲�����ݣ�
+            //应改为减字段而不是填充空（避免覆盖数据）
             if (up.v >= 17.2) {
                 colp = colp || this.cols;
                 if (up.pars.length < colp.length) {
@@ -252,7 +253,7 @@ class Base78Amd {
         }));
     }
     /**
-    * �޸�
+    * 修改
     * @param colp
     */
     _mUpdate(colp) {
@@ -266,7 +267,7 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            //�°��Ϊ���ֶζ��������գ����⸲�����ݣ�
+            //下版改为减字段而不是填充空（避免覆盖数据）
             if (up.v >= 17.2) {
                 colp = colp || up.cols;
                 if (up.pars.length < colp.length) {
@@ -292,9 +293,9 @@ class Base78Amd {
             let back = yield self.mysql.doM(sb2, values2, up);
             if (back == 0) {
                 up.backtype = "string";
-                back = "err:û���б��޸�";
+                back = "err:没有行被修改";
                 up.res = -8888;
-                up.errmsg = "û���б��޸�";
+                up.errmsg = "没有行被修改";
                 //query["_state"] = 'fail';
             }
             else {

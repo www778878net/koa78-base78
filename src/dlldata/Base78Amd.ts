@@ -1,9 +1,10 @@
-import UpInfo from '@www778878net/koa78-upinfo'
+ï»¿import UpInfo from '@www778878net/koa78-upinfo'
 import Mysql78 from '@www778878net/mysql78'
 import Validate78 from "./Validate78";
 //import MemCache78 from "./MemCache78";
 var iconv = require('iconv-lite');
 var fs = require('fs');
+//å¿…é¡»è¦å¸¦å‚æ•°å¯åŠ¨ ä¸ç„¶å°±è¦æŠ¥é”™ 
 var fspath = process.argv[3]
 var Config78 = loadjson(fspath);
 function loadjson(filepath) {
@@ -20,21 +21,21 @@ function loadjson(filepath) {
 
 export default class Base78Amd {
     up: UpInfo;
-    //ÔËĞĞÊ±    
-    Config: {} = {};//config78
-    Argv: string[] = [];//process.argv
+    //è¿è¡Œæ—¶    
+    Config: {} = Config78;//config78
+    Argv: string[] = process.argv;//process.argv
 
-    //¸÷ÖÖÁ¬½Ó
-    mysql2: Mysql78 = new Mysql78(null);
-    mysql1: Mysql78 = new Mysql78(null);
-    mysql: Mysql78 = new Mysql78(null);
+    //å„ç§è¿æ¥
+    mysql2: Mysql78 = new Mysql78(Config78.mysql2);//æ”¯æŒå¤šmysql
+    mysql1: Mysql78 = new Mysql78(Config78.mysql);//æ”¯æŒå¤šmysql
+    mysql: Mysql78 = this.mysql1;//è¯­æ³•ç³–ç®€åŒ– é»˜è®¤mysql
     //memcache: MemCache78;
-    //±íÏà¹ØÊôĞÔ
+    //è¡¨ç›¸å…³å±æ€§
     tbname: string = "";
-    cols: string[] = [];//ËùÓĞÁĞ
-    colsImp: string[] = [];//³ıremarkÍâ
-    uidcid: string = "cid";//cid uid zid(¶¼ÓĞ¿ÉÄÜ) nid£¨¶¼²»ÓÃ)
-    colsremark: string[] = [];//ËùÓĞ±í¶¼ÓĞµÄÄ¬ÈÏ×Ö¶Î
+    cols: string[] = [];//æ‰€æœ‰åˆ—
+    colsImp: string[] = [];//é™¤remarkå¤–
+    uidcid: string = "cid";//cid uid zid(éƒ½æœ‰å¯èƒ½) nidï¼ˆéƒ½ä¸ç”¨)
+    colsremark: string[] = [];//æ‰€æœ‰è¡¨éƒ½æœ‰çš„é»˜è®¤å­—æ®µ
 
     constructor(ctx: any) {
         this.up = new UpInfo(ctx);
@@ -56,7 +57,7 @@ export default class Base78Amd {
     }
 
     /**
-     * ×Ô¶¯ÅĞ¶ÏĞŞ¸Ä»¹ÊÇĞÂÔö (×Ô¶¨ÒåÂß¼­¿ÉÖØĞ´¸²¸Ç´Ë·½·¨)
+     * è‡ªåŠ¨åˆ¤æ–­ä¿®æ”¹è¿˜æ˜¯æ–°å¢ (è‡ªå®šä¹‰é€»è¾‘å¯é‡å†™è¦†ç›–æ­¤æ–¹æ³•)
      * */
     m(): Promise<string> {
         return this._m();
@@ -69,7 +70,7 @@ export default class Base78Amd {
         return new Promise(async (resolve, reject) => {
             let up = self.up;
 
-            //ÑéÖ¤
+            //éªŒè¯
             if (up.errmessage == "ok") {
                 resolve("ok");
                 return;
@@ -112,7 +113,7 @@ export default class Base78Amd {
                 up.cols = self.cols;
 
 
-            //Êı¾İ¿âÅĞ¶Ï »ñÈ¡ÓÃ»§ĞÅÏ¢
+            //æ•°æ®åº“åˆ¤æ–­ è·å–ç”¨æˆ·ä¿¡æ¯
 
             let tmp =""// await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
 
@@ -121,7 +122,7 @@ export default class Base78Amd {
             if (!tmp) {
                 //console.log(up.sid + JSON.stringify(tmp));
                 switch (Config78.location) {
-                    case "qq"://ÕâÀï¿ÉÒÔhttpÇëÇóÑéÖ¤ÓÃ»§
+                    case "qq"://è¿™é‡Œå¯ä»¥httpè¯·æ±‚éªŒè¯ç”¨æˆ·
                         reject("err:get u info err html");
                         break;
                     default:
@@ -180,8 +181,8 @@ export default class Base78Amd {
     }
 
     /**
-     * ×Ô¶¯ÅĞ¶ÏĞŞ¸Ä»¹ÊÇĞÂÔö 
-     * @param colp ×Ô¶¨Òå×Ö¶Î
+     * è‡ªåŠ¨åˆ¤æ–­ä¿®æ”¹è¿˜æ˜¯æ–°å¢ 
+     * @param colp è‡ªå®šä¹‰å­—æ®µ
      */
     _m(colp?: string[]): Promise<string> {
         const self = this;
@@ -214,10 +215,10 @@ export default class Base78Amd {
                 //console.log(back)
                 if (back == 0) {
 
-                    back = "err:Ã»ÓĞĞĞ±»ĞŞ¸Ä";
+                    back = "err:æ²¡æœ‰è¡Œè¢«ä¿®æ”¹";
                     if (up.v >= 17.1) {
                         up.res = -8888;
-                        up.errmsg = "Ã»ÓĞĞĞ±»ĞŞ¸Ä";
+                        up.errmsg = "æ²¡æœ‰è¡Œè¢«ä¿®æ”¹";
                     }
 
                 }
@@ -234,7 +235,7 @@ export default class Base78Amd {
     }
 
     /**
-     *ĞÂÔö
+     *æ–°å¢
      * @param colp
      */
     _mAdd(colp?: string[]): Promise<any> {
@@ -250,7 +251,7 @@ export default class Base78Amd {
                 return;
             }
 
-            //Ó¦¸ÄÎª¼õ×Ö¶Î¶ø²»ÊÇÌî³ä¿Õ£¨±ÜÃâ¸²¸ÇÊı¾İ£©
+            //åº”æ”¹ä¸ºå‡å­—æ®µè€Œä¸æ˜¯å¡«å……ç©ºï¼ˆé¿å…è¦†ç›–æ•°æ®ï¼‰
             if (up.v >= 17.2) {
                 colp = colp || this.cols;
                 if (up.pars.length < colp.length) {
@@ -286,7 +287,7 @@ export default class Base78Amd {
     }
 
     /**
-    * ĞŞ¸Ä
+    * ä¿®æ”¹
     * @param colp
     */
     _mUpdate(colp?: string[]): Promise<string> {
@@ -300,7 +301,7 @@ export default class Base78Amd {
                 reject(e);
                 return;
             }
-            //ÏÂ°æ¸ÄÎª¼õ×Ö¶Î¶ø²»ÊÇÌî³ä¿Õ£¨±ÜÃâ¸²¸ÇÊı¾İ£©
+            //ä¸‹ç‰ˆæ”¹ä¸ºå‡å­—æ®µè€Œä¸æ˜¯å¡«å……ç©ºï¼ˆé¿å…è¦†ç›–æ•°æ®ï¼‰
             if (up.v >= 17.2) {
                 colp = colp || up.cols;
                 if (up.pars.length < colp.length) {
@@ -327,9 +328,9 @@ export default class Base78Amd {
             let back = await self.mysql.doM(sb2, values2, up);
             if (back == 0) {
                 up.backtype = "string";
-                back = "err:Ã»ÓĞĞĞ±»ĞŞ¸Ä";
+                back = "err:æ²¡æœ‰è¡Œè¢«ä¿®æ”¹";
                 up.res = -8888;
-                up.errmsg = "Ã»ÓĞĞĞ±»ĞŞ¸Ä"; 
+                up.errmsg = "æ²¡æœ‰è¡Œè¢«ä¿®æ”¹"; 
                 //query["_state"] = 'fail';
             }
             else {
