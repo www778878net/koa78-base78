@@ -28,7 +28,7 @@
     "postpublish": "git push origin --all && git push origin --tags",
     "postversion": "npm publish --access public",
     "preversion": "npm test ",
-    "test": "tsc   && mocha     --reporter spec  -t 5000  --exit",
+    "test": "tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
     "build": "tsc  "
   },
   "engines": {
@@ -48,7 +48,9 @@
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
     "@www778878net/mysql78": "^0.0.2",
-    "dayjs": "^1.11.5"
+    "dayjs": "^1.11.5",
+    "mysql": "^2.18.1",
+    "validator": "^13.7.0"
   },
   "bundleDependencies": []
 }
