@@ -1,6 +1,6 @@
 {
   "name": "@www778878net/koa78-base78",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "nodejs koa78框架 基类",
   "main": "dist/index.js",
   "types": "src/index.ts",
