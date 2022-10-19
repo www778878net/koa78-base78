@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
+    "start": " node .\\strve\\index.js  --config config.json",
     "postpublish": "git push origin --all && git push origin --tags",
     "postversion": "npm publish --access public",
     "preversion": "npm test ",
@@ -41,6 +42,11 @@
     "cross-env": "^7.0.3",
     "fs": "^0.0.1-security",
     "iconv-lite": "^0.6.3",
+    "koa": "^2.13.4",
+    "koa-better-body": "^3.3.9",
+    "koa-bodyparser": "^4.3.0",
+    "koa-convert": "^2.0.0",
+    "koa-router": "^12.0.0",
     "mocha": "^10.1.0",
     "nodemon": "^2.0.20",
     "typescript": "^4.8.4"
@@ -48,8 +54,11 @@
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
     "@www778878net/mysql78": "^0.0.5",
+    "@www778878net/promise78": "^0.0.2",
+    "co": "^4.6.0",
     "dayjs": "^1.11.5",
     "mysql": "^2.18.1",
+    "restler": "^3.4.0",
     "validator": "^13.7.0"
   },
   "bundleDependencies": []

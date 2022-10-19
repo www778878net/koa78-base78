@@ -65,6 +65,51 @@ class Base78Amd {
     m() {
         return this._m();
     }
+    /**
+     * get方法
+     * */
+    get() {
+        return this._get();
+    }
+    /**
+     * 获取
+     * @param where
+     * @param colp
+     */
+    _get(where, colp) {
+        const self = this;
+        //colp = colp || this.cols;
+        where = where || "";
+        const up = self.up;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this._upcheck();
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
+            let values = [up[self.uidcid]];
+            colp = colp || up.cols; //修改列
+            if (where == "" && up.pars.length >= 1) {
+                for (var i = 0; i < up.pars.length; i++) {
+                    if (up.pars[i] != "") {
+                        where += " and " + colp[i] + "=?";
+                        values.push(up.pars[i]);
+                    }
+                }
+            }
+            var sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
+                + " WHERE " + self.uidcid + '=? ' + where;
+            if (up.order !== "idpk")
+                sb += '  order by ' + up.order;
+            sb += ' limit ' + up.getstart + ',' + up.getnumber;
+            //if (where !== '')
+            //    values = values.concat(up.pars);
+            let tb = yield self.mysql1.doGet(sb, values, up);
+            resolve(tb);
+        }));
+    }
     _upcheck() {
         let self = this;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -115,8 +160,8 @@ class Base78Amd {
                         reject("err:get u info err html");
                         break;
                     default:
-                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,pwd,id,upby,uptime,sid_web_date,  " +
-                            "  idcoDef,openweixin ,truename,mobile,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
+                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
+                            "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                             " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
                         var values = [up.sid, up.sid];
                         t = yield self.mysql.doGet(cmdtext, values, up);

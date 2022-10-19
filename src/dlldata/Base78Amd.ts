@@ -63,6 +63,55 @@ export default class Base78Amd {
         return this._m();
     }
 
+    /**
+     * get方法
+     * */
+    get(): Promise<string> { 
+        return this._get();
+    }
+    /**
+     * 获取
+     * @param where
+     * @param colp
+     */
+    _get(where?: string, colp?: string[]): Promise<string> {
+        const self = this;
+        //colp = colp || this.cols;
+        where = where || "";
+        const up = self.up;
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this._upcheck();
+            } catch (e) {
+                reject(e);
+                return;
+            }
+            let values = [up[self.uidcid]];
+            colp = colp || up.cols;//修改列
+            if (where == "" && up.pars.length >= 1) {
+                for (var i = 0; i < up.pars.length; i++) {
+                    if (up.pars[i] != "") {
+                        where += " and " + colp[i] + "=?";
+                        values.push(up.pars[i]);
+                    }
+                }
+            }
+
+            var sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
+                + " WHERE " + self.uidcid + '=? ' + where;
+            
+            if (up.order !== "idpk")
+                sb += '  order by ' + up.order;
+            sb += ' limit ' + up.getstart + ',' + up.getnumber;
+
+            //if (where !== '')
+            //    values = values.concat(up.pars);
+            let tb = await self.mysql1.doGet(sb, values, up);
+            resolve(tb);
+        });
+    }
+
+
 
     _upcheck(): Promise<string> {
         let self = this;
@@ -127,8 +176,8 @@ export default class Base78Amd {
                         break;
                     default:
 
-                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,pwd,id,upby,uptime,sid_web_date,  " +
-                            "  idcoDef,openweixin ,truename,mobile,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
+                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
+                            "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                             " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
                         var values = [up.sid, up.sid];
                         t = await self.mysql.doGet(cmdtext, values, up);

@@ -5,6 +5,7 @@
     "port": "3300",
     "password": "7788test",
     "database": "testdb",
-    "user": "7788test"
+    "user": "7788test",
+    "isLog": true
   }
 }
