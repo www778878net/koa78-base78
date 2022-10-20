@@ -71,6 +71,34 @@ class Base78Amd {
     get() {
         return this._get();
     }
+    del() {
+        return this._del();
+    }
+    _del() {
+        const self = this;
+        const up = self.up;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this._upcheck();
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
+            var sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
+            var values = [up.mid, up[self.uidcid]];
+            let back = yield self.mysql.doM(sb, values, up);
+            if (back == 0) {
+                back = "err:没有行被修改";
+            }
+            else {
+                back = up.mid;
+            }
+            if (back == 1)
+                back = up.mid;
+            resolve(back);
+        }));
+    }
     /**
      * 获取
      * @param where
