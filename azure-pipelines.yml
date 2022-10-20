@@ -24,8 +24,8 @@ steps:
     git config --global user.name "www778878net";
     npm install;
     npm run build;  
-    npm test;
-  displayName: 'npm install and build and test'
+    
+  displayName: 'npm install and build and notest'
 
  
  
