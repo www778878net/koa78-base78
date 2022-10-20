@@ -1,7 +1,7 @@
 ﻿import UpInfo from '@www778878net/koa78-upinfo'
 import Mysql78 from '@www778878net/mysql78'
 import Validate78 from "./Validate78";
-//import MemCache78 from "./MemCache78";
+import MemCache78 from "@www778878net/memcache78";
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -29,7 +29,7 @@ export default class Base78Amd {
     mysql2: Mysql78 = new Mysql78(Config78.mysql2);//支持多mysql
     mysql1: Mysql78 = new Mysql78(Config78.mysql);//支持多mysql
     mysql: Mysql78 = this.mysql1;//语法糖简化 默认mysql
-    //memcache: MemCache78;
+    memcache: MemCache78 = new MemCache78(Config78.memcached) ; 
     //表相关属性
     tbname: string = "";
     cols: string[] = [];//所有列
@@ -37,6 +37,8 @@ export default class Base78Amd {
     uidcid: string = "cid";//cid uid zid(都有可能) nid（都不用)
     colsremark: string[] = [];//所有表都有的默认字段
 
+    //常量：
+    mem_sid: string = "lovers_sid3_";//保存用户N个ID 方便修改 千万不能改为lovers_sid_
     constructor(ctx: any) {
         this.up = new UpInfo(ctx);
 
@@ -197,8 +199,8 @@ export default class Base78Amd {
 
             //数据库判断 获取用户信息
 
-            let tmp =""// await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
-
+            let tmp =  await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
+             
            
             let t;
             if (!tmp) {
@@ -219,7 +221,7 @@ export default class Base78Amd {
                         else {
 
                             tmp = t[0];
-                            //self.memcache.tbset(self.mem_sid + up.sid, tmp);
+                             self.memcache.tbset(self.mem_sid + up.sid, tmp);
                         }
                         break;
                 }
@@ -429,3 +431,4 @@ Base78Amd.prototype.Argv = process.argv;
 Base78Amd.prototype.Config = Config78;
 Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
+Base78Amd.prototype.memcache =new MemCache78(Config78.memcached);

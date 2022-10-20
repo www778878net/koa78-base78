@@ -24,6 +24,7 @@
     "nodejs"
   ],
   "scripts": {
+    "upgrade78": "yarn-upgrade-all",
     "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
     "start": " node .\\strve\\index.js  --config config.json",
     "postpublish": "git push origin --all && git push origin --tags",
@@ -37,7 +38,7 @@
   },
   "bundledDependencies": false,
   "devDependencies": {
-    "@types/node": "^18.11.0",
+    "@types/node": "^18.11.2",
     "chai": "^4.3.6",
     "cross-env": "^7.0.3",
     "fs": "^0.0.1-security",
@@ -53,7 +54,8 @@
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
-    "@www778878net/mysql78": "^0.0.5",
+    "@www778878net/memcache78": "^0.0.5",
+    "@www778878net/mysql78": "^0.0.8",
     "@www778878net/promise78": "^0.0.2",
     "co": "^4.6.0",
     "dayjs": "^1.11.5",
