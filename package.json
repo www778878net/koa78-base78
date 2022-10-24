@@ -27,6 +27,7 @@
     "upgrade78": "yarn-upgrade-all",
     "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
     "start": " node .\\strve\\index.js  --config config.json",
+    "startmin": " node .\\strve\\index.js  --config configmin.json",
     "postpublish": "git push origin --all && git push origin --tags",
     "postversion": "npm publish --access public",
     "preversion": "npm test ",

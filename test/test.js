@@ -24,7 +24,7 @@ describe("no power api test", () => {
         console.log(res["back"])
         expect(err).to.be.null;
 
-        expect(res["back"]["Config"]["mysql"]["database"]).to.equal("testdb");
+        expect(res["back"]["Config"]["location"]).to.equal("ali");
     });
 
     it('TestMenu/Test78/test ', async () => {
