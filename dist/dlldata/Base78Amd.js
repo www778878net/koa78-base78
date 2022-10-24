@@ -13,6 +13,7 @@ const koa78_upinfo_1 = require("@www778878net/koa78-upinfo");
 const mysql78_1 = require("@www778878net/mysql78");
 const Validate78_1 = require("./Validate78");
 const memcache78_1 = require("@www778878net/memcache78");
+const redis78_1 = require("@www778878net/redis78");
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -33,12 +34,16 @@ class Base78Amd {
     constructor(ctx) {
         //运行时    
         this.Config = Config78; //config78
+        this.nodejslog = Config78.nodejslog; //是否统计nodejs效率
+        this.iplog = Config78.iplog; //是否统计访客IP
+        this.location = Config78.location; //运行环境
         this.Argv = process.argv; //process.argv
         //各种连接
         this.mysql2 = new mysql78_1.default(Config78.mysql2); //支持多mysql
         this.mysql1 = new mysql78_1.default(Config78.mysql); //支持多mysql
         this.mysql = this.mysql1; //语法糖简化 默认mysql
         this.memcache = new memcache78_1.default(Config78.memcached);
+        this.redis = new redis78_1.default(Config78.redis);
         //表相关属性
         this.tbname = "";
         this.cols = []; //所有列
@@ -387,4 +392,5 @@ Base78Amd.prototype.Config = Config78;
 Base78Amd.prototype.mysql1 = new mysql78_1.default(Config78.mysql);
 Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
 Base78Amd.prototype.memcache = new memcache78_1.default(Config78.memcached);
+Base78Amd.prototype.redis = new redis78_1.default(Config78.redis);
 //# sourceMappingURL=Base78Amd.js.map

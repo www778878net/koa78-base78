@@ -9,13 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Base78 = require("../../../dist/dlldata/Base78").default;
-console.log(Base78)
-class Test78 extends Base78 {
+const Base78_1 = require("./Base78");
+class test extends Base78_1.default {
     constructor(ctx) {
         super(ctx);
         //this.uidcid = "uid";
-        this.tbname = "Test78";
+        this.tbname = "test";
         //这个不是表
         this.colsImp = [];
         this.cols = this.colsImp.concat(this.colsremark);
@@ -30,25 +29,6 @@ class Test78 extends Base78 {
             return;
         }));
     }
-
-    test() {
-        const self = this;
-        const up = self.up;
-        console.log("test in test" + up.uname);
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
-            return;
-        }));
-    }
-    getConfig78() {
-        const self = this;
-        const up = self.up;
-        console.log("test in getConfig78" + up.uname);
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            resolve({ Argv: self.Argv, Config: self.Config });
-            return;
-        }));
-    }
 }
-exports.default = Test78;
-//# sourceMappingURL=Test78.js.map
+exports.default = test;
+//# sourceMappingURL=test.js.map

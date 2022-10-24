@@ -38,7 +38,7 @@
   },
   "bundledDependencies": false,
   "devDependencies": {
-    "@types/node": "^18.11.2",
+    "@types/node": "^18.11.4",
     "chai": "^4.3.6",
     "cross-env": "^7.0.3",
     "fs": "^0.0.1-security",
@@ -57,8 +57,9 @@
     "@www778878net/memcache78": "^0.0.5",
     "@www778878net/mysql78": "^0.0.8",
     "@www778878net/promise78": "^0.0.2",
+    "@www778878net/redis78": "^0.1.1",
     "co": "^4.6.0",
-    "dayjs": "^1.11.5",
+    "dayjs": "^1.11.6",
     "mysql": "^2.18.1",
     "restler": "^3.4.0",
     "validator": "^13.7.0"

@@ -46,6 +46,26 @@ describe("no power api test", () => {
 
         expect(res["back"]).to.equal("看到我说明路由ok,中文ok,无权限调用OK");
     });
+
+    it('TestMenu/Test78/testredis ', async () => {
+        function test() {
+            return new Promise78((resolve, reject) => {
+                restler.get("http://localhost:88/Api7822/TestMenu/Test78/testredis", { data: { pars: ["test"] } })
+                    .on('complete', function (back) {
+                        resolve(back)
+                    });
+            })
+        }
+        let [err, res] = await test();
+        console.log(err)
+        console.log(res)
+        res = JSON.parse(res)
+
+        console.log(res["back"])
+        expect(err).to.be.null;
+
+        expect(res["back"]).to.equal("8");
+    });
 });
 
 describe("sql api m", () => {

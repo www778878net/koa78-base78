@@ -2,6 +2,7 @@
 import Mysql78 from '@www778878net/mysql78'
 import Validate78 from "./Validate78";
 import MemCache78 from "@www778878net/memcache78";
+import Redis78 from '@www778878net/redis78';
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -23,13 +24,17 @@ export default class Base78Amd {
     up: UpInfo;
     //运行时    
     Config: {} = Config78;//config78
+    nodejslog: {} = Config78.nodejslog;//是否统计nodejs效率
+    iplog: Boolean = Config78.iplog;//是否统计访客IP
+    location: string = Config78.location;//运行环境
     Argv: string[] = process.argv;//process.argv
 
     //各种连接
     mysql2: Mysql78 = new Mysql78(Config78.mysql2);//支持多mysql
     mysql1: Mysql78 = new Mysql78(Config78.mysql);//支持多mysql
     mysql: Mysql78 = this.mysql1;//语法糖简化 默认mysql
-    memcache: MemCache78 = new MemCache78(Config78.memcached) ; 
+    memcache: MemCache78 = new MemCache78(Config78.memcached); 
+    redis: Redis78 = new Redis78(Config78.redis); 
     //表相关属性
     tbname: string = "";
     cols: string[] = [];//所有列
@@ -431,4 +436,5 @@ Base78Amd.prototype.Argv = process.argv;
 Base78Amd.prototype.Config = Config78;
 Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
-Base78Amd.prototype.memcache =new MemCache78(Config78.memcached);
+Base78Amd.prototype.memcache = new MemCache78(Config78.memcached);
+Base78Amd.prototype.redis = new Redis78(Config78.redis);

@@ -78,45 +78,47 @@ export default  class Base78 extends Base78Amd {
                 //ip记录                
 
                 let sb;
-                let tmp = await self.memcache.get("sys_ip_" + up.uid + up.ip);
-                if (!tmp && up.uname != undefined) {
-                    await self.memcache.set("sys_ip_" + up.uid + up.ip, 1);
+                if (self.iplog) {
+                    let tmp = await self.memcache.get("sys_ip_" + up.uid + up.ip);
+                    if (!tmp && up.uname != undefined) {
+                        await self.memcache.set("sys_ip_" + up.uid + up.ip, 1);
 
-                    let obj: any = {
-                        uid: up.uid,
-                        ip: up.ip
-                    };
-                    obj = JSON.stringify(obj);
-                    if (up.uid != "") {
-                        //await self.redis.setlpush('Base7817_sys_ip', obj);
-                        sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
-                            + "values(?,?,?,?,?)";
-                        await self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
+                        let obj: any = {
+                            uid: up.uid,
+                            ip: up.ip
+                        };
+                        obj = JSON.stringify(obj);
+                        if (up.uid != "") {
+                            //await self.redis.setlpush('Base7817_sys_ip', obj);
+                            sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
+                                + "values(?,?,?,?,?)";
+                            await self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
+                        }
                     }
                 }
-
                 //耗时统计
                 up.debug = false;
                 let msec = new Date().getTime() - up.uptime.getTime();
+                if (self.nodejslog && self.nodejslog["issave"]) {
+                    if (self.nodejslog["redis"] && self.redis.host) {
+                        //次数redis
+                        await self.redis.zincrby('Base7817_sysnodejs_frequency', 1, up.method);
+                        //耗时redis
+                        await self.redis.zincrby('Base7817_sysnodejs_time_consuming', msec, up.method);
 
-                ////次数redis
-                //await self.redis.zincrby('Base7817_sysnodejs_frequency', 1, up.method);
-                ////耗时redis
-                //await self.redis.zincrby('Base7817_sysnodejs_time_consuming', msec, up.method);
+                        //上传redis
+                        await self.redis.zincrby('Base7817_sysnodejs_upload', up.pars.join(",").length, up.method);
 
-                ////上传redis
-                //await self.redis.zincrby('Base7817_sysnodejs_upload', up.pars.join(",").length, up.method);
+                        //下载redis
+                        await self.redis.zincrby('Base7817_sysnodejs_download', back.length, up.method);
+                    }
 
-                ////下载redis
-                //await self.redis.zincrby('Base7817_sysnodejs_download', back.length, up.method);
-
-
-                let values = ["api7817",up.apisys,up.apiobj,  up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid()
-                    , msec, up.pars.join(",").length, back.length];
-                sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
-                    "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";
-                await self.mysql1.doM(sb, values, up);// 
-
+                    let values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid()
+                        , msec, up.pars.join(",").length, back.length];
+                    sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
+                        "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";
+                    await self.mysql1.doM(sb, values, up);// 
+                }
             } catch (e) {
                 e = Util.inspect(e);
                 //这里记录错误
