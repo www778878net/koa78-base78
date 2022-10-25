@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Base78Amd_1 = require("./Base78Amd");
 const Util = require('util');
 /**
- * 基类 主要是展示out逻辑
+ * 基类 主要是展示out逻辑  和语法糖
  * */
 class Base78 extends Base78Amd_1.default {
     constructor(ctx) {
@@ -135,6 +135,12 @@ class Base78 extends Base78Amd_1.default {
             console.log("out err " + Util.inspect(e));
             self.up.ctx.body = Util.inspect(e);
         });
+    }
+    mysql1M(sb, values) {
+        return this.mysql1.doM(sb, values, this.up);
+    }
+    mysql1Get(sb, values) {
+        return this.mysql1.doGet(sb, values, this.up);
     }
 }
 exports.default = Base78;

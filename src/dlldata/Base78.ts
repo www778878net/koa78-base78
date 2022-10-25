@@ -1,7 +1,7 @@
 ﻿import Base78Amd from "./Base78Amd";
 const Util = require('util');
 /**
- * 基类 主要是展示out逻辑  
+ * 基类 主要是展示out逻辑  和语法糖
  * */
 export default  class Base78 extends Base78Amd {
     constructor(ctx: any) {
@@ -137,4 +137,11 @@ export default  class Base78 extends Base78Amd {
 
     }
 
+    mysql1M(sb: string, values: string[]) {
+        return this.mysql1.doM(sb, values, this.up);
+    }
+
+    mysql1Get(sb: string, values: string[]) {
+        return this.mysql1.doGet(sb, values, this.up);
+    }
 }

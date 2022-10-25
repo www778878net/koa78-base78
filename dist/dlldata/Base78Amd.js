@@ -83,6 +83,37 @@ class Base78Amd {
     del() {
         return this._del();
     }
+    /**
+     * 权限检查(用户日期)
+     */
+    _vidateforuid(usefor) {
+        const self = this;
+        const up = self.up;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            //await self._addWarn(usefor, "sys_sql", "services", "services_dinpay");
+            let back;
+            if (up.cid == self.cidmy) {
+                back = {
+                    code: 200
+                };
+                resolve(back);
+                return;
+            }
+            //Config78.location == "test" &&
+            if (up.cid == self.cidmy) {
+                back = {
+                    code: 200
+                };
+                resolve(back);
+                return;
+            }
+            back = {
+                code: -1,
+                errback: up.cid
+            };
+            resolve(back);
+        }));
+    }
     _del() {
         const self = this;
         const up = self.up;
