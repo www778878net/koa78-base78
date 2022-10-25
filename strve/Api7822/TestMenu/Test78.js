@@ -20,6 +20,18 @@ class Test78 extends Base78 {
         this.colsImp = [];
         this.cols = this.colsImp.concat(this.colsremark);
     }
+
+    testcidmy() {
+        const self = this;
+        const up = self.up;
+        
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            
+            resolve(self.cidmy);
+            return;
+        }));
+    }
+
     testredis() {
         const self = this;
         const up = self.up;

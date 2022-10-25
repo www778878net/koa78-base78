@@ -49,8 +49,10 @@ class Base78Amd {
         this.cols = []; //所有列
         this.colsImp = []; //除remark外
         this.uidcid = "cid"; //cid uid zid(都有可能) nid（都不用)
-        this.colsremark = []; //所有表都有的默认字段
+        this.colsremark = ["remark", "remark2", "remark3", "remark4", "remark5", "remark6"]; //所有表都有的默认字段
         //常量：
+        this.cidmy = "d4856531-e9d3-20f3-4c22-fe3c65fb009c"; //管理员帐套
+        this.cidguest = "GUEST000-8888-8888-8888-GUEST00GUEST"; //测试帐套
         this.mem_sid = "lovers_sid3_"; //保存用户N个ID 方便修改 千万不能改为lovers_sid_
         this.up = new koa78_upinfo_1.default(ctx);
     }
@@ -387,10 +389,13 @@ class Base78Amd {
     }
 }
 exports.default = Base78Amd;
-Base78Amd.prototype.Argv = process.argv;
-Base78Amd.prototype.Config = Config78;
-Base78Amd.prototype.mysql1 = new mysql78_1.default(Config78.mysql);
-Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
-Base78Amd.prototype.memcache = new memcache78_1.default(Config78.memcached);
-Base78Amd.prototype.redis = new redis78_1.default(Config78.redis);
+//Base78Amd.prototype.cidmy = "";
+//Base78Amd.prototype.cidguest = "GUEST000-8888-8888-8888-GUEST00GUEST";
+//Base78Amd.prototype.colsremark = ["remark", "remark2", "remark3", "remark4", "remark5", "remark6"];
+//Base78Amd.prototype.Argv = process.argv;
+//Base78Amd.prototype.Config = Config78;
+//Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
+//Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
+//Base78Amd.prototype.memcache = new MemCache78(Config78.memcached);
+//Base78Amd.prototype.redis = new Redis78(Config78.redis);
 //# sourceMappingURL=Base78Amd.js.map
