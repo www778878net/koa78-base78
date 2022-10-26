@@ -64,6 +64,5 @@
     "mysql": "^2.18.1",
     "restler": "^3.4.0",
     "validator": "^13.7.0"
-  },
-  "bundleDependencies": []
+  } 
 }

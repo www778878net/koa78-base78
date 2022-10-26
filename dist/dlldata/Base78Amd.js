@@ -84,6 +84,42 @@ class Base78Amd {
         return this._del();
     }
     /**
+     * 获取自定义栏位
+     */
+    getCustomCols() {
+        const self = this;
+        const up = self.up;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this._upcheck();
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
+            let datatb;
+            let values;
+            var item = self.tbname + "_customfields";
+            if (up.pars.length >= 1 && up.pars[0] != "")
+                item += "_" + up.pars[0];
+            if (self.uidcid === 'cid') {
+                values = [up.cid, item];
+                datatb = 'pars_co';
+            }
+            else {
+                values = [up.uid, item];
+                datatb = 'pars_users';
+            }
+            var sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
+            let back = yield self.mysql1.doGet(sb, values, up);
+            if (back.length === 0)
+                back = '||||';
+            else
+                back = back[0]['data'];
+            resolve(back);
+        }));
+    }
+    /**
      * 权限检查(用户日期)
      */
     _vidateforuid(usefor) {
