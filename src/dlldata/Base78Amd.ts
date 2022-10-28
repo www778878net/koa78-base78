@@ -330,7 +330,7 @@ export default class Base78Amd {
 
 
     
-            if (  up.uname == "test")
+            if (  up.uname == "sysadmin")
                 up.debug = true;
          
 

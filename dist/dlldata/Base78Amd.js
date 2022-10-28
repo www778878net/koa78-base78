@@ -294,7 +294,7 @@ class Base78Amd {
                 return;
             }
             up.bcid = up.bcid || up.cid;
-            if (up.uname == "test")
+            if (up.uname == "sysadmin")
                 up.debug = true;
             //await self._upcheck_debug();
             up.errmessage = "ok";
