@@ -6,7 +6,13 @@ import Redis78 from '@www778878net/redis78';
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
-var fspath = process.argv[3]
+var fspath = "";// = process.argv[3]
+for (var i = 0; i < process.argv.length; i++) {
+    if (process.argv[i] == "config") {
+        fspath = process.argv[i + 1]
+        break;
+    }
+}
 var Config78 = loadjson(fspath);
 function loadjson(filepath) {
     var data;
