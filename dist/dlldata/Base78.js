@@ -33,10 +33,13 @@ class Base78 extends Base78Amd_1.default {
                 if (method.charAt(0) == "m") { //&& up.ip!="127.0.0.1"
                     back = yield self.memcache.get(up.ctx.request.path + up.cache);
                     if (back) {
-                        resolve("err:防止重放攻击" + up.ctx.request.path + up.cache);
+                        back = "err:防止重放攻击" + up.ctx.request.path + up.cache;
+                        up.res = -8887;
+                        up.errmsg = back;
+                        resolve(back);
                         return;
                     }
-                    self.memcache.set(up.ctx.request.path + up.cache, 1, 5);
+                    self.memcache.set(up.ctx.request.path + up.cache, 1, 2);
                 }
             }
             try {
