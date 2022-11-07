@@ -38,9 +38,9 @@ switch (Config78.location) {
         app.use(bodyParser({ multipart: true }));
         break;
     default:
-        console.log("use koa-better-body");
+        console.log("use @www778878net/koabody78");
         //阿里云用这个OK
-        const body = require('koa-better-body');
+        const body = require('@www778878net/koabody78');
         app.use(convert(body()));
         break;
 }
