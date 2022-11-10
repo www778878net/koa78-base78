@@ -18,6 +18,18 @@ class Base78 extends Base78Amd_1.default {
     constructor(ctx) {
         super(ctx);
     }
+    /**
+    * 设置返回值类型
+    * @param res 默认0 负值为错误
+    * @param errmsg 默认为空
+    * @param kind 默认json ,string,jsondt(JSON表)
+    */
+    _setBack(res, errmsg, kind = "") {
+        let up = this.up;
+        up.backtype = kind || "string";
+        up.res = res || 0;
+        up.errmsg = errmsg || "";
+    }
     out(method) {
         const self = this;
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {

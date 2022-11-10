@@ -14,6 +14,7 @@ const mysql78_1 = require("@www778878net/mysql78");
 const Validate78_1 = require("./Validate78");
 const memcache78_1 = require("@www778878net/memcache78");
 const redis78_1 = require("@www778878net/redis78");
+const Apiqq78_1 = require("../dllopen/Apiqq78");
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -61,6 +62,8 @@ class Base78Amd {
         this.cidguest = "GUEST000-8888-8888-8888-GUEST00GUEST"; //测试帐套
         this.mem_sid = "lovers_sid3_"; //保存用户N个ID 方便修改 千万不能改为lovers_sid_
         this.up = new koa78_upinfo_1.default(ctx);
+        Config78.apiqq["host"] = Config78.host;
+        this.apiqq = new Apiqq78_1.default(Config78.apiqq, this.memcache);
     }
     mAdd(colp) {
         // colp = colp || this.colsImp;

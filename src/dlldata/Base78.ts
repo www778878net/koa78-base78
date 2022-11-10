@@ -8,6 +8,19 @@ export default  class Base78 extends Base78Amd {
         super(ctx);
     }
 
+    /**
+    * 设置返回值类型
+    * @param res 默认0 负值为错误
+    * @param errmsg 默认为空
+    * @param kind 默认json ,string,jsondt(JSON表)
+    */
+    _setBack(res, errmsg, kind = ""): any {
+        let up = this.up;
+        up.backtype = kind || "string";
+        up.res = res || 0;
+        up.errmsg = errmsg || "";
+    }
+
     out(method: string): Promise<any> {
         const self = this;
 
