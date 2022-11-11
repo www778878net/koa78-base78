@@ -108,6 +108,13 @@ CREATE TABLE `lovers`  (
 INSERT INTO `lovers` VALUES ('guest', 'e10adc3949ba59abbe56e057f20f883e', 'GUEST888-8888-8888-8888-GUEST88GUEST', '8573faf2-24b2-b586-adac-d9d8da9772d0', '2018-06-01 18:02:43', 'GUEST000-8888-8888-8888-GUEST00GUEST', '', '1900-01-01 00:00:00', 1, 'GUEST888-8888-8888-8888-GUEST88GUEST', '', '', '', '', '', '', '');
 INSERT INTO `lovers` VALUES ('sysadmin', 'e10adc3949ba59abbe56e057f20f883e', '9776b64d-70b2-9d61-4b24-60325ea1345e', 'a46f3ec9-b40d-6850-838e-6b897a73c72f', '2022-10-24 22:06:26', 'd4856531-e9d3-20f3-4c22-fe3c65fb009c', '', '1900-01-01 00:00:00', 2, 'CD86605E-7A42-481A-9786-85010E67128A', '', '', '', '', '', '', '');
 
+ALTER TABLE `lovers` 
+ADD COLUMN `email` varchar(50) NOT NULL DEFAULT '' AFTER `idcodef`,
+ADD COLUMN `truename` varchar(20) NOT NULL DEFAULT '' AFTER `idcodef`,
+ADD COLUMN `openweixin` varchar(40) NOT NULL DEFAULT '' AFTER `idcodef`,
+ADD COLUMN `mobile` varchar(20) NOT NULL DEFAULT '' AFTER `idcodef`,
+ADD COLUMN `referrer` varchar(36) NOT NULL DEFAULT '' AFTER `idcodef`,
+ADD COLUMN `money78` int(11) NOT NULL DEFAULT 0 AFTER `truename`;
 -- ----------------------------
 -- Table structure for sys_ip
 -- ----------------------------
