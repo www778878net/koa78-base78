@@ -11,7 +11,7 @@ export default class Request78 {
 
     }
 
-    doreq_multipart (url, data, headers, method, code) {
+    doreq_multipart(url, data = "", headers = "", method = "", code="") {
         code = code || "utf8";
         method = method || "POST";
 
@@ -44,7 +44,7 @@ export default class Request78 {
     * @param url
     * @param code
     */
-    doreq  (url, data, headers, method, code) {
+    doreq(url, data = {} , headers = "", method = "", code = "") {
     code = code || "utf8";
     method = method || "POST";
 
@@ -81,7 +81,7 @@ export default class Request78 {
      * @param code
      * @returns {*}
      */
-    get(url, code) {
+    get(url, code = "") {
         code = code || "UTF-8";
         var def = Q.defer();
         var headers = {
@@ -115,7 +115,7 @@ export default class Request78 {
      * @param data
      * @returns {*}
      */
-    httpreq  (url, data, method, code) {
+    httpreq(url, data = "", method = "", code = "") {
         method = method || "POST";
         code = code || "utf8";
         var def = Q.defer();

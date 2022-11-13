@@ -197,3 +197,37 @@ describe("test login", () => {
         expect(res["back"]["uname"]).to.equal("admin");
     });
 });
+
+describe("test apiqq", () => {
+    it('test loginweixin', async () => {
+        function test() {
+            let up = new UpInfo(null);
+            up = up.getGuest()
+            let pars = ["051pSF0w3XyOzZ2Kj80w3v7zjS2pSF0C"]
+
+            let data = {
+                "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
+                , "mid": up.mid
+                , "v": 17.2
+                , "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+            };
+
+            return new Promise78((resolve, reject) => {
+                restler.post("http://localhost:88/Api7822/ucenter/lovers/loginWeixin", { data: data })
+                    .on('complete', function (back) {
+                        resolve(back)
+                    });
+            })
+        }
+        let [err, res] = await test();
+        console.log(err)
+        console.log(res)
+
+        res = JSON.parse(res)
+        console.log(res["back"])
+        expect(err).to.be.null;
+
+        expect(res["back"]).to.equal("admin");
+    });
+
+})

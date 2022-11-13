@@ -1,24 +1,24 @@
-var Util = require('util');
+ï»¿var Util = require('util');
 var Q = require('q');
 var md5 = require("md5");
 var crypto = require('crypto');
-var Request78 = require('../dll78/Request78');
-var Validate78 = require('../dlldata/Validate78');
-var Xml78 = require('../dlldata/Xml78');
+import  Request78 from '../dll78/Request78';
+import Validate78 from '../dlldata/Validate78';
+import Xml78 from  '../dlldata/Xml78' ;
 var mem_weixin_token = "Apiqq78_weixin_token";
 import dayjs = require("dayjs");
 import MemCache78 from "@www778878net/memcache78";
 
 /**
- * Ìá¹©»ùÓÚPKCS7Ëã·¨µÄ¼Ó½âÃÜ½Ó¿Ú
+ * æä¾›åŸºäºPKCS7ç®—æ³•çš„åŠ è§£å¯†æ¥å£
  *
  */
 var PKCS7Encoder:any = {};
 
 /**
- * É¾³ı½âÃÜºóÃ÷ÎÄµÄ²¹Î»×Ö·û
+ * åˆ é™¤è§£å¯†åæ˜æ–‡çš„è¡¥ä½å­—ç¬¦
  *
- * @param {String} text ½âÃÜºóµÄÃ÷ÎÄ
+ * @param {String} text è§£å¯†åçš„æ˜æ–‡
  */
 PKCS7Encoder.decode = function (text) {
     var pad = text[text.length - 1];
@@ -31,14 +31,14 @@ PKCS7Encoder.decode = function (text) {
 };
 
 /**
- * ¶ÔĞèÒª¼ÓÃÜµÄÃ÷ÎÄ½øĞĞÌî³ä²¹Î»
+ * å¯¹éœ€è¦åŠ å¯†çš„æ˜æ–‡è¿›è¡Œå¡«å……è¡¥ä½
  *
- * @param {String} text ĞèÒª½øĞĞÌî³ä²¹Î»²Ù×÷µÄÃ÷ÎÄ
+ * @param {String} text éœ€è¦è¿›è¡Œå¡«å……è¡¥ä½æ“ä½œçš„æ˜æ–‡
  */
 PKCS7Encoder.encode = function (text) {
     var blockSize = 32;
     var textLength = text.length;
-    //¼ÆËãĞèÒªÌî³äµÄÎ»Êı
+    //è®¡ç®—éœ€è¦å¡«å……çš„ä½æ•°
     var amountToPad = blockSize - (textLength % blockSize);
 
     var result = new Buffer(amountToPad);
@@ -78,7 +78,7 @@ export default class Apiqq78 {
         this._secret = config["secret"];
         this.token = config["token"];
         this._token = null;//token
-        this._tokenout = dayjs().add(-1, 'day');//¹ıÆÚ¾ÍÒªÖØĞÂ»ñÈ¡
+        this._tokenout = dayjs().add(-1, 'day');//è¿‡æœŸå°±è¦é‡æ–°è·å–
 
         var AESKey = new Buffer(config["encodingAESKey"] + '=', 'base64');
         if (AESKey.length !== 32) {
@@ -90,7 +90,7 @@ export default class Apiqq78 {
     } 
 
     /**
-    *JSapiÁÙÊ±È¨ÏŞ
+    *JSapiä¸´æ—¶æƒé™
     */
     getjsapi_signature (url) {
         var self = this;
@@ -118,7 +118,7 @@ export default class Apiqq78 {
     }
 
     /**
-    *JSspi»ñÈ¡TICKET_jsapi
+    *JSspiè·å–TICKET_jsapi
     */
     getTicket_jsapi  () {
         var self = this;
@@ -155,12 +155,12 @@ export default class Apiqq78 {
     }
 
     /**
-    * »ñÈ¡ËØ²ÄÁĞ±í
+    * è·å–ç´ æåˆ—è¡¨
     */
     getmaterial  () {
         var self = this;
         var def = Q.defer();
-        //²»ÄÜÕâÑùµ÷ ²»ÖªµÀÎªÊ²Ã´ Ö±½ÓÓÃ¹¤¾ßÈ¥µ÷
+        //ä¸èƒ½è¿™æ ·è°ƒ ä¸çŸ¥é“ä¸ºä»€ä¹ˆ ç›´æ¥ç”¨å·¥å…·å»è°ƒ
         var formData = {
             "type": "news",
             "offset": 0,
@@ -202,13 +202,13 @@ export default class Apiqq78 {
     }
 
     /**
-     * Î¢ĞÅÖ§¸¶ ´´½¨Ô¤¶¨µ¥ºÅ
-     * out_trade_no ¶©µ¥ºÅ
-     * total_fee    ×Ü½ğ¶î
-     * attach       services_dinpay±íÖĞµÄkindºÍinfor
-     * trade_type   Î¢ĞÅ½»Ò×ÀàĞÍ
-     * describe     ÉÌÆ·ÃèÊö
-     * openid       Î¢ĞÅÓÃ»§µÄopenid
+     * å¾®ä¿¡æ”¯ä»˜ åˆ›å»ºé¢„å®šå•å·
+     * out_trade_no è®¢å•å·
+     * total_fee    æ€»é‡‘é¢
+     * attach       services_dinpayè¡¨ä¸­çš„kindå’Œinfor
+     * trade_type   å¾®ä¿¡äº¤æ˜“ç±»å‹
+     * describe     å•†å“æè¿°
+     * openid       å¾®ä¿¡ç”¨æˆ·çš„openid
      * 
      */
     getprepay_id   (out_trade_no, total_fee, attach, trade_type, describe, openid) {
@@ -216,7 +216,7 @@ export default class Apiqq78 {
         var def = Q.defer();
 
         //if (describe == undefined) {
-        //    describe = 'ÉÌÆ·ÃèÊö';
+        //    describe = 'å•†å“æè¿°';
         //}
 
         var appid = self._appid;
@@ -226,7 +226,7 @@ export default class Apiqq78 {
         //else {
         //    //return{
         //    //    code: -1,
-        //    //    errmsg:"ÔİÊ±²»ĞíÖ§¸¶ ===Ê§°Ü"
+        //    //    errmsg:"æš‚æ—¶ä¸è®¸æ”¯ä»˜ ===å¤±è´¥"
         //    //};  
 
         //}
@@ -327,7 +327,7 @@ export default class Apiqq78 {
     }
 
     /**
-     *   »ñÈ¡ÓÃ»§ÊÇ·ñ¹Ø×¢¹«ÖÚºÅµÄurl
+     *   è·å–ç”¨æˆ·æ˜¯å¦å…³æ³¨å…¬ä¼—å·çš„url
      */
     getUnionID    (openid) {
         var self = this;
@@ -339,10 +339,10 @@ export default class Apiqq78 {
 
 
     /**
-     *´´½¨ÁÙÊ±¶şÎ¬Âë
+     *åˆ›å»ºä¸´æ—¶äºŒç»´ç 
      */
     getTicket   (scene_id, seconds) {
-        //scene_id:1 ÍÆ¹ã
+        //scene_id:1 æ¨å¹¿
         var self = this;
         var sec = seconds || 2592000;
         var def = Q.defer();
@@ -383,7 +383,7 @@ export default class Apiqq78 {
     };
 
     /**
-     * ·¢ËÍÄ£°åÏûÏ¢
+     * å‘é€æ¨¡æ¿æ¶ˆæ¯
      */
     sendMesModel  (openid, template_id, data, remark) {
         var self = this;
@@ -394,18 +394,18 @@ export default class Apiqq78 {
 
         var memitem = 'Apiqq781_' + openid + "_" + template_id + remark;
 
-        //24Ğ¡Ê±Í¬ÑùµÄÄÚÈİÖ»·¢Ò»´Î
+        //24å°æ—¶åŒæ ·çš„å†…å®¹åªå‘ä¸€æ¬¡
         self.memcache.get(memitem).then(function (dotime) {
             if (dotime !== null) {
-                throw new Error("24Ğ¡Ê±");
+                throw new Error("24å°æ—¶");
             }
             self.memcache.set(memitem, 1);
 
             /* return new parsusers()._getByOpenid(openid,"openweixin");
         }).then(function (back) {
             if(back.length===1&&back[0]["data"]==="off")
-                throw new Error("ÓÃ»§ÉèÖÃÎ¢ĞÅ²»ÌáĞÑ");*/
-            //·¢ËÍÎ¢ĞÅÌáĞÑ
+                throw new Error("ç”¨æˆ·è®¾ç½®å¾®ä¿¡ä¸æé†’");*/
+            //å‘é€å¾®ä¿¡æé†’
             return self.getToken();
         }).then(function (back) {
             var postdata = {};
@@ -427,20 +427,20 @@ export default class Apiqq78 {
         }).then(function (back) {
             console.log("sendMesModel:" + back);
         }).catch(function (err) {
-            if (err.message !== "24Ğ¡Ê±")
+            if (err.message !== "24å°æ—¶")
                 console.log(err);
         })  
     }
 
     /**
-     * »ñÈ¡Î¢ĞÅtoken
+     * è·å–å¾®ä¿¡token
      *
      */
     getToken   () {
         var self = this;
         var def = Q.defer();
         var savemem = false;
-        var tokensec = 600;//TOKEN¸ÄÎª10·ÖÖÓÊÔÏÂ
+        var tokensec = 600;//TOKENæ”¹ä¸º10åˆ†é’Ÿè¯•ä¸‹
 
         if (self._tokenout > new Date()) {
             def.resolve(self._token);
@@ -486,7 +486,7 @@ export default class Apiqq78 {
 
 
     /**
-     * µÃµ½ÏûÏ¢ Á¢¼´»Ø¸´×éÖ¯xml
+     * å¾—åˆ°æ¶ˆæ¯ ç«‹å³å›å¤ç»„ç»‡xml
      */
     getMesBack  (ToUserName, Content) {
         var data = {};
@@ -517,7 +517,7 @@ export default class Apiqq78 {
     };
 
     /**
-     * ÑéÖ¤ÊÇ·ñÎ¢ĞÅ·¢À´µÄ
+     * éªŒè¯æ˜¯å¦å¾®ä¿¡å‘æ¥çš„
      * @param timestamp
      * @param nonce
      * @param encrypt
@@ -531,18 +531,18 @@ export default class Apiqq78 {
 
 
     /**
-     * ¶ÔÃ÷ÎÄ½øĞĞ¼ÓÃÜ(Õâ¸ö²»ĞĞ)
+     * å¯¹æ˜æ–‡è¿›è¡ŒåŠ å¯†(è¿™ä¸ªä¸è¡Œ)
      *
-     * @param {String} text ´ı¼ÓÃÜµÄÃ÷ÎÄ
+     * @param {String} text å¾…åŠ å¯†çš„æ˜æ–‡
      */
     encrypt   (text) {
-        // Ëã·¨£ºAES_Encrypt[random(16B) + msg_len(4B) + msg + $CorpID]
-        // »ñÈ¡16BµÄËæ»ú×Ö·û´®
+        // ç®—æ³•ï¼šAES_Encrypt[random(16B) + msg_len(4B) + msg + $CorpID]
+        // è·å–16Bçš„éšæœºå­—ç¬¦ä¸²
         var randomString = crypto.pseudoRandomBytes(16);
 
         var msg = new Buffer(text);
 
-        // »ñÈ¡4BµÄÄÚÈİ³¤¶ÈµÄÍøÂç×Ö½ÚĞò
+        // è·å–4Bçš„å†…å®¹é•¿åº¦çš„ç½‘ç»œå­—èŠ‚åº
         var msgLength = new Buffer(4);
         msgLength.writeUInt32BE(msg.length, 0);
 
@@ -551,33 +551,33 @@ export default class Apiqq78 {
 
         var bufMsg = Buffer.concat([randomString, msgLength, msg, id]);
 
-        // ¶ÔÃ÷ÎÄ½øĞĞ²¹Î»²Ù×÷
+        // å¯¹æ˜æ–‡è¿›è¡Œè¡¥ä½æ“ä½œ
         var encoded = PKCS7Encoder.encode(bufMsg);
 
-        // ´´½¨¼ÓÃÜ¶ÔÏó£¬AES²ÉÓÃCBCÄ£Ê½£¬Êı¾İ²ÉÓÃPKCS#7Ìî³ä£»IV³õÊ¼ÏòÁ¿´óĞ¡Îª16×Ö½Ú£¬È¡AESKeyÇ°16×Ö½Ú
+        // åˆ›å»ºåŠ å¯†å¯¹è±¡ï¼ŒAESé‡‡ç”¨CBCæ¨¡å¼ï¼Œæ•°æ®é‡‡ç”¨PKCS#7å¡«å……ï¼›IVåˆå§‹å‘é‡å¤§å°ä¸º16å­—èŠ‚ï¼Œå–AESKeyå‰16å­—èŠ‚
         var cipher = crypto.createCipheriv('aes-256-cbc', this.key, this.iv);
         cipher.setAutoPadding(false);
 
         var cipheredMsg = Buffer.concat([cipher.update(encoded), cipher.final()]);
 
-        // ·µ»Ø¼ÓÃÜÊı¾İµÄbase64±àÂë
+        // è¿”å›åŠ å¯†æ•°æ®çš„base64ç¼–ç 
         return cipheredMsg.toString('base64');
     };
 
     /**
-     * ¶ÔÃÜÎÄ½øĞĞ½âÃÜ
+     * å¯¹å¯†æ–‡è¿›è¡Œè§£å¯†
      *
-     * @param {String} text ´ı½âÃÜµÄÃÜÎÄ
+     * @param {String} text å¾…è§£å¯†çš„å¯†æ–‡
      */
     decrypt   (text) {
-        // ´´½¨½âÃÜ¶ÔÏó£¬AES²ÉÓÃCBCÄ£Ê½£¬Êı¾İ²ÉÓÃPKCS#7Ìî³ä£»IV³õÊ¼ÏòÁ¿´óĞ¡Îª16×Ö½Ú£¬È¡AESKeyÇ°16×Ö½Ú
+        // åˆ›å»ºè§£å¯†å¯¹è±¡ï¼ŒAESé‡‡ç”¨CBCæ¨¡å¼ï¼Œæ•°æ®é‡‡ç”¨PKCS#7å¡«å……ï¼›IVåˆå§‹å‘é‡å¤§å°ä¸º16å­—èŠ‚ï¼Œå–AESKeyå‰16å­—èŠ‚
         var decipher = crypto.createDecipheriv('aes-256-cbc', this.key, this.iv);
         decipher.setAutoPadding(false);
         var deciphered = Buffer.concat([decipher.update(text, 'base64'), decipher.final()]);
 
         deciphered = PKCS7Encoder.decode(deciphered);
-        // Ëã·¨£ºAES_Encrypt[random(16B) + msg_len(4B) + msg + $CorpID]
-        // È¥³ı16Î»Ëæ»úÊı
+        // ç®—æ³•ï¼šAES_Encrypt[random(16B) + msg_len(4B) + msg + $CorpID]
+        // å»é™¤16ä½éšæœºæ•°
         var content = deciphered.slice(16);
         var length = content.slice(0, 4).readUInt32BE(0);
 
@@ -589,7 +589,7 @@ export default class Apiqq78 {
 
 
     /**
-     * code»»token
+     * codeæ¢token
      * @param code
      * @returns {*}
      * @private
@@ -610,7 +610,7 @@ export default class Apiqq78 {
     };
 
     /***
-     * »ñÈ¡²Ëµ¥
+     * è·å–èœå•
      */
      getMenuModJson   () {
         var self = this;
@@ -637,11 +637,11 @@ export default class Apiqq78 {
         var menu14 = {};
         var menu15 = {};
         menu1 = {};
-        menu1["name"] = "VRÒÕÊõ";
+        menu1["name"] = "VRè‰ºæœ¯";
         menu1["sub_button"] = [];
 
         menu4 = {}
-        menu4["name"] = "ÀÏÓÃ»§ÕÒ»Ø";
+        menu4["name"] = "è€ç”¨æˆ·æ‰¾å›";
         menu4["type"] = "view";
         menu4["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid + "&redirect_uri=" +
             "http%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fbinding.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
@@ -654,7 +654,7 @@ export default class Apiqq78 {
     }
 
     /***
-     * ĞŞ¸Ä²Ëµ¥
+     * ä¿®æ”¹èœå•
      */
     menuMod  () {
         var self = this;
@@ -679,16 +679,16 @@ export default class Apiqq78 {
         var menu14 = {};
         var menu15 = {};
         //menu1 = {};
-        //menu1["name"] = "¾«²Ê»î¶¯";
+        //menu1["name"] = "ç²¾å½©æ´»åŠ¨";
         //menu1["sub_button"] = [];
 
 
         //menu4 = {}
-        //menu4["name"] = "½ñÈÕÍ·ÅÆ";
+        //menu4["name"] = "ä»Šæ—¥å¤´ç‰Œ";
         //menu4["type"] = "click";
         //menu4["key"] = "V1001_TODAY_TOP";
 
-        ////menu4["name"] = "½ñÈÕÍ·ÅÆ";
+        ////menu4["name"] = "ä»Šæ—¥å¤´ç‰Œ";
         ////menu4["type"] = "view";
         ////menu4["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid +"&redirect_uri=" +
         ////    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fdeveloping.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
@@ -699,24 +699,24 @@ export default class Apiqq78 {
 
 
         menu2 = {};
-        menu2["name"] = "ºä°ÈÊ×Ò³";
+        menu2["name"] = "è½°å­é¦–é¡µ";
         //menu2["sub_button"] = [];
         //menu6 = {}
-        //menu6["name"] = "ÃÀÒµÃÀ¹º";
+        //menu6["name"] = "ç¾ä¸šç¾è´­";
         menu2["type"] = "view";
         menu2["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid + "&redirect_uri=" +
             "http%3A%2F%2F" + host + "%2Fhtml17%2Findex.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
         //menu2["sub_button"].push(menu6);
 
         //menu7 = {}
-        //menu7["name"] = "»ı·ÖËÍ°É";
+        //menu7["name"] = "ç§¯åˆ†é€å§";
         //menu7["type"] = "view";
         //menu7["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid + "&redirect_uri=" +
         //    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fexchange%2Findex.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
         //menu2["sub_button"].push(menu7);
 
         //menu8 = {}
-        //menu8["name"] = "»·ÇòÍ¶×Ê";
+        //menu8["name"] = "ç¯çƒæŠ•èµ„";
         //menu8["type"] = "view";
         //menu8["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid +"&redirect_uri=" +
         //    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fdeveloping.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
@@ -728,30 +728,30 @@ export default class Apiqq78 {
 
 
         //menu3 = {};
-        //menu3["name"] = "·¢²¼";
+        //menu3["name"] = "å‘å¸ƒ";
         //menu3["sub_button"] = [];
         menu11 = {}
-        menu11["name"] = "ÖªÊ¶¿â";
+        menu11["name"] = "çŸ¥è¯†åº“";
         menu11["type"] = "view";
         menu11["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid + "&redirect_uri=" +
             "http%3A%2F%2Ferp.778878.net&response_type=code&scope=snsapi_base&state=98ed9139-783d-be32-de55-b1bbe289abca#wechat_redirect";
         //menu3["sub_button"].push(menu11);
 
         //menu12 = {}
-        //menu12["name"] = "»áÔ±ÕĞÄ¼";
+        //menu12["name"] = "ä¼šå‘˜æ‹›å‹Ÿ";
         //menu12["type"] = "view";
         //menu12["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid +"&redirect_uri=" +
         //    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fdeveloping.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
         //menu3["sub_button"].push(menu12);
         //menu13 = {}
-        //menu13["name"] = "»áÔ±ÊÖ²á";
+        //menu13["name"] = "ä¼šå‘˜æ‰‹å†Œ";
         //menu13["type"] = "view";
         //menu13["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid +"&redirect_uri=" +
         //    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fdeveloping.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
         //menu3["sub_button"].push(menu13);
 
         //menu14 = {}
-        //menu14["name"] = "APPÏÂÔØ";
+        //menu14["name"] = "APPä¸‹è½½";
         //menu14["type"] = "view";
         //menu14["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid +"&redirect_uri=" +
         //    "https%3A%2F%2F" + host + "%2Fhtml17%2FmobilePage%2Fdeveloping.html&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
@@ -759,7 +759,7 @@ export default class Apiqq78 {
         menu["button"].push(menu11)
 
         menu11 = {}
-        menu11["name"] = "Î¢ĞÅµÇÂ¼²âÊÔ";
+        menu11["name"] = "å¾®ä¿¡ç™»å½•æµ‹è¯•";
         menu11["type"] = "view";
         menu11["url"] = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + self._appid + "&redirect_uri=http%3A%2F%2F" +
             "erp.778878.net%2F%23%2F&response_type=code&scope=snsapi_base&state=weixin#wechat_redirect";
