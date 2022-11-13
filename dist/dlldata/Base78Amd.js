@@ -15,6 +15,7 @@ const Validate78_1 = require("./Validate78");
 const memcache78_1 = require("@www778878net/memcache78");
 const redis78_1 = require("@www778878net/redis78");
 const Apiqq78_1 = require("../dllopen/Apiqq78");
+const ApiWxSmall_1 = require("../dllopen/ApiWxSmall");
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -64,6 +65,7 @@ class Base78Amd {
         this.up = new koa78_upinfo_1.default(ctx);
         Config78.apiqq["host"] = Config78.host;
         this.apiqq = new Apiqq78_1.default(Config78.apiqq, this.memcache);
+        this.apiwxsmall = new ApiWxSmall_1.default(Config78.apiwxsmall, this.memcache);
     }
     mAdd(colp) {
         // colp = colp || this.colsImp;

@@ -227,7 +227,7 @@ describe("test apiqq", () => {
         console.log(res["back"])
         expect(err).to.be.null;
 
-        expect(res["back"]).to.equal("admin");
+        expect(res["res"]).to.equal(-5);
     });
 
 })

@@ -42,6 +42,8 @@ PKCS7Encoder.encode = function (text) {
 };
 class Apiqq78 {
     constructor(config, memcache) {
+        if (!config)
+            config = {};
         //appid, secret, encodingAESKey, token, myuserid, memcache
         //, mch_id, mch_key, apppayid, apppaySecrect, host
         this._host = config["host"];

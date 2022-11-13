@@ -4,6 +4,7 @@ import Validate78 from "./Validate78";
 import MemCache78 from "@www778878net/memcache78";
 import Redis78 from '@www778878net/redis78';
 import Apiqq78 from '../dllopen/Apiqq78';
+import ApiWxSmall from '../dllopen/ApiWxSmall';
 var iconv = require('iconv-lite');
 var fs = require('fs');
 //必须要带参数启动 不然就要报错 
@@ -42,7 +43,8 @@ export default class Base78Amd {
     mysql: Mysql78 = this.mysql1;//语法糖简化 默认mysql
     memcache: MemCache78 = new MemCache78(Config78.memcached); 
     redis: Redis78 = new Redis78(Config78.redis);
-    apiqq: Apiqq78  ; 
+    apiqq: Apiqq78; //公众号
+    apiwxsmall: ApiWxSmall; //小程序
     //表相关属性
     tbname: string = "";
     cols: string[] = [];//所有列
@@ -57,7 +59,8 @@ export default class Base78Amd {
     constructor(ctx: any) {
         this.up = new UpInfo(ctx);
         Config78.apiqq["host"] = Config78.host;
-        this.apiqq = new Apiqq78(Config78.apiqq, this.memcache); 
+        this.apiqq = new Apiqq78(Config78.apiqq, this.memcache);
+        this.apiwxsmall = new ApiWxSmall(Config78.apiwxsmall,this.memcache)
     }
 
     mAdd(colp?: string[]): Promise<string> {

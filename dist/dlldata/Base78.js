@@ -77,8 +77,12 @@ class Base78 extends Base78Amd_1.default {
                         up.backtype = "string";
                     if (back == "\"\"")
                         up.backtype = "string";
-                    if (up.backtype == "string" && back.substring(0, 1) != "\"")
-                        back = "\"" + back + "\"";
+                    if (up.backtype == "string") {
+                        if (back.length >= 1 && back.substring(0, 1) != "\"")
+                            back = "\"" + back + "\"";
+                        if (back == "")
+                            back = "\"\"";
+                    }
                     if (up.ctx.request.method == "SOCK") {
                         back = "{\"res\":" + up.res + ",\"errmsg\":\""
                             + up.errmsg + "\",\"kind\":\"" + up.backtype + "\",\"back\":"
