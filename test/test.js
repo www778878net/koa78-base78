@@ -46,7 +46,7 @@ describe("no power api test", () => {
         console.log(res["back"])
         expect(err).to.be.null;
 
-        expect(res["back"]["Config"]["location"]).to.equal("ali");
+        expect(res["back"]).to.equal("不能公开config测试的时候用用");
     });
 
     it('TestMenu/Test78/test ', async () => {
