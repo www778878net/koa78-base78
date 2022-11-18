@@ -441,9 +441,9 @@ export default class Base78Amd {
                 }
             }
          
-            let sb = "INSERT INTO " + self.tbname + "(";
-            sb += colp.join(",");
-            sb += ",id,upby,uptime," + self.uidcid + "  ) VALUES( ?,?,?,?";
+            let sb = "INSERT INTO " + self.tbname + "(`";
+            sb += colp.join("`,`");
+            sb += "`,id,upby,uptime," + self.uidcid + "  ) VALUES( ?,?,?,?";
             for (let i = 0; i < colp.length; i++) {
                 sb += ",?"; 
             }
