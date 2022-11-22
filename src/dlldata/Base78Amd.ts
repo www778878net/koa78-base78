@@ -291,7 +291,8 @@ export default class Base78Amd {
             //数据库判断 获取用户信息
 
             let tmp =  await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
-             
+            if (tmp == "pool null")
+                tmp = "";
            
             let t;
             if (!tmp) {

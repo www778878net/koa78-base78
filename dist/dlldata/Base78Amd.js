@@ -267,6 +267,8 @@ class Base78Amd {
                 up.cols = self.cols;
             //数据库判断 获取用户信息
             let tmp = yield self.memcache.tbget(self.mem_sid + up.sid, up.debug);
+            if (tmp == "pool null")
+                tmp = "";
             let t;
             if (!tmp) {
                 //console.log(up.sid + JSON.stringify(tmp));
