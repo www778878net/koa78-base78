@@ -214,10 +214,13 @@ export default class Base78Amd {
             }
             let values = [up[self.uidcid]];
             colp = colp || up.cols;//修改列
-            if (where == "" && up.pars.length >= 1) {
+            let iswhereauto = false;
+            if (where == "") iswhereauto = true
+            if (up.pars.length >= 1) {
                 for (var i = 0; i < up.pars.length; i++) {
                     if (up.pars[i] != "") {
-                        where += " and " + colp[i] + "=?";
+                        if (iswhereauto)
+                            where += " and " + colp[i] + "=?";
                         values.push(up.pars[i]);
                     }
                 }
