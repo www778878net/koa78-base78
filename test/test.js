@@ -170,7 +170,7 @@ describe("test login", () => {
         function test() {
             let up = new UpInfo(null);
             up = up.getGuest()
-            let pars = ["admin","e10adc3949ba59abbe56e057f20f883e"]
+            let pars = ["guest3","084e0343a0486ff05530df6c705c8bb4"]
 
             let data = {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
@@ -194,7 +194,7 @@ describe("test login", () => {
         console.log(res["back"])
         expect(err).to.be.null;
 
-        expect(res["back"]["uname"]).to.equal("admin");
+        expect(res["back"]["uname"]).to.equal("guest3");
     });
 });
 

@@ -9,7 +9,7 @@
   "mysql": {
     "host": "192.168.31.101",
     "port": "3306",
-    "password": "eabwd",
+    "password": "www778878net",
     "database": "saas",
     "user": "root",
     "isLog": true,
@@ -32,16 +32,16 @@
     "host": "业务域名自动取config.host"
   },
   "memcached": {
-    "host": "192.168.31.77",
+    "host": "192.168.31.101",
     "port": 11211,
     "max": 100,
-    "local": ""
+    "local": "local"
   },
   "redis": {
-    "host": "192.168.31.77",
+    "host": "192.168.31.101",
     "port": 6379,
-    "pwd": "admin",
+    "pwd": "www778878net",
     "max": 100,
-    "local": ""
+    "local": "local"
   }
 }
