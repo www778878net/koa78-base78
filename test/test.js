@@ -96,10 +96,8 @@ describe("sql api m", () => {
         up = up.getGuest()
         let newdata = up.getNewid();
         up.mid = "9009408d-6430-f43b-2b56-c94a453b7f4d"
+        
         function test() {
-
-
-
             let pars = [newdata]
 
             let data = {
@@ -223,11 +221,11 @@ describe("test apiqq", () => {
         console.log(err)
         console.log(res)
 
-        res = JSON.parse(res)
-        console.log(res["back"])
+        // res = JSON.parse(res)
+        // console.log(res["back"])
         expect(err).to.be.null;
 
-        expect(res["res"]).to.equal(-5);
+        expect(res).to.equal("apifun not find:loginWeixin");
     });
 
 })

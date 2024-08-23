@@ -57,7 +57,8 @@ class Test78 extends Base78 {
         const up = self.up;
         console.log("test in getConfig78" + up.uname);
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            resolve({ Argv: self.Argv, Config: self.Config });
+            //resolve({ Argv: self.Argv, Config: self.Config });
+            resolve("不能公开config测试的时候用用")
             return;
         }));
     }
