@@ -1,5 +1,5 @@
 ﻿'use strict';
-const expect = require('chai').expect;
+import * as chai from 'chai';
 const UpInfo = require('@www778878net/koa78-upinfo').default;
 const restler = require('restler');
 const Promise78 = require('@www778878net/promise78').default;
