@@ -59,7 +59,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@www778878net/koa78-upinfo": "^1.0.1",
+    "@www778878net/koa78-upinfo": "^1.0.2",
     "@www778878net/koabody78": "^3.3.11",
     "@www778878net/memcache78": "^0.1.0",
     "@www778878net/mysql78": "^1.0.1",
