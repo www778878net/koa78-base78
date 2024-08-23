@@ -30,7 +30,7 @@ var Config78 = loadjson(fspath);
 function loadjson(filepath) {
     var data;
     try {
-        var jsondata = iconv.decode(fs.readFileSync(filepath, "binary"), "utf8");
+        var jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
         data = JSON.parse(jsondata);
     }
     catch (err) {

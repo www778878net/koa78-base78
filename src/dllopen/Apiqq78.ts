@@ -84,7 +84,7 @@ export default class Apiqq78 {
 
         var AESKey = new Buffer(config["encodingAESKey"] + '=', 'base64');
         if (AESKey.length !== 32) {
-            console.log('encodingAESKey invalid');
+            //console.log('encodingAESKey invalid');
             return
         }
         this.key = AESKey;

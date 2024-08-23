@@ -60,7 +60,7 @@ class Apiqq78 {
         this._tokenout = dayjs().add(-1, 'day'); //过期就要重新获取
         var AESKey = new Buffer(config["encodingAESKey"] + '=', 'base64');
         if (AESKey.length !== 32) {
-            console.log('encodingAESKey invalid');
+            //console.log('encodingAESKey invalid');
             return;
         }
         this.key = AESKey;
