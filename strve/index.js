@@ -4,6 +4,7 @@ const Koa = require("koa");
 //import Config78 from "./Config78";
 const routers_1 = require("./routers");
 const app = new Koa();
+
 var iconv = require('iconv-lite');
 var fs = require('fs');
 console.log(process.argv)
@@ -38,9 +39,9 @@ switch (Config78.location) {
         app.use(bodyParser({ multipart: true }));
         break;
     default:
-        console.log("koa-body-parsers");
+        console.log("use @www778878net/koabody78");
         //阿里云用这个OK
-        const body = require('koa-body-parsers');
+        const body = require('@www778878net/koabody78');
         app.use(convert(body()));
         break;
 }
