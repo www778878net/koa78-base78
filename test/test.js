@@ -104,7 +104,7 @@ describe("sql api m", () => {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid
                 , "v": 17.2
-                , "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+                , "pars":  Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
             };
 
             console.log(data)
