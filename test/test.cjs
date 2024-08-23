@@ -1,9 +1,15 @@
 ﻿'use strict';
-import * as chai from 'chai';
+//暂时不升ts5 太多JS文件了
+//test.cjs
+
 const UpInfo = require('@www778878net/koa78-upinfo').default;
 const restler = require('restler');
 const Promise78 = require('@www778878net/promise78').default;
 
+console.log(Promise78); // 输出 Promise78 函数
+console.log(typeof Promise78); // 应该输出 function
+
+const { expect } = require('chai');
 describe("test temp", () => {
     it('test temp', async () => {
         function test() {
