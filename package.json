@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^0.0.105",
-    "@www778878net/koabody78": "^3.3.9",
+    "koa-body-parsers": "^3.0.0",
     "@www778878net/memcache78": "^0.1.0",
     "@www778878net/mysql78": "^0.0.8",
     "@www778878net/promise78": "^0.0.2",
