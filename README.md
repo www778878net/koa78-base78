@@ -11,6 +11,7 @@
 </div>
 
 ## API文档地址：[http://www.778878.net/docs/#/koa78-base78/](http://www.778878.net/docs/#/koa78-base78/)
+## 免费远程协助: [阿里云大使绑定推荐关系,即可免费协助购买和安装](https://www.aliyun.com/minisite/goods?userCode=2ty2vxdh)
 ## 反馈qq群(点击加群)：[323397913](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
 ## 背景 
