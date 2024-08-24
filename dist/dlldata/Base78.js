@@ -25,7 +25,7 @@ class Base78 extends Base78Amd_1.default {
     * @param kind 默认json ,string,jsondt(JSON表)
     */
     _setBack(res, errmsg, kind = "") {
-        let up = this.up;
+        const up = this.up;
         up.backtype = kind || "string";
         up.res = res || 0;
         up.errmsg = errmsg || "";
@@ -65,9 +65,8 @@ class Base78 extends Base78Amd_1.default {
                 up.res = -8888;
                 up.errmsg = Util.inspect(e);
             }
-            ;
             try {
-                if (!isNaN(back))
+                if (back != null && !isNaN(back))
                     back = back.toString();
                 if (self.up.backtype == "json") {
                     back = JSON.stringify(back);
@@ -102,7 +101,7 @@ class Base78 extends Base78Amd_1.default {
                 //ip记录                
                 let sb;
                 if (self.iplog) {
-                    let tmp = yield self.memcache.get("sys_ip_" + up.uid + up.ip);
+                    const tmp = yield self.memcache.get("sys_ip_" + up.uid + up.ip);
                     if (!tmp && up.uname != undefined) {
                         yield self.memcache.set("sys_ip_" + up.uid + up.ip, 1);
                         let obj = {
@@ -120,7 +119,7 @@ class Base78 extends Base78Amd_1.default {
                 }
                 //耗时统计
                 up.debug = false;
-                let msec = new Date().getTime() - up.uptime.getTime();
+                const msec = new Date().getTime() - up.uptime.getTime();
                 if (self.nodejslog && self.nodejslog["issave"]) {
                     if (self.nodejslog["redis"] && self.redis.host) {
                         //次数redis
@@ -132,7 +131,7 @@ class Base78 extends Base78Amd_1.default {
                         //下载redis
                         yield self.redis.zincrby('Base7817_sysnodejs_download', back.length, up.method);
                     }
-                    let values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid(),
+                    const values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid(),
                         msec, up.pars.join(",").length, back.length];
                     sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
                         "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";
