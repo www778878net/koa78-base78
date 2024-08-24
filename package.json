@@ -34,8 +34,7 @@
     "postversion": "npm publish --access public",
     "preversion": "npm test ",
     "test": "tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
-    "build": "tsc  ",
-    "install": "npx pnpm install"
+    "build": "tsc  "
   },
   "engines": {
     "node": ">=14.0.0"
