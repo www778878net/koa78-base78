@@ -24,7 +24,7 @@
     "nodejs"
   ],
   "scripts": {
-    "start": "npx tsc   && node ./strve/index.js  -- config config.json",
+    "start": "git checkout develop && npx tsc   && node ./strve/index.js  -- config config.json",
     "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",   
     "versionsave": "major minor patch premajor...",
     "upgrade78": "yarn-upgrade-all",    
