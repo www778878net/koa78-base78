@@ -1,6 +1,6 @@
 ﻿//Base78.ts
 import Base78Amd from "./Base78Amd";
-const Util = require('util');
+import * as Util from 'util';
 /**
  * 基类 主要是展示out逻辑  和语法糖
  * */
@@ -138,7 +138,7 @@ export default  class Base78 extends Base78Amd {
                         , msec, up.pars.join(",").length, back.length];
                     sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
                         "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";
-                    await self.mysql1.doM(sb, values, up);// 
+                    await self.mysql.doM(sb, values, up);// 
                 }
             } catch (e) {
                 e = Util.inspect(e);
@@ -158,11 +158,49 @@ export default  class Base78 extends Base78Amd {
 
     }
 
+     /**
+     * 获取自定义栏位
+     */
+     getCustomCols(): Promise<string> {
+        const self = this;
+        const up = self.up;
+
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this._upcheck();
+            } catch (e) {
+                reject(e);
+                return;
+            }
+            let datatb;
+            let values;
+            let item = self.tbname + "_customfields";
+
+            if (up.pars.length >= 1 && up.pars[0] != "")
+                item += "_" + up.pars[0];
+            if (self.uidcid === 'cid') {
+                values = [up.cid, item];
+                datatb = 'pars_co';
+            }
+            else {
+                values = [up.uid, item];
+                datatb = 'pars_users';
+            }
+            let sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
+            let back = await self.mysql.doGet(sb, values, up);
+            if (back.length === 0)
+                back = '||||';
+            else
+                back = back[0]['data'];
+            resolve(back);
+        });
+    }
+
     mysql1M(sb: string, values: string[]) {
-        return this.mysql1.doM(sb, values, this.up);
+        return this.mysql.doM(sb, values, this.up);
     }
 
     mysql1Get(sb: string, values: string[]) {
-        return this.mysql1.doGet(sb, values, this.up);
+        return this.mysql.doGet(sb, values, this.up);
     }
 }
