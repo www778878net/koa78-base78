@@ -39,7 +39,7 @@ export default class Request78 {
   }
 
   /**
- * Ç¿×Ô¶¨Òå
+ * å¼ºè‡ªå®šä¹‰
  * @param url
  * @param code
  */
@@ -69,7 +69,7 @@ export default class Request78 {
   });
 }
   /**
- * Ö±½ÓÓÃhttpreqÒ²ĞĞ ¼ò»¯GET·½·¨ÕâÑùÒ²ĞĞ
+ * ç›´æ¥ç”¨httpreqä¹Ÿè¡Œ ç®€åŒ–GETæ–¹æ³•è¿™æ ·ä¹Ÿè¡Œ
  * @param url
  * @param code
  * @returns {Promise<string>}
@@ -110,7 +110,7 @@ export default class Request78 {
 }
 
    /**
- * ¼òÒ×µ÷ÓÃ·½·¨
+ * ç®€æ˜“è°ƒç”¨æ–¹æ³•
  * @param url
  * @param data
  * @param method
