@@ -1,13 +1,15 @@
 ﻿'use strict';
 //暂时不升ts5 太多JS文件了
 //test.cjs
-
+let debug=true;
 const UpInfo = require('@www778878net/koa78-upinfo').default;
 const restler = require('restler');
 const Promise78 = require('@www778878net/promise78').default;
+const { Buffer } = require('buffer');
 
-console.log(Promise78); // 输出 Promise78 函数
-console.log(typeof Promise78); // 应该输出 function
+
+if(debug)if(debug)console.log(Promise78); // 输出 Promise78 函数
+if(debug)console.log(typeof Promise78); // 应该输出 function
 
 const { expect } = require('chai');
 describe("test temp", () => {
@@ -21,11 +23,11 @@ describe("test temp", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         res = JSON.parse(res)
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]).to.equal("d4856531-e9d3-20f3-4c22-fe3c65fb009c");
@@ -45,11 +47,11 @@ describe("no power api test", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         res = JSON.parse(res)
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]).to.equal("不能公开config测试的时候用用");
@@ -65,11 +67,11 @@ describe("no power api test", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
         res = JSON.parse(res)
 
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]).to.equal("看到我说明路由ok,中文ok,无权限调用OK");
@@ -85,11 +87,11 @@ describe("no power api test", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
         res = JSON.parse(res)
 
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]).to.equal("8");
@@ -113,7 +115,7 @@ describe("sql api m", () => {
                 , "pars":  Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
             };
 
-            console.log(data)
+            if(debug)console.log(data)
             return new Promise78((resolve, reject) => {
                 restler.post("http://localhost:88/Api7822/TestMenu/testtb/m", {
                     data: data
@@ -124,11 +126,11 @@ describe("sql api m", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         res = JSON.parse(res)
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]).to.equal(up.mid);
@@ -156,11 +158,11 @@ describe("sql api get", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         res = JSON.parse(res)
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"][0]["idpk"]).to.equal(1);
@@ -180,7 +182,7 @@ describe("test login", () => {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid
                 , "v": 17.2
-                , "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+                , "pars": Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
             };
 
             return new Promise78((resolve, reject) => {
@@ -191,11 +193,11 @@ describe("test login", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         res = JSON.parse(res)
-        console.log(res["back"])
+        if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res["back"]["uname"]).to.equal("guest3");
@@ -224,14 +226,48 @@ describe("test apiqq", () => {
             })
         }
         let [err, res] = await test();
-        console.log(err)
-        console.log(res)
+        if(debug)console.log(err)
+        if(debug)console.log(res)
 
         // res = JSON.parse(res)
-        // console.log(res["back"])
+        // if(debug)console.log(res["back"])
         expect(err).to.be.null;
 
         expect(res).to.equal("apifun not find:loginWeixin");
     });
 
 })
+
+describe("test upcheck", () => {
+  it('test upcheck', async () => {
+      function test() {
+          let up = new UpInfo(null);
+          up = up.getGuest()
+          up.sid="gagag";
+          let pars = ["guest3","084e0343a0486ff05530df6c705c8bb4"]
+
+          let data = {
+              "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
+              , "mid": up.mid
+              , "v": 17.2
+              , "pars": Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+          };
+
+          return new Promise78((resolve, reject) => {
+              restler.post("http://localhost:88/Api7822/ucenter/lovers/login", {  data:data })
+                  .on('complete', function (back) {
+                      resolve(back)
+                  });
+          })
+      }
+      let [err, res] = await test();
+      if(debug)console.log(err)
+      if(debug)console.log(res)
+
+      res = JSON.parse(res)
+      if(debug)console.log(res["back"])
+      expect(err).to.be.null;
+
+      expect(res["back"]["uname"]).to.equal("guest3");
+  });
+});
