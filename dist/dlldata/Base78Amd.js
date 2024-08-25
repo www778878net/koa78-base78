@@ -135,8 +135,8 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            let sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            let values = [up.mid, up[self.uidcid]];
+            const sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
+            const values = [up.mid, up[self.uidcid]];
             let back = yield self.mysql.doM(sb, values, up);
             if (back == 0) {
                 back = "err:没有行被修改";
@@ -167,7 +167,7 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            let values = [up[self.uidcid]];
+            const values = [up[self.uidcid]];
             colp = colp || up.cols; //修改列
             let iswhereauto = false;
             if (where == "")
@@ -188,72 +188,56 @@ class Base78Amd {
             sb += ' limit ' + up.getstart + ',' + up.getnumber;
             //if (where !== '')
             //    values = values.concat(up.pars);
-            let tb = yield self.mysql.doGet(sb, values, up);
+            const tb = yield self.mysql.doGet(sb, values, up);
             resolve(tb);
         }));
     }
     _upcheck() {
-        let self = this;
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            let up = self.up;
-            //验证
-            if (up.errmessage == "ok") {
-                resolve("ok");
-                return;
+        return __awaiter(this, void 0, void 0, function* () {
+            const up = this.up;
+            // 验证
+            if (up.errmsg === "ok") {
+                return "ok";
             }
-            //up.redis = self.redis;
             if (up.sid === '' || up.sid.length !== 36) {
-                up.errmessage = up.uname + 'sid err' + up.sid;
+                throw new Error(`${up.uname} sid err ${up.sid}`);
             }
-            //if (up.cidn === '' || up.cidn.length !== 36) {
-            //    up.errmessage = up.uname + 'cid err' + up.cidn;
-            //}
-            if (up.bcid.length == 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
-                up.errmessage = up.uname + 'bcid err' + up.bcid;
+            if (up.bcid.length === 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
+                throw new Error(`${up.uname} bcid err ${up.bcid}`);
             }
             if (up.mid === '' || up.mid.length !== 36) {
-                up.errmessage = up.method + 'mid err' + up.mid;
+                throw new Error(`${up.method} mid err ${up.mid}`);
             }
             if (!Validate78_1.default.isNum(up.getstart) || !Validate78_1.default.isNum(up.getnumber)) {
-                up.errmessage = 'getstart or number err' + up.getstart + up.getnumber;
+                throw new Error('getstart or number err' + up.getstart + up.getnumber);
             }
-            if (up.errmessage !== "") {
-                reject(up.errmessage);
-                return;
+            if (!up.inOrder(this.cols)) {
+                throw new Error("up order err:" + up.order);
             }
-            if (!up.inOrder(self.cols)) {
-                reject("up order err:" + up.order);
-                return;
-            }
-            let tmps = up.checkCols(self.cols);
-            if (tmps != "checkcolsallok") {
-                reject("checkCols err:" + tmps + JSON.stringify(up.cols));
-                return;
+            const checkColsResult = up.checkCols(this.cols);
+            if (checkColsResult !== "checkcolsallok") {
+                throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
             }
             if (up.cols.length === 1 && up.cols[0] === "all")
-                up.cols = self.cols;
-            //数据库判断 获取用户信息
-            let tmp = yield self.memcache.tbget(self.mem_sid + up.sid, up.debug);
-            if (tmp == "pool null")
+                up.cols = this.cols;
+            // 数据库判断 获取用户信息
+            let tmp = yield this.memcache.tbget(this.mem_sid + up.sid, up.debug);
+            if (tmp === "pool null")
                 tmp = "";
-            let t;
             if (!tmp) {
-                //console.log(up.sid + JSON.stringify(tmp));
                 switch (Config78.location) {
-                    case "qq": //这里可以http请求验证用户
-                        reject("err:get u info err html");
+                    case "qq":
+                        throw new Error("err:get u info err html");
                         break;
                     default:
-                        let cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
-                            "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
-                            " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
-                        let values = [up.sid, up.sid];
-                        t = yield self.mysql.doGet(cmdtext, values, up);
-                        if (t.length == 0)
+                        const cmdtext = "select t1.*, companys.coname, companys.uid as idceo, companys.id as cid from (SELECT uname, id, upby, uptime, sid_web_date, idcodef, idpk FROM lovers WHERE sid=? OR sid_web=?) as t1 LEFT JOIN companysuser as t2 ON t2.uid=t1.id AND t2.cid=t1.idcodef LEFT JOIN companys ON t1.idcodef=companys.id";
+                        const values = [up.sid, up.sid];
+                        const result = yield this.mysql.doGet(cmdtext, values, up);
+                        if (result.length === 0)
                             tmp = "";
                         else {
-                            tmp = t[0];
-                            self.memcache.tbset(self.mem_sid + up.sid, tmp);
+                            tmp = result[0];
+                            this.memcache.tbset(this.mem_sid + up.sid, tmp);
                         }
                         break;
                 }
@@ -268,18 +252,16 @@ class Base78Amd {
                 up.truename = tmp["truename"];
                 up.idpk = tmp["idpk"];
                 up.mobile = tmp["mobile"];
+                if (up.uname === "sysadmin")
+                    up.debug = true;
+                up.bcid = up.bcid || up.cid;
+                up.errmsg = "ok";
+                return "ok";
             }
             else {
-                reject("err:get u info err3");
-                return;
+                throw new Error("err:get u info err3");
             }
-            up.bcid = up.bcid || up.cid;
-            if (up.uname == "sysadmin")
-                up.debug = true;
-            //await self._upcheck_debug();
-            up.errmessage = "ok";
-            resolve("ok");
-        }));
+        });
     }
     /**
      * 自动判断修改还是新增
@@ -306,7 +288,7 @@ class Base78Amd {
                 colp = colp || this.colsImp;
             }
             try {
-                let sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
+                const sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
                 let back = yield self.mysql.doGet(sb, [up.mid], up);
                 //console.log(back)
                 if (back.length == 1)
@@ -370,7 +352,7 @@ class Base78Amd {
                 sb += ",?";
             }
             sb += ")";
-            let values = up.pars.slice(0, colp.length);
+            const values = up.pars.slice(0, colp.length);
             values.push(up.mid);
             values.push(up.uname);
             values.push(up.utime);
@@ -414,7 +396,7 @@ class Base78Amd {
             //update
             let sb2 = "UPDATE  " + self.tbname + " SET ";
             sb2 += colp.join("=?,") + "=?,upby=?,uptime=? WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            let values2 = up.pars.slice(0, colp.length);
+            const values2 = up.pars.slice(0, colp.length);
             values2.push(up.uname);
             values2.push(up.utime);
             values2.push(up.mid);

@@ -60,14 +60,16 @@ class Base78 extends Base78Amd_1.default {
                 back = yield self[method]();
             }
             catch (e) {
+                up.errmsg = e.message;
                 //这里记录错误
-                console.log("doing err log3" + Util.inspect(e));
-                back = e;
+                back = JSON.stringify(e);
                 up.res = -8888;
-                up.errmsg = Util.inspect(e);
+                console.log("doing err log3:" + Util.inspect(e));
             }
             try {
-                if (back != null && !isNaN(back))
+                if (back == null)
+                    back = "";
+                if (!isNaN(back))
                     back = back.toString();
                 if (self.up.backtype == "json") {
                     back = JSON.stringify(back);
@@ -105,13 +107,7 @@ class Base78 extends Base78Amd_1.default {
                     const tmp = yield self.memcache.get("sys_ip_" + up.uid + up.ip);
                     if (!tmp && up.uname != undefined) {
                         yield self.memcache.set("sys_ip_" + up.uid + up.ip, 1);
-                        let obj = {
-                            uid: up.uid,
-                            ip: up.ip
-                        };
-                        obj = JSON.stringify(obj);
                         if (up.uid != "") {
-                            //await self.redis.setlpush('Base7817_sys_ip', obj);
                             sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
                                 + "values(?,?,?,?,?)";
                             yield self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
@@ -159,37 +155,28 @@ class Base78 extends Base78Amd_1.default {
     * 获取自定义栏位
     */
     getCustomCols() {
-        const self = this;
-        const up = self.up;
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this._upcheck();
-            }
-            catch (e) {
-                reject(e);
-                return;
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._upcheck(); // 错误会直接抛出
+            let item = this.tbname + "_customfields"; // 直接使用 this
+            if (this.up.pars.length >= 1 && this.up.pars[0] !== "")
+                item += "_" + this.up.pars[0];
             let datatb;
             let values;
-            let item = self.tbname + "_customfields";
-            if (up.pars.length >= 1 && up.pars[0] != "")
-                item += "_" + up.pars[0];
-            if (self.uidcid === 'cid') {
-                values = [up.cid, item];
+            if (this.uidcid === 'cid') {
+                values = [this.up.cid, item];
                 datatb = 'pars_co';
             }
             else {
-                values = [up.uid, item];
+                values = [this.up.uid, item];
                 datatb = 'pars_users';
             }
-            let sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
-            let back = yield self.mysql.doGet(sb, values, up);
+            const sb = `SELECT data FROM ${datatb} WHERE ${this.uidcid}=? AND item=?`;
+            const back = yield this.mysql.doGet(sb, values, this.up);
             if (back.length === 0)
-                back = '||||';
+                return '||||'; // 直接返回字符串
             else
-                back = back[0]['data'];
-            resolve(back);
-        }));
+                return back[0]['data']; // 直接返回字符串
+        });
     }
     mysql1M(sb, values) {
         return this.mysql.doM(sb, values, this.up);

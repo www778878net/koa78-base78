@@ -1,4 +1,4 @@
-﻿import Base78 from "./Base78";
+﻿import Base78 from "../dlldata/Base78";
 
 
 
@@ -18,8 +18,8 @@ export default class test extends Base78 {
         const up = self.up;
 
         return new Promise(async (resolve, reject) => {
-            let setback = await self.redis.set("testitem", 8, 60);
-            let getback = await self.redis.get("testitem")
+            const setback = await self.redis.set("testitem", 8, 60);
+            const getback = await self.redis.get("testitem")
             resolve(getback);
             return;
         })

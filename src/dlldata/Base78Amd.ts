@@ -145,8 +145,8 @@ export default class Base78Amd {
                 return;
             }
 
-            let sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            let values = [up.mid, up[self.uidcid]];
+            const sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
+            const values = [up.mid, up[self.uidcid]];
             let back: any = await self.mysql.doM(sb, values, up);
 
             if (back == 0) {
@@ -179,7 +179,7 @@ export default class Base78Amd {
                 reject(e);
                 return;
             }
-            let values = [up[self.uidcid]];
+            const values = [up[self.uidcid]];
             colp = colp || up.cols;//修改列
             let iswhereauto = false;
             if (where == "") iswhereauto = true
@@ -202,7 +202,7 @@ export default class Base78Amd {
 
             //if (where !== '')
             //    values = values.concat(up.pars);
-            let tb = await self.mysql.doGet(sb, values, up);
+            const tb = await self.mysql.doGet(sb, values, up);
             resolve(tb);
         });
     }
@@ -211,92 +211,87 @@ export default class Base78Amd {
 
 
     async _upcheck(): Promise<string> {
-        const up = this.up;
+  const up = this.up;
 
+  // 验证
+  if (up.errmsg === "ok") {
+    return "ok";
+  }
 
-        // 验证
-        if (up.errmessage === "ok") {
-            return "ok";
+  if (up.sid === '' || up.sid.length !== 36) {
+    throw new Error(`${up.uname} sid err ${up.sid}`);
+  }
+
+  if (up.bcid.length === 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
+    throw new Error(`${up.uname} bcid err ${up.bcid}`);
+  }
+
+  if (up.mid === '' || up.mid.length !== 36) {
+    throw new Error(`${up.method} mid err ${up.mid}`);
+  }
+
+  if (!Validate78.isNum(up.getstart) || !Validate78.isNum(up.getnumber)) {
+    throw new Error('getstart or number err' + up.getstart + up.getnumber);
+  }
+
+  if (!up.inOrder(this.cols)) {
+    throw new Error("up order err:" + up.order);
+  }
+
+  const checkColsResult = up.checkCols(this.cols);
+  if (checkColsResult !== "checkcolsallok") {
+    throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
+  }
+
+  if (up.cols.length === 1 && up.cols[0] === "all")
+    up.cols = this.cols;
+
+  // 数据库判断 获取用户信息
+  let tmp = await this.memcache.tbget(this.mem_sid + up.sid, up.debug);
+
+  if (tmp === "pool null") tmp = "";
+
+  if (!tmp) {
+    switch (Config78.location) {
+      case "qq":
+        throw new Error("err:get u info err html");
+        break;
+      default:
+        const cmdtext = "select t1.*, companys.coname, companys.uid as idceo, companys.id as cid from (SELECT uname, id, upby, uptime, sid_web_date, idcodef, idpk FROM lovers WHERE sid=? OR sid_web=?) as t1 LEFT JOIN companysuser as t2 ON t2.uid=t1.id AND t2.cid=t1.idcodef LEFT JOIN companys ON t1.idcodef=companys.id";
+        const values = [up.sid, up.sid];
+        const result = await this.mysql.doGet(cmdtext, values, up);
+
+        if (result.length === 0) tmp = "";
+        else {
+          tmp = result[0];
+          this.memcache.tbset(this.mem_sid + up.sid, tmp);
         }
-
-        if (up.sid === '' || up.sid.length !== 36) {
-            up.errmessage = `${up.uname} sid err ${up.sid}`;
-            throw new Error(up.errmessage);
-        }
-
-        if (up.bcid.length === 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
-            up.errmessage = `${up.uname} bcid err ${up.bcid}`;
-            throw new Error(up.errmessage);
-        }
-
-        if (up.mid === '' || up.mid.length !== 36) {
-            up.errmessage = `${up.method} mid err ${up.mid}`;
-            throw new Error(up.errmessage);
-        }
-
-        if (!Validate78.isNum(up.getstart) || !Validate78.isNum(up.getnumber)) {
-            up.errmessage = 'getstart or number err' + up.getstart + up.getnumber;
-            throw new Error(up.errmessage);
-        }
-
-        if (!up.inOrder(this.cols)) {
-            throw new Error("up order err:" + up.order);
-        }
-
-        const checkColsResult = up.checkCols(this.cols);
-        if (checkColsResult !== "checkcolsallok") {
-            throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
-        }
-
-        if (up.cols.length === 1 && up.cols[0] === "all")
-            up.cols = this.cols;
-
-        // 数据库判断 获取用户信息
-        let tmp = await this.memcache.tbget(this.mem_sid + up.sid, up.debug);
-
-        if (tmp === "pool null") tmp = "";
-
-        if (!tmp) {
-            switch (Config78.location) {
-                case "qq"://可以在这里调用别的服务的认证信息
-                    throw new Error("err:get u info err html");
-                    break;
-                default:
-                    const cmdtext = "select t1.*, companys.coname, companys.uid as idceo, companys.id as cid from (SELECT uname, id, upby, uptime, sid_web_date, idcodef, idpk FROM lovers WHERE sid=? OR sid_web=?) as t1 LEFT JOIN companysuser as t2 ON t2.uid=t1.id AND t2.cid=t1.idcodef LEFT JOIN companys ON t1.idcodef=companys.id";
-                    const values = [up.sid, up.sid];
-                    const result = await this.mysql.doGet(cmdtext, values, up);
-
-                    if (result.length === 0) tmp = "";
-                    else {
-                        tmp = result[0];
-                        this.memcache.tbset(this.mem_sid + up.sid, tmp);
-                    }
-                    break;
-            }
-        }
-
-        if (tmp) {
-            up.uid = tmp["id"];
-            up.uname = tmp["uname"];
-            up.cid = tmp["cid"];
-            up.coname = tmp["coname"];
-            up.idceo = tmp["idceo"];
-            up.weixin = tmp["openweixin"];
-            up.truename = tmp["truename"];
-            up.idpk = tmp["idpk"];
-            up.mobile = tmp["mobile"];
-
-            if (up.uname === "sysadmin")
-                up.debug = true;
-
-            up.bcid = up.bcid || up.cid;
-            up.errmessage = "ok";
-
-            return "ok";
-        } else {
-            throw new Error("err:get u info err3");
-        }
+        break;
     }
+  }
+
+  if (tmp) {
+    up.uid = tmp["id"];
+    up.uname = tmp["uname"];
+    up.cid = tmp["cid"];
+    up.coname = tmp["coname"];
+    up.idceo = tmp["idceo"];
+    up.weixin = tmp["openweixin"];
+    up.truename = tmp["truename"];
+    up.idpk = tmp["idpk"];
+    up.mobile = tmp["mobile"];
+
+    if (up.uname === "sysadmin")
+      up.debug = true;
+
+    up.bcid = up.bcid || up.cid;
+    up.errmsg = "ok";
+
+    return "ok";
+  } else {
+    throw new Error("err:get u info err3");
+  }
+}
 
     /**
      * 自动判断修改还是新增 
@@ -323,7 +318,7 @@ export default class Base78Amd {
                 colp = colp || this.colsImp;
             }
             try {
-                let sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
+                const sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
                 let back: any = await self.mysql.doGet(sb, [up.mid], up);
                 //console.log(back)
                 if (back.length == 1)
@@ -391,7 +386,7 @@ export default class Base78Amd {
                 sb += ",?";
             }
             sb += ")";
-            let values = up.pars.slice(0, colp.length);
+            const values = up.pars.slice(0, colp.length);
             values.push(up.mid);
             values.push(up.uname);
             values.push(up.utime);
@@ -437,7 +432,7 @@ export default class Base78Amd {
             //update
             let sb2 = "UPDATE  " + self.tbname + " SET ";
             sb2 += colp.join("=?,") + "=?,upby=?,uptime=? WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            let values2 = up.pars.slice(0, colp.length);
+            const values2 = up.pars.slice(0, colp.length);
             values2.push(up.uname);
             values2.push(up.utime);
             values2.push(up.mid);

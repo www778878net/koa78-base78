@@ -239,35 +239,53 @@ describe("test apiqq", () => {
 })
 
 describe("test upcheck", () => {
-  it('test upcheck', async () => {
-      function test() {
-          let up = new UpInfo(null);
-          up = up.getGuest()
-          up.sid="gagag";
-          let pars = ["guest3","084e0343a0486ff05530df6c705c8bb4"]
+   it('test upcheck', async () => {
+       function test() {
+           let up = new UpInfo(null);
+           up = up.getGuest();
+           up.sid = "gagag";
+           let pars = ["guest3", "084e0343a0486ff05530df6c705c8bb4"];
 
-          let data = {
-              "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
-              , "mid": up.mid
-              , "v": 17.2
-              , "pars": Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
-          };
+           let data = {
+               "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid,
+               "mid": up.mid,
+               "v": 24,
+               "pars": Buffer.from(JSON.stringify(pars))
+           };
 
-          return new Promise78((resolve, reject) => {
-              restler.post("http://localhost:88/Api7822/ucenter/lovers/login", {  data:data })
-                  .on('complete', function (back) {
-                      resolve(back)
-                  });
-          })
-      }
-      let [err, res] = await test();
-      if(debug)console.log(err)
-      if(debug)console.log(res)
+           return new Promise78((resolve, reject) => {
+               restler.post("http://localhost:88/Api7822/TestMenu/Test78/testupcheck", { data: data })
+                   .on('complete', function ( back) {
+                       //if (debug) console.log(response);
+                       if (debug) console.log(back);
+                           resolve(back);
+                      
+                   })
+                   .on('error', function (error) {
+                       reject(error);
+                   });
+           })
+       }
 
-      res = JSON.parse(res)
-      if(debug)console.log(res["back"])
-      expect(err).to.be.null;
+       try {
+           let [err, res] = await test();
+           if (debug) console.log(err);
+           if (debug) console.log(res);
 
-      expect(res["back"]["uname"]).to.equal("guest3");
-  });
+           let parsedRes;
+           try {
+               parsedRes = JSON.parse(res);
+           } catch (parseError) {
+               throw new Error(`Failed to parse response: ${parseError.message}`);
+           }
+
+           if (debug) console.log(parsedRes["back"]);
+           expect(err).to.be.null;
+
+           expect(parsedRes["errmsg"]).to.equal("guest sid err gagag");
+       } catch (error) {
+           console.error(error);
+           throw error; // Rethrow the error for the test to fail
+       }
+   });
 });

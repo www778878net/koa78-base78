@@ -51,12 +51,12 @@ export default class Base78 extends Base78Amd {
             try {
                 //不建议reject 可以设置res=-N来返回预期的错误
                 back = await self[method]();
-            } catch (e) {
+            } catch (e ) {
+                up.errmsg =(e as Error).message;
                 //这里记录错误
-                console.log("doing err log3" + Util.inspect(e));
-                back = e;
+                back = JSON.stringify(e) ;
                 up.res = -8888;
-                up.errmsg = Util.inspect(e);
+                console.log("doing err log3:" + Util.inspect(e));   
             }
 
             try {
@@ -87,7 +87,7 @@ export default class Base78 extends Base78Amd {
                         back = "{\"res\":" + up.res + ",\"errmsg\":\""
                             + up.errmsg + "\",\"kind\":\"" + up.backtype + "\",\"back\":"
                             + back + "}"
-
+                         
 
 
                 }

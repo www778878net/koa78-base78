@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Base78 = require("../../../dist/dlldata/Base78").default;
-//console.log(Base78)
+const Util = require("util");
 class Test78 extends Base78 {
     constructor(ctx) {
         super(ctx);
@@ -20,6 +20,25 @@ class Test78 extends Base78 {
         this.colsImp = [];
         this.cols = this.colsImp.concat(this.colsremark);
     }
+
+    testupcheck(){
+      const self = this;
+      const up = self.up;
+ 
+     
+      return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield self._upcheck();
+        } catch (e) {
+            reject(e);
+            return;
+        }     
+        let back=  yield self.getCustomCols();
+    
+          resolve(back);
+          return;
+        }));
+      }
 
     testcidmy() {
         const self = this;
