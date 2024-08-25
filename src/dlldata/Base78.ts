@@ -4,7 +4,7 @@ import * as Util from 'util';
 /**
  * 基类 主要是展示out逻辑  和语法糖
  * */
-export default  class Base78 extends Base78Amd {
+export default class Base78 extends Base78Amd {
     constructor(ctx: any) {
         super(ctx);
     }
@@ -37,7 +37,7 @@ export default  class Base78 extends Base78Amd {
             if (up.v >= 17.2) {
                 if (method.charAt(0) == "m") {//&& up.ip!="127.0.0.1"
                     back = await self.memcache.get(up.ctx.request.path + up.cache);
-                    if (back) { 
+                    if (back) {
                         back = "err:防止重放攻击" + up.ctx.request.path + up.cache
                         up.res = -8887;
                         up.errmsg = back
@@ -60,7 +60,8 @@ export default  class Base78 extends Base78Amd {
             }
 
             try {
-                if (back != null && !isNaN(back)) back = back.toString();
+                if (back == null) back = "";
+                if (!isNaN(back)) back = back.toString();
 
 
                 if (self.up.backtype == "json") {
@@ -103,14 +104,7 @@ export default  class Base78 extends Base78Amd {
                     const tmp = await self.memcache.get("sys_ip_" + up.uid + up.ip);
                     if (!tmp && up.uname != undefined) {
                         await self.memcache.set("sys_ip_" + up.uid + up.ip, 1);
-
-                        let obj: any = {
-                            uid: up.uid,
-                            ip: up.ip
-                        };
-                        obj = JSON.stringify(obj);
                         if (up.uid != "") {
-                            //await self.redis.setlpush('Base7817_sys_ip', obj);
                             sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
                                 + "values(?,?,?,?,?)";
                             await self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
@@ -158,42 +152,37 @@ export default  class Base78 extends Base78Amd {
 
     }
 
-     /**
-     * 获取自定义栏位
-     */
-     getCustomCols(): Promise<string> {
-        const self = this;
-        const up = self.up;
+    /**
+    * 获取自定义栏位
+    */
+    async getCustomCols(): Promise<string> {
+        
+        await this._upcheck(); // 错误会直接抛出
+        
 
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this._upcheck();
-            } catch (e) {
-                reject(e);
-                return;
-            }
-            let datatb;
-            let values;
-            let item = self.tbname + "_customfields";
+        let item = this.tbname + "_customfields"; // 直接使用 this
 
-            if (up.pars.length >= 1 && up.pars[0] != "")
-                item += "_" + up.pars[0];
-            if (self.uidcid === 'cid') {
-                values = [up.cid, item];
-                datatb = 'pars_co';
-            }
-            else {
-                values = [up.uid, item];
-                datatb = 'pars_users';
-            }
-            let sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
-            let back = await self.mysql.doGet(sb, values, up);
-            if (back.length === 0)
-                back = '||||';
-            else
-                back = back[0]['data'];
-            resolve(back);
-        });
+        if (this.up.pars.length >= 1 && this.up.pars[0] !== "")
+            item += "_" + this.up.pars[0];
+
+        let datatb;
+        let values;
+
+        if (this.uidcid === 'cid') {
+            values = [this.up.cid, item];
+            datatb = 'pars_co';
+        } else {
+            values = [this.up.uid, item];
+            datatb = 'pars_users';
+        }
+
+        const sb = `SELECT data FROM ${datatb} WHERE ${this.uidcid}=? AND item=?`;
+        const back = await this.mysql.doGet(sb, values, this.up);
+
+        if (back.length === 0)
+            return '||||'; // 直接返回字符串
+        else
+            return back[0]['data']; // 直接返回字符串
     }
 
     mysql1M(sb: string, values: string[]) {

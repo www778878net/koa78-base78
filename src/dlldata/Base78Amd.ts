@@ -40,16 +40,16 @@ export default class Base78Amd {
     //各种连接
     static mysql782: Mysql78 = new Mysql78(Config78.mysql2);//支持多mysql
     static mysql781: Mysql78 = new Mysql78(Config78.mysql);//支持多mysql
-    static memcache78: MemCache78 = new MemCache78(Config78.memcached); 
+    static memcache78: MemCache78 = new MemCache78(Config78.memcached);
     static redis78: Redis78 = new Redis78(Config78.redis);
-    
+
     mysql2: Mysql78 = Base78Amd.mysql782;//支持多mysql
     mysql1: Mysql78 = Base78Amd.mysql781;//支持多mysql
     mysql: Mysql78 = Base78Amd.mysql781;//语法糖简化 默认mysql    
-    memcache: MemCache78 =Base78Amd.memcache78;
+    memcache: MemCache78 = Base78Amd.memcache78;
     redis: Redis78 = Base78Amd.redis78;
-    apiqq: Apiqq78= new Apiqq78(Config78.apiqq, Base78Amd.memcache78); //公众号
-    apiwxsmall: ApiWxSmall= new ApiWxSmall(Config78.apiwxsmall,Base78Amd.memcache78) //小程序
+    apiqq: Apiqq78 = new Apiqq78(Config78.apiqq, Base78Amd.memcache78); //公众号
+    apiwxsmall: ApiWxSmall = new ApiWxSmall(Config78.apiwxsmall, Base78Amd.memcache78) //小程序
     //表相关属性
     tbname: string = "";
     cols: string[] = [];//所有列
@@ -58,12 +58,12 @@ export default class Base78Amd {
     colsremark: string[] = ["remark", "remark2", "remark3", "remark4", "remark5", "remark6"];//所有表都有的默认字段
 
     //常量：
-    cidmy: string ="d4856531-e9d3-20f3-4c22-fe3c65fb009c";//管理员帐套
+    cidmy: string = "d4856531-e9d3-20f3-4c22-fe3c65fb009c";//管理员帐套
     cidguest: string = "GUEST000-8888-8888-8888-GUEST00GUEST";//测试帐套
     mem_sid: string = "lovers_sid3_";//保存用户N个ID 方便修改 千万不能改为lovers_sid_
     constructor(ctx) {
         this.up = new UpInfo(ctx);
-        Config78.apiqq["host"] = Config78.host;   
+        Config78.apiqq["host"] = Config78.host;
     }
 
     mAdd(colp?: string[]): Promise<string> {
@@ -90,7 +90,7 @@ export default class Base78Amd {
     /**
      * get方法
      * */
-    get(): Promise<string> { 
+    get(): Promise<string> {
         return this._get();
     }
 
@@ -98,7 +98,7 @@ export default class Base78Amd {
         return this._del();
     }
 
-   
+
 
     /**
      * 权限检查(用户日期)
@@ -110,7 +110,7 @@ export default class Base78Amd {
 
             //await self._addWarn(usefor, "sys_sql", "services", "services_dinpay");
             let back;
-            if (up.cid == self.cidmy  ) {
+            if (up.cid == self.cidmy) {
                 back = {
                     code: 200
                 }
@@ -130,7 +130,7 @@ export default class Base78Amd {
                 , errback: up.cid
             }
             resolve(back);
- 
+
         });
     }
 
@@ -144,20 +144,20 @@ export default class Base78Amd {
                 reject(e);
                 return;
             }
-   
+
             let sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
             let values = [up.mid, up[self.uidcid]];
             let back: any = await self.mysql.doM(sb, values, up);
 
             if (back == 0) {
                 back = "err:没有行被修改";
-            
+
             }
             else {
                 back = up.mid;
-           
+
             }
-         
+
             if (back == 1) back = up.mid;
             resolve(back);
         });
@@ -195,7 +195,7 @@ export default class Base78Amd {
 
             let sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
                 + " WHERE " + self.uidcid + '=? ' + where;
-            
+
             if (up.order !== "idpk")
                 sb += '  order by ' + up.order;
             sb += ' limit ' + up.getstart + ',' + up.getnumber;
@@ -209,121 +209,93 @@ export default class Base78Amd {
 
 
 
-    _upcheck(): Promise<string> {
-        let self = this;
 
-        return new Promise(async (resolve, reject) => {
-            let up = self.up;
+    async _upcheck(): Promise<string> {
+        const up = this.up;
 
-            //验证
-            if (up.errmessage == "ok") {
-                resolve("ok");
-                return;
+
+        // 验证
+        if (up.errmessage === "ok") {
+            return "ok";
+        }
+
+        if (up.sid === '' || up.sid.length !== 36) {
+            up.errmessage = `${up.uname} sid err ${up.sid}`;
+            throw new Error(up.errmessage);
+        }
+
+        if (up.bcid.length === 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
+            up.errmessage = `${up.uname} bcid err ${up.bcid}`;
+            throw new Error(up.errmessage);
+        }
+
+        if (up.mid === '' || up.mid.length !== 36) {
+            up.errmessage = `${up.method} mid err ${up.mid}`;
+            throw new Error(up.errmessage);
+        }
+
+        if (!Validate78.isNum(up.getstart) || !Validate78.isNum(up.getnumber)) {
+            up.errmessage = 'getstart or number err' + up.getstart + up.getnumber;
+            throw new Error(up.errmessage);
+        }
+
+        if (!up.inOrder(this.cols)) {
+            throw new Error("up order err:" + up.order);
+        }
+
+        const checkColsResult = up.checkCols(this.cols);
+        if (checkColsResult !== "checkcolsallok") {
+            throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
+        }
+
+        if (up.cols.length === 1 && up.cols[0] === "all")
+            up.cols = this.cols;
+
+        // 数据库判断 获取用户信息
+        let tmp = await this.memcache.tbget(this.mem_sid + up.sid, up.debug);
+
+        if (tmp === "pool null") tmp = "";
+
+        if (!tmp) {
+            switch (Config78.location) {
+                case "qq"://可以在这里调用别的服务的认证信息
+                    throw new Error("err:get u info err html");
+                    break;
+                default:
+                    const cmdtext = "select t1.*, companys.coname, companys.uid as idceo, companys.id as cid from (SELECT uname, id, upby, uptime, sid_web_date, idcodef, idpk FROM lovers WHERE sid=? OR sid_web=?) as t1 LEFT JOIN companysuser as t2 ON t2.uid=t1.id AND t2.cid=t1.idcodef LEFT JOIN companys ON t1.idcodef=companys.id";
+                    const values = [up.sid, up.sid];
+                    const result = await this.mysql.doGet(cmdtext, values, up);
+
+                    if (result.length === 0) tmp = "";
+                    else {
+                        tmp = result[0];
+                        this.memcache.tbset(this.mem_sid + up.sid, tmp);
+                    }
+                    break;
             }
-            //up.redis = self.redis;
+        }
 
+        if (tmp) {
+            up.uid = tmp["id"];
+            up.uname = tmp["uname"];
+            up.cid = tmp["cid"];
+            up.coname = tmp["coname"];
+            up.idceo = tmp["idceo"];
+            up.weixin = tmp["openweixin"];
+            up.truename = tmp["truename"];
+            up.idpk = tmp["idpk"];
+            up.mobile = tmp["mobile"];
 
-            if (up.sid === '' || up.sid.length !== 36) {
-                up.errmessage = up.uname + 'sid err' + up.sid;
-            }
-            //if (up.cidn === '' || up.cidn.length !== 36) {
-            //    up.errmessage = up.uname + 'cid err' + up.cidn;
-            //}
-            if (up.bcid.length == 36 && (up.bcid.indexOf("-") !== 8 || up.bcid.indexOf("-", 19) !== 23)) {
-                up.errmessage = up.uname + 'bcid err' + up.bcid;
-            }
-
-            if (up.mid === '' || up.mid.length !== 36) {
-                up.errmessage = up.method + 'mid err' + up.mid;
-            }
-            if (!Validate78.isNum(up.getstart) || !Validate78.isNum(up.getnumber)) {
-                up.errmessage = 'getstart or number err' + up.getstart + up.getnumber;
-            }
-            if (up.errmessage !== "") {
-                reject(up.errmessage);
-                return;
-            }
-
-            if (!up.inOrder(self.cols)) {
-                reject("up order err:" + up.order);
-                return;
-            }
-            let tmps = up.checkCols(self.cols)
-            if (tmps != "checkcolsallok") {
-                reject("checkCols err:" + tmps + JSON.stringify(up.cols));
-                return;
-            }
-
-            if (up.cols.length === 1 && up.cols[0] === "all")
-                up.cols = self.cols;
-
-
-            //数据库判断 获取用户信息
-
-            let tmp =  await self.memcache.tbget(self.mem_sid + up.sid, up.debug);
-            if (tmp == "pool null")
-                tmp = "";
-           
-            let t;
-            if (!tmp) {
-                //console.log(up.sid + JSON.stringify(tmp));
-                switch (Config78.location) {
-                    case "qq"://这里可以http请求验证用户
-                        reject("err:get u info err html");
-                        break;
-                    default:
-
-                        let cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
-                            "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
-                            " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
-                        let values = [up.sid, up.sid];
-                        t = await self.mysql.doGet(cmdtext, values, up);
-
-                        if (t.length == 0) tmp = "";
-                        else {
-
-                            tmp = t[0];
-                             self.memcache.tbset(self.mem_sid + up.sid, tmp);
-                        }
-                        break;
-                }
-
-            }
-
-
-
-            if (tmp) { 
-                up.uid = tmp["id"];
-                up.uname = tmp["uname"];
-                up.cid = tmp["cid"];
-
-                up.coname = tmp["coname"];
-                up.idceo = tmp["idceo"];
-                up.weixin = tmp["openweixin"];
-                up.truename = tmp["truename"];
-                up.idpk = tmp["idpk"]
-                up.mobile = tmp["mobile"];
-
-            } else {
-
-                reject("err:get u info err3");
-                return;
-            }
-            up.bcid = up.bcid || up.cid;
-
-
-    
-            if (  up.uname == "sysadmin")
+            if (up.uname === "sysadmin")
                 up.debug = true;
-         
 
-            //await self._upcheck_debug();
-        
-
+            up.bcid = up.bcid || up.cid;
             up.errmessage = "ok";
 
-            resolve("ok");
-        })
+            return "ok";
+        } else {
+            throw new Error("err:get u info err3");
+        }
     }
 
     /**
@@ -411,12 +383,12 @@ export default class Base78Amd {
                     }
                 }
             }
-         
+
             let sb = "INSERT INTO " + self.tbname + "(`";
             sb += colp.join("`,`");
             sb += "`,id,upby,uptime," + self.uidcid + "  ) VALUES( ?,?,?,?";
             for (let i = 0; i < colp.length; i++) {
-                sb += ",?"; 
+                sb += ",?";
             }
             sb += ")";
             let values = up.pars.slice(0, colp.length);
@@ -426,7 +398,7 @@ export default class Base78Amd {
             values.push(up[self.uidcid]);
 
 
-            let back = await self.mysql.doM(sb, values, up); 
+            let back = await self.mysql.doM(sb, values, up);
             if (back == 1) back = up.mid;
             resolve(back);
         });
@@ -460,7 +432,7 @@ export default class Base78Amd {
                         up.pars.push('');
                     }
                 }
-            } 
+            }
 
             //update
             let sb2 = "UPDATE  " + self.tbname + " SET ";
@@ -476,14 +448,14 @@ export default class Base78Amd {
                 up.backtype = "string";
                 back = "err:没有行被修改";
                 up.res = -8888;
-                up.errmsg = "没有行被修改"; 
+                up.errmsg = "没有行被修改";
                 //query["_state"] = 'fail';
             }
             else {
                 back = up.mid;
                 //query["_state"] = 'ok';
             }
-           
+
             resolve(back);
 
         });
