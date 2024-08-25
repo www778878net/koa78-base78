@@ -24,17 +24,18 @@
     "nodejs"
   ],
   "scripts": {
+    "start": "npx tsc   && node ./strve/index.js  -- config config.json",
+    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",   
     "versionsave": "major minor patch premajor...",
-    "upgrade78": "yarn-upgrade-all",
-    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
-    "start": " node ./strve/index.js  -- config config.json",
+    "upgrade78": "yarn-upgrade-all",    
     "startpm": " pm2 start ./dist/index.js   --name koa78 -i 2 -- config configali.json",
     "startmin": " node ./strve/index.js  --config configmin.json",
     "postpublish": "git push origin --all && git push origin --tags",
     "postversion": "npm publish --access public",
     "preversion": "npm test ",
-    "test": "tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
-    "build": "tsc  "
+    "test": "npx tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
+    "build": "npx tsc  ",
+    "mainupdate": "git checkout main && git pull origin main && git merge develop --squash --no-commit"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -55,7 +56,7 @@
     "iconv-lite": "^0.6.3",
     "mocha": "^10.1.0",
     "nodemon": "^3.1.4",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "@www778878net/koa78-upinfo": "^1.0.2",

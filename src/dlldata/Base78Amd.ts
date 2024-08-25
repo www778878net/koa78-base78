@@ -5,21 +5,21 @@ import MemCache78 from "@www778878net/memcache78";
 import Redis78 from '@www778878net/redis78';
 import Apiqq78 from '../dllopen/Apiqq78';
 import ApiWxSmall from '../dllopen/ApiWxSmall';
-var iconv = require('iconv-lite');
-var fs = require('fs');
+import * as iconv from 'iconv-lite';
+import * as fs from 'fs';
 //必须要带参数启动 不然就要报错 
-var fspath = "";// = process.argv[3]
-for (var i = 0; i < process.argv.length; i++) {
+let fspath = "";// = process.argv[3]
+for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] == "config") {
         fspath = process.argv[i + 1]
         break;
     }
 }
-var Config78 = loadjson(fspath);
+const Config78 = loadjson(fspath);
 function loadjson(filepath) {
-    var data;
+    let data;
     try {
-        var jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
+        const jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
         data = JSON.parse(jsondata);
     }
     catch (err) {
@@ -31,20 +31,25 @@ function loadjson(filepath) {
 export default class Base78Amd {
     up: UpInfo;
     //运行时    
-    Config: {} = Config78;//config78
-    nodejslog: {} = Config78.nodejslog;//是否统计nodejs效率
-    iplog: Boolean = Config78.iplog;//是否统计访客IP
+    Config: object = Config78;//config78
+    nodejslog: object = Config78.nodejslog;//是否统计nodejs效率
+    iplog: boolean = Config78.iplog;//是否统计访客IP
     location: string = Config78.location;//运行环境
     Argv: string[] = process.argv;//process.argv
 
     //各种连接
-    mysql2: Mysql78 = new Mysql78(Config78.mysql2);//支持多mysql
-    mysql1: Mysql78 = new Mysql78(Config78.mysql);//支持多mysql
-    mysql: Mysql78 = this.mysql1;//语法糖简化 默认mysql
-    memcache: MemCache78 = new MemCache78(Config78.memcached); 
-    redis: Redis78 = new Redis78(Config78.redis);
-    apiqq: Apiqq78; //公众号
-    apiwxsmall: ApiWxSmall; //小程序
+    static mysql782: Mysql78 = new Mysql78(Config78.mysql2);//支持多mysql
+    static mysql781: Mysql78 = new Mysql78(Config78.mysql);//支持多mysql
+    static memcache78: MemCache78 = new MemCache78(Config78.memcached); 
+    static redis78: Redis78 = new Redis78(Config78.redis);
+    
+    mysql2: Mysql78 = Base78Amd.mysql782;//支持多mysql
+    mysql1: Mysql78 = Base78Amd.mysql781;//支持多mysql
+    mysql: Mysql78 = Base78Amd.mysql781;//语法糖简化 默认mysql    
+    memcache: MemCache78 =Base78Amd.memcache78;
+    redis: Redis78 = Base78Amd.redis78;
+    apiqq: Apiqq78= new Apiqq78(Config78.apiqq, Base78Amd.memcache78); //公众号
+    apiwxsmall: ApiWxSmall= new ApiWxSmall(Config78.apiwxsmall,Base78Amd.memcache78) //小程序
     //表相关属性
     tbname: string = "";
     cols: string[] = [];//所有列
@@ -56,11 +61,9 @@ export default class Base78Amd {
     cidmy: string ="d4856531-e9d3-20f3-4c22-fe3c65fb009c";//管理员帐套
     cidguest: string = "GUEST000-8888-8888-8888-GUEST00GUEST";//测试帐套
     mem_sid: string = "lovers_sid3_";//保存用户N个ID 方便修改 千万不能改为lovers_sid_
-    constructor(ctx: any) {
+    constructor(ctx) {
         this.up = new UpInfo(ctx);
-        Config78.apiqq["host"] = Config78.host;
-        this.apiqq = new Apiqq78(Config78.apiqq, this.memcache);
-        this.apiwxsmall = new ApiWxSmall(Config78.apiwxsmall,this.memcache)
+        Config78.apiqq["host"] = Config78.host;   
     }
 
     mAdd(colp?: string[]): Promise<string> {
@@ -95,48 +98,12 @@ export default class Base78Amd {
         return this._del();
     }
 
-    /**
-     * 获取自定义栏位
-     */
-    getCustomCols(): Promise<string> {
-        const self = this;
-        const up = self.up;
-
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this._upcheck();
-            } catch (e) {
-                reject(e);
-                return;
-            }
-            let datatb;
-            let values;
-            var item = self.tbname + "_customfields";
-
-            if (up.pars.length >= 1 && up.pars[0] != "")
-                item += "_" + up.pars[0];
-            if (self.uidcid === 'cid') {
-                values = [up.cid, item];
-                datatb = 'pars_co';
-            }
-            else {
-                values = [up.uid, item];
-                datatb = 'pars_users';
-            }
-            var sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
-            let back = await self.mysql1.doGet(sb, values, up);
-            if (back.length === 0)
-                back = '||||';
-            else
-                back = back[0]['data'];
-            resolve(back);
-        });
-    }
+   
 
     /**
      * 权限检查(用户日期)
      */
-    _vidateforuid(usefor): Promise<{}> {
+    _vidateforuid(usefor): Promise<object> {
         const self = this;
         const up = self.up;
         return new Promise(async (resolve, reject) => {
@@ -178,8 +145,8 @@ export default class Base78Amd {
                 return;
             }
    
-            var sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            var values = [up.mid, up[self.uidcid]];
+            let sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
+            let values = [up.mid, up[self.uidcid]];
             let back: any = await self.mysql.doM(sb, values, up);
 
             if (back == 0) {
@@ -217,7 +184,7 @@ export default class Base78Amd {
             let iswhereauto = false;
             if (where == "") iswhereauto = true
             if (up.pars.length >= 1) {
-                for (var i = 0; i < up.pars.length; i++) {
+                for (let i = 0; i < up.pars.length; i++) {
                     if (up.pars[i] != "") {
                         if (iswhereauto)
                             where += " and " + colp[i] + "=?";
@@ -226,7 +193,7 @@ export default class Base78Amd {
                 }
             }
 
-            var sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
+            let sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
                 + " WHERE " + self.uidcid + '=? ' + where;
             
             if (up.order !== "idpk")
@@ -235,7 +202,7 @@ export default class Base78Amd {
 
             //if (where !== '')
             //    values = values.concat(up.pars);
-            let tb = await self.mysql1.doGet(sb, values, up);
+            let tb = await self.mysql.doGet(sb, values, up);
             resolve(tb);
         });
     }
@@ -306,10 +273,10 @@ export default class Base78Amd {
                         break;
                     default:
 
-                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
+                        let cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
                             "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                             " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
-                        var values = [up.sid, up.sid];
+                        let values = [up.sid, up.sid];
                         t = await self.mysql.doGet(cmdtext, values, up);
 
                         if (t.length == 0) tmp = "";
@@ -384,7 +351,7 @@ export default class Base78Amd {
                 colp = colp || this.colsImp;
             }
             try {
-                var sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
+                let sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
                 let back: any = await self.mysql.doGet(sb, [up.mid], up);
                 //console.log(back)
                 if (back.length == 1)
@@ -496,9 +463,9 @@ export default class Base78Amd {
             } 
 
             //update
-            var sb2 = "UPDATE  " + self.tbname + " SET ";
+            let sb2 = "UPDATE  " + self.tbname + " SET ";
             sb2 += colp.join("=?,") + "=?,upby=?,uptime=? WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            var values2 = up.pars.slice(0, colp.length);
+            let values2 = up.pars.slice(0, colp.length);
             values2.push(up.uname);
             values2.push(up.utime);
             values2.push(up.mid);
@@ -527,6 +494,7 @@ export default class Base78Amd {
 //Base78Amd.prototype.colsremark = ["remark", "remark2", "remark3", "remark4", "remark5", "remark6"];
 //Base78Amd.prototype.Argv = process.argv;
 //Base78Amd.prototype.Config = Config78;
+//Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 //Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 //Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
 //Base78Amd.prototype.memcache = new MemCache78(Config78.memcached);

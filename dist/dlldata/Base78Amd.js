@@ -16,21 +16,21 @@ const memcache78_1 = require("@www778878net/memcache78");
 const redis78_1 = require("@www778878net/redis78");
 const Apiqq78_1 = require("../dllopen/Apiqq78");
 const ApiWxSmall_1 = require("../dllopen/ApiWxSmall");
-var iconv = require('iconv-lite');
-var fs = require('fs');
+const iconv = require("iconv-lite");
+const fs = require("fs");
 //必须要带参数启动 不然就要报错 
-var fspath = ""; // = process.argv[3]
-for (var i = 0; i < process.argv.length; i++) {
+let fspath = ""; // = process.argv[3]
+for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] == "config") {
         fspath = process.argv[i + 1];
         break;
     }
 }
-var Config78 = loadjson(fspath);
+const Config78 = loadjson(fspath);
 function loadjson(filepath) {
-    var data;
+    let data;
     try {
-        var jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
+        const jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
         data = JSON.parse(jsondata);
     }
     catch (err) {
@@ -46,12 +46,13 @@ class Base78Amd {
         this.iplog = Config78.iplog; //是否统计访客IP
         this.location = Config78.location; //运行环境
         this.Argv = process.argv; //process.argv
-        //各种连接
-        this.mysql2 = new mysql78_1.default(Config78.mysql2); //支持多mysql
-        this.mysql1 = new mysql78_1.default(Config78.mysql); //支持多mysql
-        this.mysql = this.mysql1; //语法糖简化 默认mysql
-        this.memcache = new memcache78_1.default(Config78.memcached);
-        this.redis = new redis78_1.default(Config78.redis);
+        this.mysql2 = Base78Amd.mysql782; //支持多mysql
+        this.mysql1 = Base78Amd.mysql781; //支持多mysql
+        this.mysql = Base78Amd.mysql781; //语法糖简化 默认mysql    
+        this.memcache = Base78Amd.memcache78;
+        this.redis = Base78Amd.redis78;
+        this.apiqq = new Apiqq78_1.default(Config78.apiqq, Base78Amd.memcache78); //公众号
+        this.apiwxsmall = new ApiWxSmall_1.default(Config78.apiwxsmall, Base78Amd.memcache78); //小程序
         //表相关属性
         this.tbname = "";
         this.cols = []; //所有列
@@ -64,8 +65,6 @@ class Base78Amd {
         this.mem_sid = "lovers_sid3_"; //保存用户N个ID 方便修改 千万不能改为lovers_sid_
         this.up = new koa78_upinfo_1.default(ctx);
         Config78.apiqq["host"] = Config78.host;
-        this.apiqq = new Apiqq78_1.default(Config78.apiqq, this.memcache);
-        this.apiwxsmall = new ApiWxSmall_1.default(Config78.apiwxsmall, this.memcache);
     }
     mAdd(colp) {
         // colp = colp || this.colsImp;
@@ -93,42 +92,6 @@ class Base78Amd {
     }
     del() {
         return this._del();
-    }
-    /**
-     * 获取自定义栏位
-     */
-    getCustomCols() {
-        const self = this;
-        const up = self.up;
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this._upcheck();
-            }
-            catch (e) {
-                reject(e);
-                return;
-            }
-            let datatb;
-            let values;
-            var item = self.tbname + "_customfields";
-            if (up.pars.length >= 1 && up.pars[0] != "")
-                item += "_" + up.pars[0];
-            if (self.uidcid === 'cid') {
-                values = [up.cid, item];
-                datatb = 'pars_co';
-            }
-            else {
-                values = [up.uid, item];
-                datatb = 'pars_users';
-            }
-            var sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
-            let back = yield self.mysql1.doGet(sb, values, up);
-            if (back.length === 0)
-                back = '||||';
-            else
-                back = back[0]['data'];
-            resolve(back);
-        }));
     }
     /**
      * 权限检查(用户日期)
@@ -172,8 +135,8 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            var sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            var values = [up.mid, up[self.uidcid]];
+            let sb = "delete from  " + self.tbname + "   WHERE id=? and " + self.uidcid + "=? LIMIT 1";
+            let values = [up.mid, up[self.uidcid]];
             let back = yield self.mysql.doM(sb, values, up);
             if (back == 0) {
                 back = "err:没有行被修改";
@@ -210,7 +173,7 @@ class Base78Amd {
             if (where == "")
                 iswhereauto = true;
             if (up.pars.length >= 1) {
-                for (var i = 0; i < up.pars.length; i++) {
+                for (let i = 0; i < up.pars.length; i++) {
                     if (up.pars[i] != "") {
                         if (iswhereauto)
                             where += " and " + colp[i] + "=?";
@@ -218,14 +181,14 @@ class Base78Amd {
                     }
                 }
             }
-            var sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
+            let sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
                 + " WHERE " + self.uidcid + '=? ' + where;
             if (up.order !== "idpk")
                 sb += '  order by ' + up.order;
             sb += ' limit ' + up.getstart + ',' + up.getnumber;
             //if (where !== '')
             //    values = values.concat(up.pars);
-            let tb = yield self.mysql1.doGet(sb, values, up);
+            let tb = yield self.mysql.doGet(sb, values, up);
             resolve(tb);
         }));
     }
@@ -281,10 +244,10 @@ class Base78Amd {
                         reject("err:get u info err html");
                         break;
                     default:
-                        var cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
+                        let cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,id,upby,uptime,sid_web_date,  " +
                             "  idcodef,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                             " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t1.idcodef=companys.id";
-                        var values = [up.sid, up.sid];
+                        let values = [up.sid, up.sid];
                         t = yield self.mysql.doGet(cmdtext, values, up);
                         if (t.length == 0)
                             tmp = "";
@@ -343,7 +306,7 @@ class Base78Amd {
                 colp = colp || this.colsImp;
             }
             try {
-                var sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
+                let sb = 'SELECT id FROM ' + self.tbname + ' where id=? ';
                 let back = yield self.mysql.doGet(sb, [up.mid], up);
                 //console.log(back)
                 if (back.length == 1)
@@ -449,9 +412,9 @@ class Base78Amd {
                 }
             }
             //update
-            var sb2 = "UPDATE  " + self.tbname + " SET ";
+            let sb2 = "UPDATE  " + self.tbname + " SET ";
             sb2 += colp.join("=?,") + "=?,upby=?,uptime=? WHERE id=? and " + self.uidcid + "=? LIMIT 1";
-            var values2 = up.pars.slice(0, colp.length);
+            let values2 = up.pars.slice(0, colp.length);
             values2.push(up.uname);
             values2.push(up.utime);
             values2.push(up.mid);
@@ -473,11 +436,17 @@ class Base78Amd {
     }
 }
 exports.default = Base78Amd;
+//各种连接
+Base78Amd.mysql782 = new mysql78_1.default(Config78.mysql2); //支持多mysql
+Base78Amd.mysql781 = new mysql78_1.default(Config78.mysql); //支持多mysql
+Base78Amd.memcache78 = new memcache78_1.default(Config78.memcached);
+Base78Amd.redis78 = new redis78_1.default(Config78.redis);
 //Base78Amd.prototype.cidmy = "";
 //Base78Amd.prototype.cidguest = "GUEST000-8888-8888-8888-GUEST00GUEST";
 //Base78Amd.prototype.colsremark = ["remark", "remark2", "remark3", "remark4", "remark5", "remark6"];
 //Base78Amd.prototype.Argv = process.argv;
 //Base78Amd.prototype.Config = Config78;
+//Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 //Base78Amd.prototype.mysql1 = new Mysql78(Config78.mysql);
 //Base78Amd.prototype.mysql = Base78Amd.prototype.mysql1;
 //Base78Amd.prototype.memcache = new MemCache78(Config78.memcached);

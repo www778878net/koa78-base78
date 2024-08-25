@@ -22,6 +22,7 @@ router.all('/:apiv/:msys/:apiobj/:apifun', co.wrap(function* (ctx, next) {
         return;
     }
     try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
         const Base78 = require('./' + apiv + '/' + msys + '/' + apiobj);
         var base78 = new Base78.default(ctx);
         ctx.body = yield base78.out(apifun);

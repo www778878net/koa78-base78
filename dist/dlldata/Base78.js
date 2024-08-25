@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+//Base78.ts
 const Base78Amd_1 = require("./Base78Amd");
-const Util = require('util');
+const Util = require("util");
 /**
  * 基类 主要是展示out逻辑  和语法糖
  * */
@@ -135,7 +136,7 @@ class Base78 extends Base78Amd_1.default {
                         msec, up.pars.join(",").length, back.length];
                     sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
                         "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";
-                    yield self.mysql1.doM(sb, values, up); // 
+                    yield self.mysql.doM(sb, values, up); // 
                 }
             }
             catch (e) {
@@ -154,11 +155,47 @@ class Base78 extends Base78Amd_1.default {
             self.up.ctx.body = Util.inspect(e);
         });
     }
+    /**
+    * 获取自定义栏位
+    */
+    getCustomCols() {
+        const self = this;
+        const up = self.up;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this._upcheck();
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
+            let datatb;
+            let values;
+            let item = self.tbname + "_customfields";
+            if (up.pars.length >= 1 && up.pars[0] != "")
+                item += "_" + up.pars[0];
+            if (self.uidcid === 'cid') {
+                values = [up.cid, item];
+                datatb = 'pars_co';
+            }
+            else {
+                values = [up.uid, item];
+                datatb = 'pars_users';
+            }
+            let sb = "SELECT data	FROM " + datatb + " where " + self.uidcid + "=? and item=?";
+            let back = yield self.mysql.doGet(sb, values, up);
+            if (back.length === 0)
+                back = '||||';
+            else
+                back = back[0]['data'];
+            resolve(back);
+        }));
+    }
     mysql1M(sb, values) {
-        return this.mysql1.doM(sb, values, this.up);
+        return this.mysql.doM(sb, values, this.up);
     }
     mysql1Get(sb, values) {
-        return this.mysql1.doGet(sb, values, this.up);
+        return this.mysql.doGet(sb, values, this.up);
     }
 }
 exports.default = Base78;
