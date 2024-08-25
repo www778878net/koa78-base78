@@ -35,7 +35,7 @@
     "preversion": "npm test ",
     "test": "npx tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
     "build": "npx tsc  ",
-    "mainupdate": "git checkout main && git pull origin main && git merge develop --squash --no-commit"
+    "main": "git checkout main && git pull origin main && git merge develop --squash --no-commit"
   },
   "engines": {
     "node": ">=14.0.0"
