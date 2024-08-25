@@ -24,17 +24,18 @@
     "nodejs"
   ],
   "scripts": {
-    "versionsave": "major minor patch premajor...",
-    "upgrade78": "yarn-upgrade-all",
-    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
     "start": "npx tsc   && node ./strve/index.js  -- config config.json",
+    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",   
+    "versionsave": "major minor patch premajor...",
+    "upgrade78": "yarn-upgrade-all",    
     "startpm": " pm2 start ./dist/index.js   --name koa78 -i 2 -- config configali.json",
     "startmin": " node ./strve/index.js  --config configmin.json",
     "postpublish": "git push origin --all && git push origin --tags",
     "postversion": "npm publish --access public",
     "preversion": "npm test ",
     "test": "npx tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
-    "build": "npx tsc  "
+    "build": "npx tsc  ",
+    "mainupdate": "git checkout main && git pull origin main && git merge develop --squash --no-commit"
   },
   "engines": {
     "node": ">=14.0.0"
