@@ -1,4 +1,5 @@
-﻿import Base78Amd from "./Base78Amd";
+﻿//Base78.ts
+import Base78Amd from "./Base78Amd";
 const Util = require('util');
 /**
  * 基类 主要是展示out逻辑  和语法糖
