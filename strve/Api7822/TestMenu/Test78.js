@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Base78 = require("../../../dist/dlldata/Base78").default;
-console.log(Base78)
+//console.log(Base78)
 class Test78 extends Base78 {
     constructor(ctx) {
         super(ctx);
@@ -35,7 +35,7 @@ class Test78 extends Base78 {
     testredis() {
         const self = this;
         const up = self.up;
-        console.log(self.redis)
+         
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let setback = yield self.redis.set("testitem", 8, 60);
             let getback = yield self.redis.get("testitem");
