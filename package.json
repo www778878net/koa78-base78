@@ -1,6 +1,6 @@
 {
   "name": "@www778878net/koa78-base78",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "nodejs koa78框架 基类",
   "main": "dist/index.js",
   "types": "src/index.ts",
@@ -25,9 +25,9 @@
   ],
   "scripts": {
     "start": "git checkout develop && npx tsc   && node ./strve/index.js  -- config config.json",
-    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",   
+    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
     "versionsave": "major minor patch premajor...",
-    "upgrade78": "yarn-upgrade-all",    
+    "upgrade78": "yarn-upgrade-all",
     "startpm": " pm2 start ./dist/index.js   --name koa78 -i 2 -- config configali.json",
     "startmin": " node ./strve/index.js  --config configmin.json",
     "postpublish": "git push origin --all && git push origin --tags",
