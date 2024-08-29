@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 //Base78.ts
+const koa78_upinfo_1 = require("koa78-upinfo");
 const Base78Amd_1 = require("./Base78Amd");
 const Util = require("util");
 /**
@@ -110,7 +111,7 @@ class Base78 extends Base78Amd_1.default {
                         if (up.uid != "") {
                             sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
                                 + "values(?,?,?,?,?)";
-                            yield self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
+                            yield self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, koa78_upinfo_1.default.getNewid()], up);
                         }
                     }
                 }
@@ -128,7 +129,7 @@ class Base78 extends Base78Amd_1.default {
                         //下载redis
                         yield self.redis.zincrby('Base7817_sysnodejs_download', back.length, up.method);
                     }
-                    const values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid(),
+                    const values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, koa78_upinfo_1.default.getNewid(),
                         msec, up.pars.join(",").length, back.length];
                     sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
                         "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";

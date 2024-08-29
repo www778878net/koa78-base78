@@ -1,11 +1,12 @@
 ﻿//Base78.ts
+import UpInfo from "koa78-upinfo";
 import Base78Amd from "./Base78Amd";
 import * as Util from 'util';
 /**
  * 基类 主要是展示out逻辑  和语法糖
  * */
 export default class Base78 extends Base78Amd {
-    constructor(ctx: any) {
+    constructor(ctx) {
         super(ctx);
     }
 
@@ -15,7 +16,7 @@ export default class Base78 extends Base78Amd {
     * @param errmsg 默认为空
     * @param kind 默认json ,string,jsondt(JSON表)
     */
-    _setBack(res, errmsg, kind = ""): any {
+    _setBack(res, errmsg, kind = ""): void {
         const up = this.up;
         up.backtype = kind || "string";
         up.res = res || 0;
@@ -107,7 +108,7 @@ export default class Base78 extends Base78Amd {
                         if (up.uid != "") {
                             sb = "insert into sys_ip(uid,ip, upby,uptime,id)"
                                 + "values(?,?,?,?,?)";
-                            await self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, up.getNewid()], up);
+                            await self.mysql.doM(sb, [up.uid, up.ip, up.uname, up.utime, UpInfo.getNewid()], up);
                         }
                     }
                 }
@@ -128,7 +129,7 @@ export default class Base78 extends Base78Amd {
                         await self.redis.zincrby('Base7817_sysnodejs_download', back.length, up.method);
                     }
 
-                    const values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, up.getNewid()
+                    const values = ["api7817", up.apisys, up.apiobj, up.method, "1", msec, up.pars.join(",").length, back.length, up.utime, UpInfo.getNewid()
                         , msec, up.pars.join(",").length, back.length];
                     sb = "insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)" +
                         "values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?";

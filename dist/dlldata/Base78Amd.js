@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const koa78_upinfo_1 = require("@www778878net/koa78-upinfo");
-const mysql78_1 = require("@www778878net/mysql78");
+const koa78_upinfo_1 = require("koa78-upinfo");
+const mysql78_1 = require("mysql78");
 const Validate78_1 = require("./Validate78");
-const memcache78_1 = require("@www778878net/memcache78");
-const redis78_1 = require("@www778878net/redis78");
+const memcache78_1 = require("memcache78");
+const redis78_1 = require("redis78");
 const Apiqq78_1 = require("../dllopen/Apiqq78");
 const ApiWxSmall_1 = require("../dllopen/ApiWxSmall");
 const iconv = require("iconv-lite");
@@ -94,7 +94,7 @@ class Base78Amd {
         return this._del();
     }
     /**
-     * 权限检查(用户日期)
+     * @deprecated 放到别的类去 权限检查(用户日期)
      */
     _vidateforuid(usefor) {
         const self = this;
@@ -189,7 +189,7 @@ class Base78Amd {
             //if (where !== '')
             //    values = values.concat(up.pars);
             const tb = yield self.mysql.doGet(sb, values, up);
-            resolve(tb);
+            resolve(tb.toString());
         }));
     }
     _upcheck() {
@@ -281,6 +281,7 @@ class Base78Amd {
                 reject(e);
                 return;
             }
+            console.log(up);
             if (up.v >= 17.2) {
                 colp = colp || up.cols;
             }
@@ -354,7 +355,7 @@ class Base78Amd {
             sb += ")";
             const values = up.pars.slice(0, colp.length);
             values.push(up.mid);
-            values.push(up.uname);
+            values.push(up.uname || '');
             values.push(up.utime);
             values.push(up[self.uidcid]);
             let back = yield self.mysql.doM(sb, values, up);
@@ -397,23 +398,24 @@ class Base78Amd {
             let sb2 = "UPDATE  " + self.tbname + " SET ";
             sb2 += colp.join("=?,") + "=?,upby=?,uptime=? WHERE id=? and " + self.uidcid + "=? LIMIT 1";
             const values2 = up.pars.slice(0, colp.length);
-            values2.push(up.uname);
+            values2.push(up.uname || '');
             values2.push(up.utime);
             values2.push(up.mid);
             values2.push(up[self.uidcid]);
-            let back = yield self.mysql.doM(sb2, values2, up);
-            if (back == 0) {
+            let back = '';
+            back = yield self.mysql.doM(sb2, values2, up);
+            if (back === 0) {
                 up.backtype = "string";
                 back = "err:没有行被修改";
                 up.res = -8888;
                 up.errmsg = "没有行被修改";
                 //query["_state"] = 'fail';
             }
-            else {
-                back = up.mid;
+            else if (back === 1) {
+                back = up.mid.toString();
                 //query["_state"] = 'ok';
             }
-            resolve(back);
+            resolve(back.toString());
         }));
     }
 }

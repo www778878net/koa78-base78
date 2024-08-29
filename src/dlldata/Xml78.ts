@@ -1,17 +1,19 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-
-export default class Xml78 {
+/**
+ * @deprecated 独立出去
+ */
+export default class Xml78old {
     xml: string;
     constructor(xmlin) {
         this.xml = xmlin;
     }
 
     xmlBuild   (data, root) {
-        var items:string[] = [];
+        const items:string[] = [];
         items.push('<?xml version="1.0" encoding="utf-8"?>');
         items.push('<' + root + ' xmlns="http://mns.aliyuncs.com/doc/v1/">');
-        for (var key in data) {
+        for (const key in data) {
             if (data[key].length > 0) {
                 items.push('<' + key + '>' + data[key] + '</' + key + '>');
             }
@@ -20,17 +22,17 @@ export default class Xml78 {
         items.push('</' + root + '>');
 
         return items.join('');
-    };
+    }
 
     _getOneTag   (tag) {
-        var xml = this.xml;
-        var data:any = [];
+        const xml = this.xml;
+        const data:any = [];
 
         if (xml.indexOf('<' + tag + '>') !== -1) {
-            var tree = xml.split('<' + tag + '>');
+            const tree = xml.split('<' + tag + '>');
             _.each(tree, function (v) {
                 if (v.indexOf('</' + tag + '>') !== -1) {
-                    var item = (v.split('</' + tag + '>')[0]).trim();
+                    let item = (v.split('</' + tag + '>')[0]).trim();
                     if (item.length > 0) {
                         if (item.indexOf("<![CDATA[") === 0)
                             item = item.substring(9, item.length - 3);
@@ -43,5 +45,5 @@ export default class Xml78 {
             return null;
         }
         return data;
-    };
+    }
 }

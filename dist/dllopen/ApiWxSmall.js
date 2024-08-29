@@ -5,6 +5,9 @@ const md5 = require("md5");
 const crypto = require('crypto');
 const Request78_1 = require("../dll78/Request78");
 const mem_weixin_token = "Apiqq78_weixin_token";
+/**
+ * @deprecated 独立出去
+ */
 class ApiWxSmall {
     constructor(config, memcache) {
         if (!config)

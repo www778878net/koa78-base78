@@ -20,7 +20,7 @@ var Config78 = loadjson(fspath);
 function loadjson(filepath) {
     var data;
     try {
-        var jsondata = iconv.decode(fs.readFileSync(filepath, "binary"), "utf8");
+        var jsondata = iconv.decode(fs.readFileSync(filepath), "utf8");
         data = JSON.parse(jsondata);
     }
     catch (err) {
@@ -31,21 +31,35 @@ function loadjson(filepath) {
 //console.log(Config78)
 let port = 88;
 const convert = require('koa-convert');
+const { koaBody } = require('koa-body');
+
 console.log("Config78.location");
-switch (Config78.location) {
-    case "qq":
-        console.log("koa-bodyparser");
-        //腾迅云用上面那个PYTHON就报错 BadRequestError: invalid urlencoded received
-        const bodyParser = require("koa-bodyparser");
-        app.use(bodyParser({ multipart: true }));
-        break;
-    default:
-        console.log("use @www778878net/koabody78");
-        //阿里云用这个OK
-        const body = require('@www778878net/koabody78');
-        app.use(convert(body()));
-        break;
-}
+
+// 使用 koa-body
+app.use(koaBody({
+  multipart: true,
+  formidable: {
+    maxFileSize: 200 * 1024 * 1024
+  },
+  onError: (err, ctx) => {
+    console.log('koa-body error:', err);
+    ctx.throw(422, 'body parse error');
+  }
+}));
+
+// 添加错误处理中间件
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    ctx.status = err.status || 500;
+    ctx.body = {
+      message: err.message
+    };
+    ctx.app.emit('error', err, ctx);
+  }
+});
+
 app.use(convert(routers_1.default.routes()));
 app.on('error', function (err, ctx) {
     //这里增加错误日志

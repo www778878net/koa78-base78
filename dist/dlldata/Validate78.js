@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util = require('util');
+const Util = require('util');
 const validator = require("validator");
+/**
+ * @deprecated 直接用validator
+ */
 class Validate78 {
     static isEmail(str) {
         return validator.isEmail(str);

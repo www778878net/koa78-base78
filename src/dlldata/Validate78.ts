@@ -1,7 +1,9 @@
 ﻿
-var Util = require('util');
+const Util = require('util');
 import * as validator from "validator";
-
+/**
+ * @deprecated 直接用validator
+ */
 export default class Validate78 {
     static isEmail(str:string): boolean {
         return validator.isEmail(str);

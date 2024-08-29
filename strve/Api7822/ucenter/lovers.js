@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const dayjs = require("dayjs");
 const Base78_1 = require("../../../dist/dlldata/Base78");
+const { default: UpInfo } = require("koa78-upinfo");
 class lovers extends Base78_1.default {
     constructor(ctx) {
         super(ctx);
@@ -51,7 +52,7 @@ class lovers extends Base78_1.default {
             }
             var sb = 'SELECT pwd ,uname, coname, sid_web, idcodef   FROM lovers LEFT OUTER JOIN      companys ON lovers.idcodef = companys.id ' +
                 'where  uname=? ';
-            let sid = up.getNewid();
+            let sid = UpInfo.getNewid();
             let tb = yield self.mysql1.doGet(sb, [uname], up);
             let values;
             if (tb.length == 0) {
@@ -155,7 +156,7 @@ class lovers extends Base78_1.default {
             //let sb = 'insert into `services_mes_sms` (`uid`,`uname`,`mid`,`ddate`,tou,template,content,`upby`,`uptime`,`id`) ' +
             //    ' values(?,?,?,?,?,?,?,?,?,?)';
             //let back = await self.mysql.doM(sb, [up.uid, up.uname, "mobileyz"
-            //    , up.utime, mobile, "SMS_168591175", "{\"code\":" + sjnum + "}", up.uname, up.utime, up.getNewid()], up);
+            //    , up.utime, mobile, "SMS_168591175", "{\"code\":" + sjnum + "}", up.uname, up.utime, Upinfo.getNewid()], up);
             //back = "验证码已发出 请注意接收.";
             resolve(back);
         }));
@@ -194,7 +195,7 @@ class lovers extends Base78_1.default {
                 return;
             }
             let back = "";
-            let sid = up.getNewid();
+            let sid = UpInfo.getNewid();
             let sb = 'SELECT pwd ,uname, coname, sid_web, idcodef,openweixin,lovers.idpk  FROM lovers LEFT OUTER JOIN      companys ON lovers.idcodef = companys.id ' +
                 'where  uname=? ';
             let tb = yield self.mysql.doGet(sb, [uname], up);

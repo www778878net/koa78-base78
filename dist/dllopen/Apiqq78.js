@@ -37,6 +37,9 @@ PKCS7Encoder.encode = function (text) {
     result.fill(amountToPad);
     return Buffer.concat([text, result]);
 };
+/**
+ * @deprecated 独立出去 改await
+ */
 class Apiqq78 {
     constructor(config, memcache) {
         if (!config)

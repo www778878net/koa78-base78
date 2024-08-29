@@ -2,9 +2,9 @@
 //暂时不升ts5 太多JS文件了
 //test.cjs
 let debug=true;
-const UpInfo = require('@www778878net/koa78-upinfo').default;
+const UpInfo = require('koa78-upinfo').default;
 const restler = require('restler');
-const Promise78 = require('@www778878net/promise78').default;
+const Promise78 = require('promise78').default;
 const { Buffer } = require('buffer');
 
 
@@ -101,8 +101,8 @@ describe("no power api test", () => {
 describe("sql api m", () => {
     it('Api7822/TestMenu/testtb/m', async () => {
         let up = new UpInfo(null);
-        up = up.getGuest()
-        let newdata = up.getNewid();
+        up = UpInfo.getGuest()
+        let newdata = UpInfo.getNewid();
         up.mid = "9009408d-6430-f43b-2b56-c94a453b7f4d"
         
         function test() {
@@ -111,7 +111,7 @@ describe("sql api m", () => {
             let data = {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid
-                , "v": 17.2
+                ,"jsonbase64":true
                 , "pars":  Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
             };
 
@@ -143,11 +143,11 @@ describe("sql api get", () => {
     it('Api7822/TestMenu/testtb/get', async () => {
         function test() {
             let up = new UpInfo(null);
-            up = up.getGuest()
+            up = UpInfo.getGuest()
             let data = {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid, "getstart": up.getstart, "getnumber": up.getnumber
-                , "v": 17.2
+                , "v":24
                 //, "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
             };
             return new Promise78((resolve, reject) => {
@@ -159,12 +159,13 @@ describe("sql api get", () => {
         }
         let [err, res] = await test();
         if(debug)console.log(err)
-        if(debug)console.log(res)
+       
 
         res = JSON.parse(res)
+        if(debug)console.log( res)
         if(debug)console.log(res["back"])
         expect(err).to.be.null;
-
+        if(debug)console.log(JSON.parse(res["back"]))
         expect(res["back"][0]["idpk"]).to.equal(1);
     });
 
@@ -175,14 +176,14 @@ describe("test login", () => {
     it('test login', async () => {
         function test() {
             let up = new UpInfo(null);
-            up = up.getGuest()
+            up = UpInfo.getGuest()
             let pars = ["guest3","084e0343a0486ff05530df6c705c8bb4"]
 
             let data = {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid
-                , "v": 17.2
-                , "pars": Buffer.from(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+                , "v": 24
+                , "pars": Buffer.from(JSON.stringify(pars))
             };
 
             return new Promise78((resolve, reject) => {
@@ -208,14 +209,14 @@ describe("test apiqq", () => {
     it('test loginweixin', async () => {
         function test() {
             let up = new UpInfo(null);
-            up = up.getGuest()
+            up = UpInfo.getGuest()
             let pars = ["051pSF0w3XyOzZ2Kj80w3v7zjS2pSF0C"]
 
             let data = {
                 "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
                 , "mid": up.mid
-                , "v": 17.2
-                , "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+                
+                , "pars": new Buffer(JSON.stringify(pars)) 
             };
 
             return new Promise78((resolve, reject) => {
@@ -242,7 +243,7 @@ describe("test upcheck", () => {
    it('test upcheck', async () => {
        function test() {
            let up = new UpInfo(null);
-           up = up.getGuest();
+           up = UpInfo.getGuest();
            up.sid = "gagag";
            let pars = ["guest3", "084e0343a0486ff05530df6c705c8bb4"];
 

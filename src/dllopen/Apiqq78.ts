@@ -3,10 +3,10 @@ const md5 = require("md5");
 const crypto = require('crypto');
 import  Request78 from '../dll78/Request78';
 import Validate78 from '../dlldata/Validate78';
-import Xml78 from  '../dlldata/Xml78' ;
+import Xml78old from  '../dlldata/Xml78' ;
 const mem_weixin_token = "Apiqq78_weixin_token";
 import dayjs = require("dayjs");
-import MemCache78 from "@www778878net/memcache78";
+import MemCache78 from "memcache78";
 
 /**
  * 提供基于PKCS7算法的加解密接口
@@ -46,7 +46,9 @@ PKCS7Encoder.encode = function (text) {
     return Buffer.concat([text, result]);
 };
 
-
+/**
+ * @deprecated 独立出去 改await
+ */
 export default class Apiqq78 {
     _host: string;
     mch_id: string;
