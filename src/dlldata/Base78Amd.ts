@@ -90,7 +90,7 @@ export default class Base78Amd {
     /**
      * get方法
      * */
-    get(): Promise<string> {
+    get(): Promise<object> {
         return this._get();
     }
 
@@ -167,7 +167,7 @@ export default class Base78Amd {
      * @param where
      * @param colp
      */
-    _get(where?: string, colp?: string[]): Promise<string> {
+    _get(where?: string, colp?: string[]): Promise<object> {
         const self = this;
         //colp = colp || this.cols;
         where = where || "";
@@ -203,7 +203,8 @@ export default class Base78Amd {
             //if (where !== '')
             //    values = values.concat(up.pars);
             const tb = await self.mysql.doGet(sb, values, up);
-            resolve(tb.toString());
+            
+            resolve(tb);
         });
     }
 

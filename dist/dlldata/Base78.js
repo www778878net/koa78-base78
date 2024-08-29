@@ -70,8 +70,6 @@ class Base78 extends Base78Amd_1.default {
             try {
                 if (back == null)
                     back = "";
-                if (!isNaN(back))
-                    back = back.toString();
                 if (self.up.backtype == "json") {
                     back = JSON.stringify(back);
                 }
@@ -81,17 +79,14 @@ class Base78 extends Base78Amd_1.default {
                     if (back == "\"\"")
                         up.backtype = "string";
                     if (up.backtype == "string") {
+                        if (!isNaN(back))
+                            back = back.toString();
                         if (back.length >= 1 && back.substring(0, 1) != "\"")
                             back = "\"" + back + "\"";
                         if (back == "")
                             back = "\"\"";
                     }
                     if (up.ctx.request.method == "SOCK") {
-                        back = "{\"res\":" + up.res + ",\"errmsg\":\""
-                            + up.errmsg + "\",\"kind\":\"" + up.backtype + "\",\"back\":"
-                            + back + ",\"path\":\"" + up.ctx["request"]["path"]
-                            + "\",\"backpar\":\"" + up.ctx["request"]["backpar"]
-                            + "\"}";
                     }
                     else
                         back = "{\"res\":" + up.res + ",\"errmsg\":\""

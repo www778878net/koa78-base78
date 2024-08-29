@@ -189,7 +189,7 @@ class Base78Amd {
             //if (where !== '')
             //    values = values.concat(up.pars);
             const tb = yield self.mysql.doGet(sb, values, up);
-            resolve(tb.toString());
+            resolve(tb);
         }));
     }
     _upcheck() {
@@ -281,7 +281,6 @@ class Base78Amd {
                 reject(e);
                 return;
             }
-            console.log(up);
             if (up.v >= 17.2) {
                 colp = colp || up.cols;
             }

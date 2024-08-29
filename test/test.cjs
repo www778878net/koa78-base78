@@ -12,6 +12,41 @@ if(debug)if(debug)console.log(Promise78); // 输出 Promise78 函数
 if(debug)console.log(typeof Promise78); // 应该输出 function
 
 const { expect } = require('chai');
+
+describe("sql api get", () => {
+  it('Api7822/TestMenu/testtb/get', async () => {
+      function test() {
+          let up = new UpInfo(null);
+          up = UpInfo.getGuest()
+          let data = {
+              "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
+              , "mid": up.mid, "getstart": up.getstart, "getnumber": up.getnumber
+              , "v":24
+              //, "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
+          };
+          return new Promise78((resolve, reject) => {
+              restler.post("http://localhost:88/Api7822/TestMenu/testtb/get", { data: data })
+                  .on('complete', function (back) {
+                      resolve(back)
+                  });
+          })
+      }
+      let [err, res] = await test();
+      if(debug)console.log(err)
+     
+
+      res = JSON.parse(res)
+      if(debug)console.log( res)
+      if(debug)console.log(res["back"])
+      expect(err).to.be.null;
+     
+      expect(res["back"][0]["idpk"]).to.equal(1);
+  });
+
+
+});
+
+
 describe("test temp", () => {
     it('test temp', async () => {
         function test() {
@@ -139,38 +174,7 @@ describe("sql api m", () => {
 
 });
 
-describe("sql api get", () => {
-    it('Api7822/TestMenu/testtb/get', async () => {
-        function test() {
-            let up = new UpInfo(null);
-            up = UpInfo.getGuest()
-            let data = {
-                "sid": up.sid, "cid": up.cid, "uname": up.uname, "bcid": up.bcid
-                , "mid": up.mid, "getstart": up.getstart, "getnumber": up.getnumber
-                , "v":24
-                //, "pars": new Buffer(JSON.stringify(pars)).toString("base64").replace('+', '*').replace('/', '-').replace('=', '.')
-            };
-            return new Promise78((resolve, reject) => {
-                restler.post("http://localhost:88/Api7822/TestMenu/testtb/get", { data: data })
-                    .on('complete', function (back) {
-                        resolve(back)
-                    });
-            })
-        }
-        let [err, res] = await test();
-        if(debug)console.log(err)
-       
 
-        res = JSON.parse(res)
-        if(debug)console.log( res)
-        if(debug)console.log(res["back"])
-        expect(err).to.be.null;
-        if(debug)console.log(JSON.parse(res["back"]))
-        expect(res["back"][0]["idpk"]).to.equal(1);
-    });
-
-
-});
 
 describe("test login", () => {
     it('test login', async () => {

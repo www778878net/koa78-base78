@@ -52,6 +52,7 @@ export default class Base78 extends Base78Amd {
             try {
                 //不建议reject 可以设置res=-N来返回预期的错误
                 back = await self[method]();
+                
             } catch (e ) {
                 up.errmsg =(e as Error).message;
                 //这里记录错误
@@ -62,27 +63,25 @@ export default class Base78 extends Base78Amd {
 
             try {
                 if (back == null) back = "";
-                if (!isNaN(back)) back = back.toString();
+               
 
-
+                
                 if (self.up.backtype == "json") {
                     back = JSON.stringify(back);
                 }
+                
                 if (up.v >= 17.1) {
                     if (up.res == -8888) up.backtype = "string";
                     if (back == "\"\"") up.backtype = "string";
                     if (up.backtype == "string") {
+                      if (!isNaN(back)) back = back.toString();
                         if (back.length >= 1 && back.substring(0, 1) != "\"")
                             back = "\"" + back + "\"";
                         if (back == "")
                             back = "\"\"";
                     }
                     if (up.ctx.request.method == "SOCK") {
-                        back = "{\"res\":" + up.res + ",\"errmsg\":\""
-                            + up.errmsg + "\",\"kind\":\"" + up.backtype + "\",\"back\":"
-                            + back + ",\"path\":\"" + up.ctx["request"]["path"]
-                            + "\",\"backpar\":\"" + up.ctx["request"]["backpar"]
-                            + "\"}";
+                     
 
                     } else
                         back = "{\"res\":" + up.res + ",\"errmsg\":\""
