@@ -196,7 +196,7 @@ export default class Base78Amd {
             let sb = 'SELECT `' + colp.join("`,`") + "`,id,upby,uptime,idpk FROM " + self.tbname
                 + " WHERE " + self.uidcid + '=? ' + where;
 
-            if (up.order !== "idpk")
+            //if (up.order !== "idpk")
                 sb += '  order by ' + up.order;
             sb += ' limit ' + up.getstart + ',' + up.getnumber;
 

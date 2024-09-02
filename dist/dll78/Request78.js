@@ -36,7 +36,7 @@ class Request78 {
         });
     }
     /**
-   * ǿ�Զ���
+   * 强自定义
    * @param url
    * @param code
    */
@@ -67,7 +67,7 @@ class Request78 {
         });
     }
     /**
-   * ֱ����httpreqҲ�� ��GET��������Ҳ��
+   * 直接用httpreq也行 简化GET方法这样也行
    * @param url
    * @param code
    * @returns {Promise<string>}
@@ -107,7 +107,7 @@ class Request78 {
         });
     }
     /**
-  * ���׵��÷���
+  * 简易调用方法
   * @param url
   * @param data
   * @param method
