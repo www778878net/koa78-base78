@@ -1,6 +1,6 @@
 {
   "name": "koa78-base78",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "nodejs koa78框架 基类",
   "main": "dist/index.js",
   "types": "src/index.ts",
@@ -24,60 +24,25 @@
     "nodejs"
   ],
   "scripts": {
-    "debug": "npx tsc   && node ./strve/index.js  -- config config.json",
-    "dev": "cross-env NODE_ENV=dev nodemon -e ts --exec ts-node src/index.ts",
-    "versionsave": "major minor patch premajor...",
-    "upgrade78": "yarn-upgrade-all",
-    "startpm": " pm2 start ./dist/index.js   --name koa78 -i 2 -- config configali.json",
-    "startmin": " node ./strve/index.js  --config configmin.json",
-    "postpublish": "git push origin --all && git push origin --tags",
-    "postversion": "npm publish --access public",
-    "preversion": "npm test ",
-    "test": "npx tsc   && mocha  --config  config.json   --reporter spec  -t 5000  --exit",
-    "build": "npx tsc  ",
-    "main": "git checkout main && git pull origin main && git merge develop --squash --no-commit"
+    "postversion": "git push --follow-tags && git checkout develop3 && git merge main3 && git push origin develop3",
+    "preversion": "npm test",
+    "dev:precommit": "node hooks/pre-commit.cjs",
+    "dev:prepush": "node hooks/pre-push.cjs",
+    "dev:hooks": "node hooks/install-hooks.cjs",
+    "dev:dev3": "git checkout develop3 && git merge main3",
+    "dev:main3": "node hooks/mergeBranches.cjs",
+    "test": "cross-env NODE_ENV=test jest "
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "bundledDependencies": false,
-  "devDependencies": {
-    "@types/node": "^18.11.9",
-    "@typescript-eslint/eslint-plugin": "^8.2.0",
-    "@typescript-eslint/parser": "^8.2.0",
-    "chai": "^4.3.7",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-es": "^4.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-react": "^7.35.0",
-    "fs": "^0.0.1-security",
-    "iconv-lite": "^0.6.3",
-    "mocha": "^10.1.0",
-    "nodemon": "^3.1.4",
+  "devDependencies": {  
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "co": "^4.6.0",
-    "dayjs": "^1.11.6",
-    "koa": "^2.13.4",
-    "koa-body": "^6.0.1",
-    "koa-convert": "^2.0.0",
-    "koa-router": "^12.0.0",
-    "koa78-upinfo": "^4.0.0",
-    "lodash": "^4.17.21",
-    "md5": "^2.3.0",
-    "memcache78": "^0.1.0",
-    "mysql": "^2.18.1",
-    "mysql78": "^2.2.4",
-    "promise78": "^0.0.3",
-    "redis78": "^0.1.2",
-    "request": "^2.88.2",
-    "restler": "^3.4.0",
-    "urlencode": "^2.0.0",
-    "validator": "^13.7.0"
+     
   },
   "bundleDependencies": []
 }

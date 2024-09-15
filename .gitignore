@@ -5,4 +5,20 @@
 /.vs
 /node_modules
 /yarn-error.log
+dist/**/*.map
+*.map
+logs/
+testlogs/
+dist/
+*.js linguist-generated=true
+*.d.ts linguist-generated=true
+config/settings.json
+config/setting.json
 
+# 依赖锁文件
+package-lock.json
+pnpm-lock.yaml
+
+# 其他常见的需要忽略的文件和目录
+
+*.log
