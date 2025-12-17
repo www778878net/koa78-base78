@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import config from 'config';
 import * as path from 'path';
-import { tableConfigs, TableConfig } from './tableConfig';
+import { tableConfigs, TableSet } from './tableConfig';
 import * as fs from 'fs';
 
 @injectable()
@@ -19,12 +19,12 @@ export class Config {
 
             // 首先检查构造函数参数
             let tableConfigFilePath = customConfigPath;
-            
+
             // 如果构造函数参数为空，则检查环境变量
             if (!tableConfigFilePath) {
                 tableConfigFilePath = process.env.TABLE_CONFIG_FILE;
             }
-            
+
             // 如果环境变量也为空，则检查配置文件中的 tableconfigfile 字段
             if (!tableConfigFilePath) {
                 tableConfigFilePath = this.configObject.tableconfigfile;
@@ -75,7 +75,7 @@ export class Config {
         return value;
     }
 
-    public getTable(tableName: string): TableConfig | undefined {
+    public getTable(tableName: string): TableSet | undefined {
         //console.log(`Attempting to get table config for: ${tableName}`);
         if (!this.configObject.tables) {
             //console.log('Tables configuration not found');
@@ -87,11 +87,11 @@ export class Config {
             //console.log(`Table config for ${tableName} not found`);
             return undefined;
         }
-        const result: TableConfig = {
+        const result: TableSet = {
+            tbname: tableName.toLowerCase(),
+            cols: [...tableConfig.colsImp, 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'],
             colsImp: tableConfig.colsImp,
-            uidcid: tableConfig.uidcid,
-            apiver: tableConfig.apiver,
-            apisys: tableConfig.apisys
+            uidcid: tableConfig.uidcid
         };
         //console.log(`Processed table config for ${tableName}:`, result);
         return result;

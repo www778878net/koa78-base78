@@ -52,6 +52,7 @@
     },
     "bundleDependencies": [],
     "dependencies": {
+        "@elastic/elasticsearch": "^9.2.0",
         "@types/iconv-lite": "^0.0.1",
         "@types/request": "^2.48.13",
         "config": "^4.1.1",

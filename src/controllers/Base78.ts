@@ -3,24 +3,26 @@ import { DatabaseService } from '../services/DatabaseService';
 import { CacheService } from '../services/CacheService';
 import { AuthService } from '../services/AuthService';
 import { Config } from '../config/Config';
-import { TableConfig } from '../interfaces/TableConfig';
+import { TableSet, TableConfig } from '../config/tableConfig';
 
 import UpInfo from 'koa78-upinfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { ApiMethod } from '../interfaces/decorators';
-import LoggerService from '../services/LoggerService';
-import TsLog78 from 'tslog78';
+import { ContainerManager } from '../ContainerManager';
+import { TsLog78 } from 'tslog78';
 import Elasticsearch78 from '../services/elasticsearch78';
 
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
-    protected logger: TsLog78 = LoggerService.getLogger();
+    protected logger: TsLog78;
     protected dbname: string = "default";//mysql数据库名（非表名） 
     protected tbname: string;//表名
-    public tableConfig: TableConfig;
+    public tableConfig: TableSet;
 
     constructor() {
+        // 使用新的日志服务方式，与DatabaseService中完全一致
+        this.logger = ContainerManager.getLogger() || TsLog78.Instance;
         this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
@@ -68,9 +70,6 @@ export default class Base78<T extends BaseSchema> {
         return CacheService.instance;
     }
 
-    protected get authService(): AuthService {
-        return AuthService.getInstance();
-    }
 
     protected get config(): Config {
         return Config.getInstance();
@@ -82,7 +81,7 @@ export default class Base78<T extends BaseSchema> {
         this.logger.error("错误:", e);
     }
 
-    private _loadConfig(): TableConfig {
+    private _loadConfig(): TableSet {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config.getInstance();

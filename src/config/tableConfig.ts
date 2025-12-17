@@ -1,5 +1,10 @@
 import { CidSchema, UidSchema } from '../controllers/BaseSchema';
-
+export interface TableSet {
+    tbname: string;
+    cols: string[];
+    colsImp: string[];
+    uidcid: 'cid' | 'uid';
+}
 export interface TableConfig {
     colsImp: readonly string[];
     uidcid: 'cid' | 'uid';
