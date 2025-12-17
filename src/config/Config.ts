@@ -9,7 +9,7 @@ export class Config {
     private static instance: Config | null = null;
     private configObject: any;
 
-    private constructor(customConfigPath?: string) {
+    constructor(customConfigPath?: string) {
         const env = process.env.NODE_ENV || 'development';
         console.log(`初始加载 ${env} 环境的配置`);
 

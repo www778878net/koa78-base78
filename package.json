@@ -1,6 +1,6 @@
 {
     "name": "koa78-base78",
-    "version": "3.0.5",
+    "version": "3.0.7",
     "description": "nodejs koa78框架 基类",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -26,14 +26,15 @@
     "scripts": {
         "start": "npx tsc && cross-env NODE_ENV=production node ./dist/index.js config config.json",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
-        "postversion": "git push --follow-tags && npm publish && git checkout develop3 && git merge main3 && git push origin develop3",
+        "postversion": "git push --follow-tags  && git checkout develop3 && git merge main3 && git push origin develop3",
         "preversion": "npm test",
         "dev:precommit": "node hooks/pre-commit.cjs",
         "dev:prepush": "node hooks/pre-push.cjs",
         "dev:hooks": "node hooks/install-hooks.cjs",
         "dev:dev3": "git checkout develop3 && git merge main3",
         "dev:main3": "node hooks/mergeBranches.cjs",
-        "test": "cross-env NODE_ENV=test jest "
+        "test": "cross-env NODE_ENV=test jest ",
+        "testtsc": "npx tsc --noEmit"
     },
     "engines": {
         "node": ">=18.0.0"
@@ -66,6 +67,6 @@
         "request": "^2.88.2",
         "tslog78": "^1.7.2",
         "urlencode": "^2.0.0",
-        "zod": "^4.2.1"
+        "zod": "^3.22.4"
     }
 }
