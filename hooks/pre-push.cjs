@@ -5,7 +5,7 @@ console.log('Pre-push hook starts executing');
 // Get current branch name
 const currentBranch = shell.exec('git rev-parse --abbrev-ref HEAD', { silent: true }).stdout.trim();
 
-if (currentBranch === 'develop3') {
+if (currentBranch === 'develop') {
     console.log('Current branch is develop. Running npm run main...');
     const mergeResult = shell.exec('npm run dev:main3');
 
@@ -14,7 +14,7 @@ if (currentBranch === 'develop3') {
         shell.exit(1);
     }
     console.log('Merge to main completed successfully');
-} else if (currentBranch === 'main3') {
+} else if (currentBranch === 'main') {
     console.log('Current branch is main. Running ..');
     console.log('运行测试...');
     const testResult = shell.exec('npm test');

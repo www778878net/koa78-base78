@@ -6,7 +6,7 @@ console.log('Pre-commit hook starts executing');
 // Get current branch name
 const currentBranch = shell.exec('git rev-parse --abbrev-ref HEAD', { silent: true }).stdout.trim();
 
-if (currentBranch === 'develop3') {
+if (currentBranch === 'develop') {
     console.log('Current branch is develop. Running pre-commit checks...');
 
     // Switch to repository root directory
