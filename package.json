@@ -26,7 +26,7 @@
     "scripts": {
         "start": "npx tsc && cross-env NODE_ENV=production node ./dist/index.js config config.json",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
-        "postversion": "git push --follow-tags && git checkout develop3 && git merge main3 && git push origin develop3",
+        "postversion": "git push --follow-tags && npm publish && git checkout develop3 && git merge main3 && git push origin develop3",
         "preversion": "npm test",
         "dev:precommit": "node hooks/pre-commit.cjs",
         "dev:prepush": "node hooks/pre-push.cjs",
