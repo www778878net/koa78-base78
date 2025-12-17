@@ -4,11 +4,20 @@ export {
     UidSchema,
 } from './controllers/BaseSchema';
 
-
+export {
+    default as Base78
+} from './controllers/Base78';
 
 export {
     Config,
 } from './config/Config';
+
+export {
+    TableSet,
+    TableConfig,
+    tableConfigs,
+    TableSchemas
+} from './config/tableConfig';
 
 export {
     DatabaseConnections,
@@ -23,11 +32,25 @@ export {
 } from './services/CacheService';
 
 export {
+    AuthService,
+} from './services/AuthService';
+
+export {
+    default as Elasticsearch78
+} from './services/elasticsearch78';
+
+export {
+    default as Request78
+} from './dll78/Request78';
+
+export {
+    QueryBuilder,
+} from './utils/QueryBuilder';
+
+export {
+    ApiMethod,
+} from './interfaces/decorators';
+
+export {
     ContainerManager
 } from './ContainerManager';
-
-// 注意：初始化代码不会自动运行，用户需要明确实例化 AppInitializer 来触发初始化过程
-// 示例：
-// import { AppInitializer } from 'koa78-base78';
-// const app = new AppInitializer('/path/to/config.json');
-// const container = app.initializeAll();

@@ -77,14 +77,11 @@ export default class Elasticsearch78 {
         }
 
         // 将size参数合并到body中（优先使用params.size > params.body.size > 默认值）
-        const requestParams = {
+        const requestParams: any = {
             index: params.index,
-            body: {
-                ...params.body,
-                size: params.body.size ?? 100
-            }
+            size: params.body.size ?? 100,
+            body: params.body
         };
-
 
         const response = await this.client.search<T>(requestParams);
         return response;
@@ -123,7 +120,7 @@ export default class Elasticsearch78 {
         };
 
         // Logging the body for debugging purposes
-        const body = {
+        const body: any = {
             script: {
                 source: scriptSource,
                 params: scriptParams
@@ -134,7 +131,7 @@ export default class Elasticsearch78 {
         const retries = 3;
         for (let attempt = 0; attempt < retries; attempt++) {
             try {
-                const response = await this.client.update({
+                const response: any = await this.client.update({
                     index: index,
                     id: id,
                     body: body,
@@ -183,7 +180,7 @@ export default class Elasticsearch78 {
         };
 
         // Logging the body for debugging purposes
-        const body = {
+        const body: any = {
             script: {
                 source: scriptSource,
                 params: scriptParams
@@ -247,17 +244,17 @@ export default class Elasticsearch78 {
             const indexExists = await this.client.indices.exists({
                 index: index
             });
-            
+
             if (!indexExists) {
                 console.error(`索引 ${index} 不存在！`);
                 return null;
             }
-            
-             
-            
-   
+
+
+
+
             // 使用search API检查文档是否存在，避免exists API的问题
-            const searchResponse = await this.client.search({
+            const searchResponse: any = await this.client.search({
                 index: index,
                 body: {
                     query: {
@@ -266,18 +263,18 @@ export default class Elasticsearch78 {
                         }
                     },
                     size: 1
-                }
+                } as any
             });
 
             // 如果找到文档，说明已存在
             const totalHits = searchResponse.hits.total;
             const hitCount = typeof totalHits === 'number' ? totalHits : totalHits?.value || 0;
-            
+
             if (hitCount > 0) {
                 console.log(`Document with id ${id} already exists in index ${index}`);
                 return { result: 'exists' };
             }
-            
+
             // 如果文档不存在，则添加新文档
             const response = await this.client.index({
                 index: index,
@@ -285,13 +282,13 @@ export default class Elasticsearch78 {
                 body: data,
                 refresh: refresh
             });
-            
+
             return response;
         } catch (error) {
             console.error('Error in addIfNotExists:', JSON.stringify(error, null, 2));
             console.error('Index:', index, 'ID:', id, 'Data:', JSON.stringify(data, null, 2));
-        
-            
+
+
             return null;
         }
     }
@@ -356,13 +353,13 @@ export default class Elasticsearch78 {
             : { ...newData };
 
         try {
-            const response = await this.client.update({
+            const response: any = await this.client.update({
                 index: index,
                 id: id,
                 refresh: refresh, // 新增refresh参数控制立即刷新
                 body: {
                     doc: updatedData,
-                },
+                } as any,
             });
             //console.log('Data updated:', response);
             return response;

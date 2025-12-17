@@ -8,13 +8,13 @@ export class DatabaseService {
     public static instance: DatabaseService;
     private dbConnections?: DatabaseConnections;
     private log: any = null;
-    
+
     constructor() {
         // 使用新的日志服务方式
         this.log = ContainerManager.getLogger();
         DatabaseService.instance = this;
     }
-    
+
     setDatabaseConnections(dbConnections: DatabaseConnections) {
         this.dbConnections = dbConnections;
     }
@@ -66,7 +66,7 @@ export class DatabaseService {
             throw new Error('Default MySQL connection not found');
         }
         try {
-            return await mysql.doTransaction(cmds, values, errtexts, logtext, logvalue, up);
+            return await mysql.doT(cmds, values, errtexts, logtext, logvalue, up);
         } catch (error) {
             this.log.error(dbName + 'Error in DatabaseService.doT:', error);
             throw error;
