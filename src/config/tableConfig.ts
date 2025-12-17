@@ -1,4 +1,4 @@
-import { CidSchema, UidSchema } from '../controllers/BaseSchema';
+import { CidSchema, UidSchema, BaseSchema } from '../controllers/BaseSchema';
 
 export interface TableSet {
     tbname: string;
@@ -35,11 +35,26 @@ export const tableConfigs = {
     },
 } as const;
 
-// 添加索引签名以支持外部配置的表
+// 修改TableSchemas类型定义，确保所有表配置都符合BaseSchema要求
 export type TableSchemas = {
     [K in keyof typeof tableConfigs]: (typeof tableConfigs[K]['uidcid'] extends 'cid' ? CidSchema : UidSchema) &
     Record<typeof tableConfigs[K]['colsImp'][number], string>;
 } & {
-    // 允许通过字符串索引访问任意表配置，但类型为可选的
-    [key: string]: ((CidSchema | UidSchema) & { [key: string]: string }) | undefined;
+    // 允许通过字符串索引访问任意表配置，但始终返回BaseSchema兼容类型
+    [key: string]: BaseSchema & { [k: string]: any };
 };
+
+// 定义一个更宽松的表结构类型，用于外部表配置
+export interface ExternalTableSchema {
+    [key: string]: string | number | boolean | undefined;
+    id?: string;
+    idpk?: number;
+    upby?: string;
+    uptime?: string;
+    remark?: string;
+    remark2?: string;
+    remark3?: string;
+    remark4?: string;
+    remark5?: string;
+    remark6?: string;
+}
