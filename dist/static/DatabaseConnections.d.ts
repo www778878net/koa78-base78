@@ -27,8 +27,8 @@ export interface RedisConfig {
 export declare class DatabaseConnections {
     private static instance;
     private mysqlConnections;
-    memcache: MemCache78;
-    redis: Redis78;
+    memcache?: MemCache78;
+    redis?: Redis78;
     constructor(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig);
     static getInstance(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig): DatabaseConnections;
     getMySQLConnection(name?: string): Mysql78 | undefined;
