@@ -76,7 +76,7 @@ function useDatabaseService() {
 
 ```typescript
 // 在另一个文件中
-import { ContainerManager } from 'koa78-base78/ContainerManager';
+import { ContainerManager } from 'koa78-base78';
 
 // 创建 ContainerManager 的新实例（不会重复初始化）
 const containerManager = new ContainerManager();
