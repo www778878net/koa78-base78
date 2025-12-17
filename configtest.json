@@ -1,0 +1,30 @@
+{
+  "location": "ali",
+  "nodejslog": {
+    "issave": true,
+    "redis": true
+  },
+  "iplog": true,
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": "3300",
+    "password": "7788test",
+    "database": "testdb",
+    "user": "root",
+    "isLog": true,
+    "isCount": true
+  },
+  "memcached": {
+    "host": "127.0.0.1",
+    "port": 11211,
+    "max": 100,
+    "local": ""
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379,
+    "pwd": "admin",
+    "max": 100,
+    "local": ""
+  }
+}
