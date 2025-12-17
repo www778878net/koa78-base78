@@ -1,0 +1,10 @@
+{
+    "location": "ali",
+    "host": "oa.778878.net",
+    "tableconfigfile": "../src/config/tableConfig.ts",
+    "nodejslog": {
+        "issave": true,
+        "redis": true
+    },
+    "iplog": true
+}

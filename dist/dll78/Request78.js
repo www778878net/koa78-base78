@@ -1,10 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Util = require('util');
-var request = require('request');
-var iconv = require('iconv-lite');
+const request = require('request');
+const iconv = require('iconv-lite');
 //iconv.encodings = require("iconv-lite/encodings")
-var urlencode = require('urlencode');
+const urlencode = require('urlencode');
 class Request78 {
     constructor() {
     }
@@ -75,7 +74,7 @@ class Request78 {
     get(url, code = "") {
         code = code || "UTF-8";
         return new Promise((resolve, reject) => {
-            var headers = {
+            const headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'
             };
             try {
@@ -86,7 +85,7 @@ class Request78 {
                     uri: url,
                     timeout: 1500
                 }, function (error, response, body) {
-                    var str = body;
+                    let str = body;
                     try {
                         str = iconv.decode(body, code);
                     }
@@ -118,15 +117,15 @@ class Request78 {
         method = method || "POST";
         code = code || "utf8";
         return new Promise((resolve, reject) => {
-            var headers = {
+            const headers = {
                 'User-Agent': 'request',
                 "charset": code
             };
-            var post_body;
+            let post_body;
             try {
                 post_body = urlencode.stringify(data, { charset: code });
             }
-            catch (err) {
+            catch (_a) {
                 post_body = data;
             }
             headers["Content-Type"] = 'application/x-www-form-urlencoded';
@@ -142,8 +141,8 @@ class Request78 {
                         reject(e);
                     }
                     else {
-                        var body = iconv.decode(body, code);
-                        resolve(body);
+                        const bodyResult = iconv.decode(body, code);
+                        resolve(bodyResult);
                     }
                 });
             }
