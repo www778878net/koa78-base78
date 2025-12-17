@@ -24,6 +24,14 @@ import { Config } from './config/Config';
 import { DatabaseConnections } from './static/DatabaseConnections';
 import { DatabaseService } from './services/DatabaseService';
 import { CacheService } from './services/CacheService';
+import { TsLog78, LogstashServerLog78, FileLog78, ConsoleLog78 } from "tslog78";
+
+// 日志实例
+// 采用全局变量而非依赖注入的方式，原因如下：
+// 1. 日志服务需要在容器初始化早期就能使用，用于记录初始化过程中的信息
+// 2. 日志服务本身不依赖其他服务，可以在容器初始化之前独立初始化
+// 3. 提供静态方法访问，简化使用方式
+let loggerInstance: TsLog78 | null = null;
 
 export class ContainerManager {
     private configPath: string | undefined;
@@ -66,6 +74,49 @@ export class ContainerManager {
     }
 
     /**
+     * 初始化日志服务
+     */
+    private initializeLogger() {
+        try {
+            const config = this.container!.get<Config>(Config);
+            // 使用 Config 类已有的 get 方法获取日志配置
+            const logstashConfig = config.get('logstash');
+            const isDebug = config.get('isdebug');
+
+            let serverLogger: LogstashServerLog78 | undefined;
+            if (logstashConfig && logstashConfig.host && logstashConfig.port) {
+                const serverUrl = `http://${logstashConfig.host}:${logstashConfig.port}`;
+                serverLogger = new LogstashServerLog78(serverUrl);
+            }
+
+            loggerInstance = TsLog78.Instance;
+            loggerInstance.setup(serverLogger, new FileLog78(), new ConsoleLog78());
+            
+            if (isDebug) {
+                loggerInstance.setupLevel(20, 20, 50);
+                loggerInstance.setupDetailFile("detail.log");
+                loggerInstance.clearDetailLog();
+            }
+            
+            console.log('日志服务初始化完成');
+        } catch (error) {
+            console.warn('日志服务初始化失败，使用默认控制台日志:', error);
+        }
+    }
+
+    /**
+     * 获取日志实例
+     * 
+     * 使用静态方法而非依赖注入的原因：
+     * 1. 日志服务需要在容器初始化早期就能使用
+     * 2. 简化日志服务的获取方式
+     * 3. 避免在容器尚未初始化完成时无法获取日志服务
+     */
+    public static getLogger(): TsLog78 | null {
+        return loggerInstance;
+    }
+
+    /**
      * 初始化所有服务
      */
     async initialize(): Promise<Container> {
@@ -80,6 +131,10 @@ export class ContainerManager {
             // 初始化配置服务
             this.container.bind(Config).toSelf().inSingletonScope();
             const config = this.container.get<Config>(Config);
+            
+            // 初始化日志服务
+            // 日志服务在其他服务之前初始化，以便记录后续初始化过程
+            this.initializeLogger();
             
             // 获取数据库和缓存配置
             const mysqlConfig = config.get('mysql');

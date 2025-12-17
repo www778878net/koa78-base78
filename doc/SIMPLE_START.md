@@ -123,12 +123,22 @@ export class ServiceAccessor {
         const container = await getContainer();
         return container.get('CacheService');
     }
+    
+    static getLogger() {
+        return ContainerManager.getLogger();
+    }
 }
 
 // 在业务文件中使用
 import { ServiceAccessor } from './services/ServiceAccessor';
 
 async function businessLogic() {
+    // 获取日志服务
+    const logger = ServiceAccessor.getLogger();
+    if (logger) {
+        logger.info('开始执行业务逻辑');
+    }
+    
     const databaseService = await ServiceAccessor.getDatabaseService();
     const cacheService = await ServiceAccessor.getCacheService();
     
@@ -148,6 +158,12 @@ async function main() {
         
         // 初始化所有服务
         const container = await containerManager.initialize();
+        
+        // 获取日志实例
+        const logger = ContainerManager.getLogger();
+        if (logger) {
+            logger.info('应用启动成功');
+        }
         
         // 获取服务实例
         const databaseService = container.get('DatabaseService');
@@ -173,7 +189,7 @@ main();
 使用 ContainerManager 类会自动：
 1. 解析传入的配置文件路径（通过构造函数参数或命令行参数）
 2. 加载配置文件
-3. 初始化所有服务（数据库连接、缓存等）
+3. 初始化所有服务（数据库连接、缓存、日志等）
 4. 返回配置好的容器实例
 
 用户可以通过容器实例获取任何需要的服务，这种方式简单明了，符合类库的使用习惯。

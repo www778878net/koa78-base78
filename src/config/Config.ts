@@ -63,6 +63,10 @@ export class Config {
         Config.instance = null;
     }
 
+    /**
+     * 获取配置项
+     * @param key 配置项键名
+     */
     public get(key: string): any {
         if (!this.configObject) {
             throw new Error('Config object is not initialized');

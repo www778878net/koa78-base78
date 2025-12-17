@@ -4,11 +4,7 @@ export {
     UidSchema,
 } from './controllers/BaseSchema';
 
-export {
-    AppInitializer,
-    initializeApp,
-    getConfigPathFromArgs
-} from './AppInitializer';
+
 
 export {
     Config,
@@ -25,6 +21,10 @@ export {
 export {
     CacheService,
 } from './services/CacheService';
+
+export {
+    ContainerManager
+} from './ContainerManager';
 
 // 注意：初始化代码不会自动运行，用户需要明确实例化 AppInitializer 来触发初始化过程
 // 示例：
