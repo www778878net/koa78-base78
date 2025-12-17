@@ -8,18 +8,14 @@ const config_1 = tslib_1.__importDefault(require("config"));
 const fs = tslib_1.__importStar(require("fs"));
 const tableConfig_1 = require("./tableConfig");
 let Config = Config_1 = class Config {
-    constructor(customConfigPath) {
+    constructor() {
         const env = process.env.NODE_ENV || 'development';
         console.log(`初始加载 ${env} 环境的配置`);
         try {
             this.configObject = config_1.default;
             console.log(`加载环境配置: ${config_1.default.util.getEnv('NODE_ENV')}`);
-            // 检查构造函数参数是否指定表配置文件路径
-            let tableConfigFilePath = customConfigPath;
-            // 如果未通过构造函数参数指定，则检查配置文件中的 tableconfigfile 字段
-            if (!tableConfigFilePath) {
-                tableConfigFilePath = this.configObject.tableconfigfile;
-            }
+            // 从环境变量或配置中获取表配置文件路径
+            const tableConfigFilePath = process.env.TABLE_CONFIG_FILE || this.configObject.tableconfigfile;
             // 如果指定了外部配置文件路径且文件存在，则使用外部配置
             if (tableConfigFilePath && fs.existsSync(tableConfigFilePath)) {
                 try {
@@ -47,9 +43,9 @@ let Config = Config_1 = class Config {
             };
         }
     }
-    static getInstance(customConfigPath) {
+    static getInstance() {
         if (!Config_1.instance) {
-            Config_1.instance = new Config_1(customConfigPath);
+            Config_1.instance = new Config_1();
         }
         return Config_1.instance;
     }
@@ -95,7 +91,7 @@ let Config = Config_1 = class Config {
 Config.instance = null;
 Config = Config_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
-    tslib_1.__metadata("design:paramtypes", [String])
+    tslib_1.__metadata("design:paramtypes", [])
 ], Config);
 exports.Config = Config;
 //# sourceMappingURL=Config.js.map

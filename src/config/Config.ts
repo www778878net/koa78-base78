@@ -8,7 +8,7 @@ export class Config {
     private static instance: Config | null = null;
     private configObject: any;
 
-    constructor(customConfigPath?: string) {
+    constructor() {
         const env = process.env.NODE_ENV || 'development';
         console.log(`初始加载 ${env} 环境的配置`);
 
@@ -16,13 +16,8 @@ export class Config {
             this.configObject = config;
             console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
 
-            // 检查构造函数参数是否指定表配置文件路径
-            let tableConfigFilePath = customConfigPath;
-
-            // 如果未通过构造函数参数指定，则检查配置文件中的 tableconfigfile 字段
-            if (!tableConfigFilePath) {
-                tableConfigFilePath = this.configObject.tableconfigfile;
-            }
+            // 从环境变量或配置中获取表配置文件路径
+            const tableConfigFilePath = this.configObject.tableconfigfile;
 
             // 如果指定了外部配置文件路径且文件存在，则使用外部配置
             if (tableConfigFilePath && fs.existsSync(tableConfigFilePath)) {
@@ -49,9 +44,9 @@ export class Config {
         }
     }
 
-    public static getInstance(customConfigPath?: string): Config {
+    public static getInstance(): Config {
         if (!Config.instance) {
-            Config.instance = new Config(customConfigPath);
+            Config.instance = new Config();
         }
         return Config.instance;
     }

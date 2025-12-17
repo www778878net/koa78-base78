@@ -2,8 +2,8 @@ import { TableSet } from './tableConfig';
 export declare class Config {
     private static instance;
     private configObject;
-    constructor(customConfigPath?: string);
-    static getInstance(customConfigPath?: string): Config;
+    constructor();
+    static getInstance(): Config;
     static resetInstance(): void;
     /**
      * 获取配置项
