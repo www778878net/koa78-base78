@@ -4,6 +4,10 @@ import { Config } from '../config/Config';
 import UpInfo from 'koa78-upinfo';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
+/**
+ * @experimental 此类为实验性实现，API可能会在未来版本中发生变化
+ * 建议在生产环境中谨慎使用，并关注后续版本的变更通知
+ */
 @injectable()
 export default class Elasticsearch78 {
     private static instance: Elasticsearch78 | null = null;

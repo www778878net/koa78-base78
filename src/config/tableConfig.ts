@@ -1,10 +1,12 @@
 import { CidSchema, UidSchema } from '../controllers/BaseSchema';
+
 export interface TableSet {
     tbname: string;
     cols: string[];
     colsImp: string[];
     uidcid: 'cid' | 'uid';
 }
+
 export interface TableConfig {
     colsImp: readonly string[];
     uidcid: 'cid' | 'uid';
@@ -13,7 +15,6 @@ export interface TableConfig {
 }
 
 export const tableConfigs = {
-
     sys_ip: {
         colsImp: ['ip'] as const,
         uidcid: 'cid' as const,
@@ -34,9 +35,11 @@ export const tableConfigs = {
     },
 } as const;
 
-// type CommonFields = 'id' | 'idpk' | 'upby' | 'uptime';  // 注释掉这行
-
+// 添加索引签名以支持外部配置的表
 export type TableSchemas = {
     [K in keyof typeof tableConfigs]: (typeof tableConfigs[K]['uidcid'] extends 'cid' ? CidSchema : UidSchema) &
     Record<typeof tableConfigs[K]['colsImp'][number], string>;
+} & {
+    // 允许通过字符串索引访问任意表配置，但类型为可选的
+    [key: string]: ((CidSchema | UidSchema) & { [key: string]: string }) | undefined;
 };
