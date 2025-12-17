@@ -2,7 +2,7 @@
     "name": "koa78-base78",
     "version": "3.0.10",
     "description": "nodejs koa78框架 基类",
-    "main": "dist/index.ts",
+    "main": "dist/index.js",
     "types": "src/index.ts",
     "author": {
         "name": "Frieda.Hu<657225485@qq.com>"
