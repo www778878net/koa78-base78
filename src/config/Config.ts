@@ -1,8 +1,7 @@
 import { injectable } from 'inversify';
 import config from 'config';
-import * as path from 'path';
-import { tableConfigs, TableSet } from './tableConfig';
 import * as fs from 'fs';
+import { tableConfigs, TableSet } from './tableConfig';
 
 @injectable()
 export class Config {
@@ -15,17 +14,12 @@ export class Config {
 
         try {
             this.configObject = config;
-            console.warn(`加载环境配置${this.configObject.location}`);
+            console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
 
-            // 首先检查构造函数参数
+            // 检查构造函数参数是否指定表配置文件路径
             let tableConfigFilePath = customConfigPath;
 
-            // 如果构造函数参数为空，则检查环境变量
-            if (!tableConfigFilePath) {
-                tableConfigFilePath = process.env.TABLE_CONFIG_FILE;
-            }
-
-            // 如果环境变量也为空，则检查配置文件中的 tableconfigfile 字段
+            // 如果未通过构造函数参数指定，则检查配置文件中的 tableconfigfile 字段
             if (!tableConfigFilePath) {
                 tableConfigFilePath = this.configObject.tableconfigfile;
             }
@@ -48,7 +42,10 @@ export class Config {
             }
         } catch (error) {
             console.error('加载配置时出错:', error);
-            throw error;
+            // 出错时使用默认配置
+            this.configObject = {
+                tables: tableConfigs
+            };
         }
     }
 

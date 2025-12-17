@@ -54,5 +54,5 @@ export {
 } from './interfaces/decorators';
 
 export {
-    ContainerManager
+    ContainerManager,
 } from './ContainerManager';
