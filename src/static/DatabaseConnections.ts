@@ -31,17 +31,27 @@ export interface RedisConfig {
 export class DatabaseConnections {
   private static instance: DatabaseConnections;
   private mysqlConnections: Map<string, Mysql78> = new Map();
-  public memcache: MemCache78;
-  public redis: Redis78;
+  public memcache?: MemCache78;
+  public redis?: Redis78;
 
   public constructor(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig) {
-    for (const [name, mysqlConfig] of Object.entries(mysqls)) {
+    // 允许空的mysql配置
+    const mysqlEntries = mysqls ? Object.entries(mysqls) : [];
+    for (const [name, mysqlConfig] of mysqlEntries) {
       console.warn(`${name} ${mysqlConfig.host} ${mysqlConfig.database}`);
       this.mysqlConnections.set(name, new Mysql78(mysqlConfig));
     }
-    this.memcache = new MemCache78(memcachedConfig);
-    this.redis = new Redis78(redisConfig);
-    console.warn(`redis ${redisConfig.host} ${redisConfig.port} ${redisConfig.pwd} ${redisConfig.max} ${redisConfig.local}`);
+    
+    // 只有当配置存在且为对象时才创建memcache和redis实例
+    if (memcachedConfig && typeof memcachedConfig === 'object') {
+      this.memcache = new MemCache78(memcachedConfig);
+    }
+    
+    if (redisConfig && typeof redisConfig === 'object') {
+      this.redis = new Redis78(redisConfig);
+    }
+    
+    console.warn(`redis ${redisConfig?.host} ${redisConfig?.port} ${redisConfig?.pwd} ${redisConfig?.max} ${redisConfig?.local}`);
   }
 
   public static getInstance(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig): DatabaseConnections {
