@@ -5,7 +5,9 @@ export {
 } from './controllers/BaseSchema';
 
 export {
-    default as Base78
+    default as Base78,
+    CidBase78,
+    UidBase78
 } from './controllers/Base78';
 
 export {
