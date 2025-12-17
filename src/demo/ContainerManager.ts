@@ -4,7 +4,7 @@ import { Config } from '../config/Config';
 import { DatabaseService } from './DatabaseService';
 import { CacheService } from './CacheService';
 import { AuthService } from './AuthService';
-import LoggerService from './LoggerService';
+import LoggerService from '../services/LoggerService';
 import { ControllerLoader } from '../utils/ControllerLoader';
 import testtb from '../apitest/testmenu/testtb';
 
@@ -54,7 +54,7 @@ const controllerLoader = container.get(ControllerLoader);
 // controllerLoader 的构造函数中已经调用了 loadControllers 方法
 
 log.detail('ContainerManager initialization completed');
- 
+
 
 export { container };
 export default container;

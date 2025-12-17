@@ -17,8 +17,18 @@ export class Config {
             this.configObject = config;
             console.warn(`加载环境配置${this.configObject.location}`);
 
-            // 检查配置中是否有 tableconfigfile 字段
-            let tableConfigFilePath = this.configObject.tableconfigfile;
+            // 首先检查构造函数参数
+            let tableConfigFilePath = customConfigPath;
+            
+            // 如果构造函数参数为空，则检查环境变量
+            if (!tableConfigFilePath) {
+                tableConfigFilePath = process.env.TABLE_CONFIG_FILE;
+            }
+            
+            // 如果环境变量也为空，则检查配置文件中的 tableconfigfile 字段
+            if (!tableConfigFilePath) {
+                tableConfigFilePath = this.configObject.tableconfigfile;
+            }
 
             // 如果指定了外部配置文件路径且文件存在，则使用外部配置
             if (tableConfigFilePath && fs.existsSync(tableConfigFilePath)) {
@@ -62,19 +72,24 @@ export class Config {
     }
 
     public getTable(tableName: string): TableConfig | undefined {
+        //console.log(`Attempting to get table config for: ${tableName}`);
         if (!this.configObject.tables) {
+            //console.log('Tables configuration not found');
             return undefined;
         }
         const tableConfig = this.configObject.tables[tableName];
+        //console.log(`Raw table config for ${tableName}:`, tableConfig);
         if (!tableConfig) {
+            //console.log(`Table config for ${tableName} not found`);
             return undefined;
         }
-        const result = {
-            tbname: tableName.toLowerCase(),
-            cols: [...tableConfig.colsImp, 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'],
+        const result: TableConfig = {
             colsImp: tableConfig.colsImp,
-            uidcid: tableConfig.uidcid
+            uidcid: tableConfig.uidcid,
+            apiver: tableConfig.apiver,
+            apisys: tableConfig.apisys
         };
+        //console.log(`Processed table config for ${tableName}:`, result);
         return result;
     }
 
