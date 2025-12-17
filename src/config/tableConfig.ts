@@ -47,7 +47,6 @@ export type TableSchemas = {
 // 定义一个更宽松的表结构类型，用于外部表配置
 export interface ExternalTableSchema {
     [key: string]: string | number | boolean | undefined;
-    id?: string;
     idpk?: number;
     upby?: string;
     uptime?: string;

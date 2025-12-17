@@ -13,6 +13,7 @@ export class AuthService {
     public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
     private dbService: DatabaseService;
     private cacheService: CacheService;
+    private static instance: AuthService | null = null;
 
     constructor(
         @inject(DatabaseService) dbService: DatabaseService,
@@ -24,6 +25,12 @@ export class AuthService {
         this.cacheService = cacheService;
     }
 
+    public static getInstance(): AuthService {
+        if (!AuthService.instance) {
+            AuthService.instance = global.appContainer.get(AuthService);
+        }
+        return AuthService.instance!;
+    }
 
     async upcheck(up: UpInfo, cols: string[], dbname: string): Promise<string> {
         if (up.errmsg === "ok") {

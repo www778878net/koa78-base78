@@ -28,12 +28,14 @@
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
         "postversion": "git push --follow-tags && npm publish && git checkout develop3 && git merge main3 && git push origin develop3",
         "preversion": "npm test",
+        "publish": "npm publish",
         "dev:precommit": "node hooks/pre-commit.cjs",
         "dev:prepush": "node hooks/pre-push.cjs",
         "dev:hooks": "node hooks/install-hooks.cjs",
         "dev:dev3": "git checkout develop3 && git merge main3",
         "dev:main3": "node hooks/mergeBranches.cjs",
-        "test": "cross-env NODE_ENV=test jest "
+        "test": "cross-env NODE_ENV=test jest ",
+        "testtsc": "npx tsc --noEmit"
     },
     "engines": {
         "node": ">=18.0.0"
@@ -66,6 +68,6 @@
         "request": "^2.88.2",
         "tslog78": "^1.7.2",
         "urlencode": "^2.0.0",
-        "zod": "^4.2.1"
+        "zod": "^3.22.4"
     }
 }
