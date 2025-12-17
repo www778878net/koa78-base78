@@ -15,7 +15,7 @@ let Config = Config_1 = class Config {
             this.configObject = config_1.default;
             console.log(`加载环境配置: ${config_1.default.util.getEnv('NODE_ENV')}`);
             // 从环境变量或配置中获取表配置文件路径
-            const tableConfigFilePath = process.env.TABLE_CONFIG_FILE || this.configObject.tableconfigfile;
+            const tableConfigFilePath = this.configObject.tableconfigfile;
             // 如果指定了外部配置文件路径且文件存在，则使用外部配置
             if (tableConfigFilePath && fs.existsSync(tableConfigFilePath)) {
                 try {
