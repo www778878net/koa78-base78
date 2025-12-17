@@ -2,7 +2,7 @@
     "name": "koa78-base78",
     "version": "3.0.8",
     "description": "nodejs koa78框架 基类",
-    "main": "dist/index.js",
+    "main": "src/index.ts",
     "types": "src/index.ts",
     "author": {
         "name": "Frieda.Hu<657225485@qq.com>"
@@ -14,7 +14,8 @@
     "license": "Apache-2.0",
     "files": [
         "src",
-        "dist"
+        "dist",
+        "!dist/**/*.map"
     ],
     "keywords": [
         "typescript",
@@ -24,10 +25,11 @@
         "nodejs"
     ],
     "scripts": {
-        "start": "npx tsc && cross-env NODE_ENV=production node ./dist/index.js config config.json",
+        "build": "tsc",
+        "start": "npm run build && cross-env NODE_ENV=production node ./dist/index.js config config.json",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
         "postversion": "git push --follow-tags  && git checkout develop3 && git merge main3 && git push origin develop3",
-        "preversion": "npx tsc && npm test",
+        "preversion": "npm run build && npm test",
         "dev:precommit": "node hooks/pre-commit.cjs",
         "dev:prepush": "node hooks/pre-push.cjs",
         "dev:hooks": "node hooks/install-hooks.cjs",
