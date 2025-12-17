@@ -9,7 +9,7 @@ dist/**/*.map
 *.map
 logs/
 testlogs/
-dist/
+
 *.js linguist-generated=true
 *.d.ts linguist-generated=true
 config/settings.json
