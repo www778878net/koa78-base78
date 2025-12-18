@@ -1,0 +1,73 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ControllerLoader = void 0;
+const tslib_1 = require("tslib");
+const inversify_1 = require("inversify");
+const path = tslib_1.__importStar(require("path"));
+const fs = tslib_1.__importStar(require("fs"));
+const Base78_1 = tslib_1.__importDefault(require("../controllers/Base78"));
+const ContainerManager_1 = require("../ContainerManager");
+const tslog78_1 = require("tslog78");
+const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
+let ControllerLoader = class ControllerLoader {
+    constructor() {
+        this.controllers = new Map();
+        log.detail('ControllerLoader constructed');
+        this.loadControllers();
+    }
+    loadControllers() {
+        log.detail('Starting to load controllers');
+        const apiDir = path.resolve(__dirname, '..');
+        fs.readdirSync(apiDir).forEach((dir) => {
+            if (dir.toLowerCase().startsWith('api') && fs.statSync(path.join(apiDir, dir)).isDirectory()) {
+                this.loadControllersFromDirectory(path.join(apiDir, dir));
+            }
+        });
+        log.detail('Finished loading controllers');
+    }
+    loadControllersFromDirectory(dir) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
+            for (const item of fs.readdirSync(dir)) {
+                const fullPath = path.join(dir, item);
+                if (fs.statSync(fullPath).isDirectory()) {
+                    yield this.loadControllersFromDirectory(fullPath);
+                }
+                else if (item.endsWith('.ts') || item.endsWith('.js')) {
+                    if (item.endsWith('.d.ts'))
+                        continue;
+                    try {
+                        // 使用动态导入替代 require
+                        const module = yield (_a = fullPath, Promise.resolve().then(() => tslib_1.__importStar(require(_a))));
+                        const controllerClass = module.default;
+                        if (controllerClass && controllerClass.prototype instanceof Base78_1.default) {
+                            const apiDir = path.basename(path.dirname(path.dirname(fullPath))).toLowerCase();
+                            const menuDir = path.basename(path.dirname(fullPath)).toLowerCase();
+                            const controllerName = path.basename(fullPath, path.extname(fullPath)).toLowerCase();
+                            const controllerKey = `${apiDir}/${menuDir}/${controllerName}`;
+                            this.controllers.set(controllerKey, controllerClass);
+                        }
+                        else {
+                            log.warn(`File ${fullPath} does not export a valid controller class`);
+                        }
+                    }
+                    catch (error) {
+                        log.error(`Error loading controller from ${fullPath}:`, error);
+                    }
+                }
+            }
+        });
+    }
+    getController(path) {
+        const [apiver, apisys, apiobj] = path.split('/');
+        const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();
+        log.detail(`Attempting to get controller with key: ${controllerKey}`);
+        return this.controllers.get(controllerKey);
+    }
+};
+ControllerLoader = tslib_1.__decorate([
+    (0, inversify_1.injectable)(),
+    tslib_1.__metadata("design:paramtypes", [])
+], ControllerLoader);
+exports.ControllerLoader = ControllerLoader;
+//# sourceMappingURL=ControllerLoader.js.map

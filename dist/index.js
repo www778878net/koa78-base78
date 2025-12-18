@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContainerManager = exports.ApiMethod = exports.QueryBuilder = exports.Request78 = exports.Elasticsearch78 = exports.AuthService = exports.CacheService = exports.DatabaseService = exports.DatabaseConnections = exports.tableConfigs = exports.Config = exports.UidBase78 = exports.CidBase78 = exports.Base78 = void 0;
+exports.ControllerLoader = exports.ContainerManager = exports.ApiMethod = exports.QueryBuilder = exports.Request78 = exports.Elasticsearch78 = exports.AuthService = exports.CacheService = exports.DatabaseService = exports.DatabaseConnections = exports.tableConfigs = exports.Config = exports.UidBase78 = exports.CidBase78 = exports.Base78 = void 0;
 var Base78_1 = require("./controllers/Base78");
 Object.defineProperty(exports, "Base78", { enumerable: true, get: function () { return __importDefault(Base78_1).default; } });
 Object.defineProperty(exports, "CidBase78", { enumerable: true, get: function () { return Base78_1.CidBase78; } });
@@ -30,4 +30,6 @@ var decorators_1 = require("./interfaces/decorators");
 Object.defineProperty(exports, "ApiMethod", { enumerable: true, get: function () { return decorators_1.ApiMethod; } });
 var ContainerManager_1 = require("./ContainerManager");
 Object.defineProperty(exports, "ContainerManager", { enumerable: true, get: function () { return ContainerManager_1.ContainerManager; } });
+var ControllerLoader_1 = require("./utils/ControllerLoader");
+Object.defineProperty(exports, "ControllerLoader", { enumerable: true, get: function () { return ControllerLoader_1.ControllerLoader; } });
 //# sourceMappingURL=index.js.map
