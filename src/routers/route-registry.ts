@@ -128,3 +128,5 @@ export async function setupRoutes(app: any) {
 
     log.info('Routes setup completed');
 }
+// 导出路由器，以便在其他地方使用
+export { router };

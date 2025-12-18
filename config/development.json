@@ -1,6 +1,7 @@
 {
     "location": "ali",
     "port": 88,
+    "isdebug": true,
     "host": "oa.778878.net",
     "tableconfigfile": "../src/config/tableConfig.ts",
     "nodejslog": {

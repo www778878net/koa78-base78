@@ -69,13 +69,15 @@ export class ControllerLoader {
     }
 
     getController(path: string): any {
+        // 获取日志实例
+        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
+
         // 确保控制器已加载
         if (!this.loaded) {
             this.loadControllers();
         }
 
-        // 获取日志实例
-        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
+
 
         const [apiver, apisys, apiobj] = path.split('/');
         const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();

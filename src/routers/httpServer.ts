@@ -1,9 +1,8 @@
 import Koa from 'koa';
 import bodyParser from '@www778878net/koabody78';
-import { setupRoutes } from './route-registry';
+import { setupRoutes, router } from './route-registry';
 import { Config } from '../config/Config';
 import { ContainerManager } from '../ContainerManager';
-import Router from '@koa/router';
 import { TsLog78 } from 'tslog78';
 import http from 'http';
 import { Elasticsearch78 } from '../services/elasticsearch78';  // 假设您的 Elasticsearch 客户端类
@@ -21,8 +20,12 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
         //console.warn(ctx);
         return; // 或者可以选择抛出一个错误，或者执行其他操作
     }
+    // 确保参数存在后再解构
     const { apiver, apisys, apiobj, apifun } = ctx.params;
+    
+    // 如果是测试接口，直接返回
     if (apiobj == "testtb") return;
+    
     const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
     //const uploadSize = ctx.request.headers['content-length'];  // Request body size (in characters)
     const downloadSize = back.length;  // Response body size
@@ -94,9 +97,16 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
     log.info(`尝试在端口 ${httpPort} 上启动服务器`);
 
     const app = new Koa();
-    const router = new Router();
 
-    // 使用统计中间件
+    log.info("正在设置路由...");
+    await setupRoutes(app);
+    log.info("路由设置成功");
+
+    // 路由
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+
+    // 使用统计中间件（放在路由之后，避免影响路由匹配）
     app.use(statsMiddleware);
     // 中间件
     app.use(errorHandler);
@@ -112,14 +122,6 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
             ctx.throw('body parse error', 422);
         }
     }));
-
-    log.info("正在设置路由...");
-    await setupRoutes(app);
-    log.info("路由设置成功");
-
-    // 路由
-    app.use(router.routes());
-    app.use(router.allowedMethods());
 
     return new Promise((resolve, reject) => {
         const httpServer = app.listen(httpPort, () => {
