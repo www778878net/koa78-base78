@@ -16,7 +16,7 @@ export class ControllerLoader {
         // 不在构造函数中加载控制器，避免在模块加载时访问未初始化的日志服务
     }
 
-    private loadControllers() {
+    public loadControllers() {
         // 确保只加载一次
         if (this.loaded) {
             return;

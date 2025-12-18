@@ -174,6 +174,10 @@ export class ContainerManager {
             const cacheService = this.container.get(CacheService);
             cacheService.setMemcache(dbConnections);
 
+            // 预加载控制器，避免第一次请求时出现控制器找不到的问题
+            const controllerLoader = this.container.get(ControllerLoader);
+            controllerLoader.loadControllers();
+
             // 将容器挂载到 global 对象，方便在应用程序的其他部分访问
             (global as any).appContainer = this.container;
 
