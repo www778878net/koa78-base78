@@ -95,6 +95,87 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
+    // SQLite相关方法
+    sqliteGet(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.dbConnections) {
+                this.log.error('DatabaseConnections not initialized');
+                throw new Error('DatabaseConnections not initialized');
+            }
+            const sqlite = this.dbConnections.getSQLiteConnection(dbName);
+            if (!sqlite) {
+                this.log.error('Default SQLite connection not found');
+                throw new Error('Default SQLite connection not found');
+            }
+            try {
+                return yield sqlite.doGet(sql, values, up);
+            }
+            catch (error) {
+                this.log.error(dbName + 'Error in DatabaseService.sqliteGet:', error);
+                throw error;
+            }
+        });
+    }
+    sqliteM(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.dbConnections) {
+                this.log.error('DatabaseConnections not initialized');
+                throw new Error('DatabaseConnections not initialized');
+            }
+            const sqlite = this.dbConnections.getSQLiteConnection(dbName);
+            if (!sqlite) {
+                this.log.error('Default SQLite connection not found');
+                throw new Error('Default SQLite connection not found');
+            }
+            try {
+                return yield sqlite.doM(sql, values, up);
+            }
+            catch (error) {
+                this.log.error(dbName + 'Error in DatabaseService.sqliteM:', error);
+                throw error;
+            }
+        });
+    }
+    sqliteDoT(cmds, values, errtexts, logtext, logvalue, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.dbConnections) {
+                this.log.error('DatabaseConnections not initialized');
+                throw new Error('DatabaseConnections not initialized');
+            }
+            const sqlite = this.dbConnections.getSQLiteConnection(dbName);
+            if (!sqlite) {
+                this.log.error('Default SQLite connection not found');
+                throw new Error('Default SQLite connection not found');
+            }
+            try {
+                return yield sqlite.doT(cmds, values, errtexts, logtext, logvalue, up);
+            }
+            catch (error) {
+                this.log.error(dbName + 'Error in DatabaseService.sqliteDoT:', error);
+                throw error;
+            }
+        });
+    }
+    sqliteMAdd(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.dbConnections) {
+                this.log.error('DatabaseConnections not initialized');
+                throw new Error('DatabaseConnections not initialized');
+            }
+            const sqlite = this.dbConnections.getSQLiteConnection(dbName);
+            if (!sqlite) {
+                this.log.error('Default SQLite connection not found');
+                throw new Error('Default SQLite connection not found');
+            }
+            try {
+                return yield sqlite.doMAdd(sql, values, up);
+            }
+            catch (error) {
+                this.log.error(dbName + 'Error in DatabaseService.sqliteMAdd:', error);
+                throw error;
+            }
+        });
+    }
 };
 DatabaseService = DatabaseService_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),

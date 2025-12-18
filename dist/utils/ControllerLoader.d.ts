@@ -2,7 +2,7 @@ export declare class ControllerLoader {
     private controllers;
     private loaded;
     constructor();
-    private loadControllers;
+    loadControllers(): void;
     private loadControllersFromDirectory;
     getController(path: string): any;
 }

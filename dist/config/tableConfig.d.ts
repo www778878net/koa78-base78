@@ -18,6 +18,12 @@ export declare const tableConfigs: {
         readonly apiver: "apitest";
         readonly apisys: "testmenu";
     };
+    readonly SqliteTest: {
+        readonly colsImp: readonly ["field1", "field2"];
+        readonly uidcid: "cid";
+        readonly apiver: "apitest";
+        readonly apisys: "testmenu";
+    };
     readonly Test78: {
         readonly colsImp: readonly ["field1", "field2"];
         readonly uidcid: "cid";

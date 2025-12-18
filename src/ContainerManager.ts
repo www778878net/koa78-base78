@@ -28,6 +28,7 @@ import { AuthService } from './services/AuthService';
 import { TsLog78, LogstashServerLog78, FileLog78, ConsoleLog78 } from "tslog78";
 import { ControllerLoader } from './utils/ControllerLoader';
 
+
 // 日志实例
 // 采用全局变量而非依赖注入的方式，原因如下：
 // 1. 日志服务需要在容器初始化早期就能使用，用于记录初始化过程中的信息
@@ -148,9 +149,10 @@ export class ContainerManager {
             const mysqlConfig = config.get('mysql');
             const memcachedConfig = config.get('memcached');
             const redisConfig = config.get('redis');
+            const sqliteConfig = config.get('sqlites');
 
             // 初始化数据库连接
-            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig);
+            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);
 
             // 使用 toConstantValue 绑定已存在的实例
             // 这种方式适用于:
@@ -168,6 +170,7 @@ export class ContainerManager {
             this.container.bind(DatabaseService).toSelf().inSingletonScope();
             this.container.bind(CacheService).toSelf().inSingletonScope();
             this.container.bind(AuthService).toSelf().inSingletonScope();
+
 
             // 绑定ControllerLoader服务
             this.container.bind(ControllerLoader).toSelf().inSingletonScope();

@@ -23,7 +23,12 @@ import { TsLog78 } from "tslog78";
 export declare class ContainerManager {
     private configPath;
     private container;
+    private static instance;
     constructor(configPath?: string);
+    /**
+     * 获取ContainerManager实例
+     */
+    static getInstance(): ContainerManager | null;
     /**
      * 从命令行参数中解析配置文件路径
      * 支持以下格式:

@@ -8,6 +8,12 @@ exports.tableConfigs = {
         apiver: 'apitest',
         apisys: 'testmenu'
     },
+    SqliteTest: {
+        colsImp: ['field1', 'field2'],
+        uidcid: 'cid',
+        apiver: 'apitest',
+        apisys: 'testmenu'
+    },
     Test78: {
         colsImp: ['field1', 'field2'],
         uidcid: 'cid',
