@@ -40,7 +40,12 @@ export class ContainerManager {
     private container: Container | null = null;
 
     constructor(configPath?: string) {
-        this.configPath = configPath || this.getConfigPathFromArgs();
+        // 检查是否有环境变量 CONFIG_FILE
+        if (process.env.CONFIG_FILE) {
+            this.configPath = process.env.CONFIG_FILE;
+        } else {
+            this.configPath = configPath || this.getConfigPathFromArgs();
+        }
 
         // 如果提供了配置文件路径，设置环境变量
         if (this.configPath) {
