@@ -27,7 +27,9 @@ const Config_1 = require("./config/Config");
 const DatabaseConnections_1 = require("./static/DatabaseConnections");
 const DatabaseService_1 = require("./services/DatabaseService");
 const CacheService_1 = require("./services/CacheService");
+const AuthService_1 = require("./services/AuthService");
 const tslog78_1 = require("tslog78");
+const ControllerLoader_1 = require("./utils/ControllerLoader");
 // 日志实例
 // 采用全局变量而非依赖注入的方式，原因如下：
 // 1. 日志服务需要在容器初始化早期就能使用，用于记录初始化过程中的信息
@@ -83,7 +85,8 @@ class ContainerManager {
             loggerInstance = tslog78_1.TsLog78.Instance;
             loggerInstance.setup(serverLogger, new tslog78_1.FileLog78(), new tslog78_1.ConsoleLog78());
             if (isDebug) {
-                loggerInstance.setupLevel(20, 20, 50);
+                console.log('调试模式已启用');
+                loggerInstance.setupLevel(0, 0, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -141,6 +144,9 @@ class ContainerManager {
                 // 4. inSingletonScope() 确保在整个应用中只有一个实例
                 this.container.bind(DatabaseService_1.DatabaseService).toSelf().inSingletonScope();
                 this.container.bind(CacheService_1.CacheService).toSelf().inSingletonScope();
+                this.container.bind(AuthService_1.AuthService).toSelf().inSingletonScope();
+                // 绑定ControllerLoader服务
+                this.container.bind(ControllerLoader_1.ControllerLoader).toSelf().inSingletonScope();
                 // 设置服务依赖
                 const databaseService = this.container.get(DatabaseService_1.DatabaseService);
                 databaseService.setDatabaseConnections(dbConnections);
