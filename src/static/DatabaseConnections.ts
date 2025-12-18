@@ -60,7 +60,12 @@ export class DatabaseConnections {
       const sqliteEntries = Object.entries(sqlites);
       for (const [name, sqliteConfig] of sqliteEntries) {
         console.warn(`SQLite ${name} ${sqliteConfig.filename}`);
-        this.sqliteConnections.set(name, new Sqlite78(sqliteConfig));
+        const sqliteInstance = new Sqlite78(sqliteConfig);
+        // 初始化连接
+        sqliteInstance.initialize().catch(err => {
+          console.error(`Failed to initialize SQLite connection ${name}:`, err);
+        });
+        this.sqliteConnections.set(name, sqliteInstance);
       }
     }
     

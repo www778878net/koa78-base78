@@ -10,7 +10,7 @@
     },
     "sqlites": {
         "default": {
-            "filename": "./default.db",
+            "filename": "./data/default.db",
             "isLog": true,
             "isCount": true
         }

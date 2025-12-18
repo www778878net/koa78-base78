@@ -45,17 +45,33 @@ export default class Sqlite78 {
      */
     async initialize(): Promise<void> {
         try {
+            this.log.debug(`正在初始化SQLite数据库连接: ${this._filename}`);
+            
+            // 确保目录存在
+            const path = await import('path');
+            const fs = await import('fs');
+            const dir = path.dirname(this._filename);
+            
+            try {
+                await fs.promises.access(dir);
+            } catch (err) {
+                this.log.debug(`创建目录: ${dir}`);
+                await fs.promises.mkdir(dir, { recursive: true });
+            }
+            
             this._db = await open({
                 filename: this._filename,
                 driver: sqlite3.Database
             });
-
+            
             // 启用外键约束
             await this._db.run('PRAGMA foreign_keys = ON');
             // 设置WAL模式以提高并发性能
             await this._db.run('PRAGMA journal_mode = WAL');
+            
+            this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
         } catch (err) {
-            this.log.error(err as Error, 'sqlite_initialize');
+            this.log.error(err as Error, `SQLite数据库连接初始化失败: ${this._filename}`);
             throw err;
         }
     }

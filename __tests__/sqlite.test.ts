@@ -63,66 +63,66 @@ describe("SQLite Database Tests", () => {
         }
     });
 
-    // it('should query data from sys_log table', async () => {
-    //     // 设置单个测试的超时时间
-    //     jest.setTimeout(15000);
+    it('should query data from sys_log table', async () => {
+        // 设置单个测试的超时时间
+        jest.setTimeout(15000);
 
-    //     try {
-    //         // 查询日志数据
-    //         const response = await axios.get(`${baseURL}/SqliteTest/queryLogs`);
+        try {
+            // 查询日志数据
+            const response = await axios.get(`${baseURL}/SqliteTest/queryLogs`);
 
-    //         console.log('Query logs response:', response.data);
-    //         expect(response.status).toBe(200);
-    //         expect(response.data).toHaveProperty('message');
-    //         expect(response.data).toHaveProperty('count');
-    //         expect(response.data.message).toContain('成功'); // 成功的关键字
+            console.log('Query logs response:', response.data);
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty('message');
+            expect(response.data).toHaveProperty('count');
+            expect(response.data.message).toContain('成功'); // 成功的关键字
 
-    //         // 检查是否有数据返回
-    //         if (response.data.count > 0) {
-    //             expect(response.data).toHaveProperty('data');
-    //             expect(Array.isArray(response.data.data)).toBe(true);
-    //         }
-    //     } catch (error) {
-    //         console.error('Query logs error:', error.response?.data || error.message);
-    //         throw error;
-    //     }
-    // });
+            // 检查是否有数据返回
+            if (response.data.count > 0) {
+                expect(response.data).toHaveProperty('data');
+                expect(Array.isArray(response.data.data)).toBe(true);
+            }
+        } catch (error) {
+            console.error('Query logs error:', error.response?.data || error.message);
+            throw error;
+        }
+    });
 
-    // it('should query data from sys_warn table', async () => {
-    //     // 设置单个测试的超时时间
-    //     jest.setTimeout(15000);
+    it('should query data from sys_warn table', async () => {
+        // 设置单个测试的超时时间
+        jest.setTimeout(15000);
 
-    //     try {
-    //         // 查询警告信息
-    //         const response = await axios.get(`${baseURL}/SqliteTest/queryWarnings`);
+        try {
+            // 查询警告信息
+            const response = await axios.get(`${baseURL}/SqliteTest/queryWarnings`);
 
-    //         console.log('Query warnings response:', response.data);
-    //         expect(response.status).toBe(200);
-    //         expect(response.data).toHaveProperty('message');
-    //         expect(response.data).toHaveProperty('count');
-    //         expect(response.data.message).toContain('成功'); // 成功的关键字
-    //     } catch (error) {
-    //         console.error('Query warnings error:', error.response?.data || error.message);
-    //         throw error;
-    //     }
-    // });
+            console.log('Query warnings response:', response.data);
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty('message');
+            expect(response.data).toHaveProperty('count');
+            expect(response.data.message).toContain('成功'); // 成功的关键字
+        } catch (error) {
+            console.error('Query warnings error:', error.response?.data || error.message);
+            throw error;
+        }
+    });
 
-    // it('should query data from sys_sql table', async () => {
-    //     // 设置单个测试的超时时间
-    //     jest.setTimeout(15000);
+    it('should query data from sys_sql table', async () => {
+        // 设置单个测试的超时时间
+        jest.setTimeout(15000);
 
-    //     try {
-    //         // 查询SQL记录
-    //         const response = await axios.get(`${baseURL}/SqliteTest/querySqlRecords`);
+        try {
+            // 查询SQL记录
+            const response = await axios.get(`${baseURL}/SqliteTest/querySqlRecords`);
 
-    //         console.log('Query SQL records response:', response.data);
-    //         expect(response.status).toBe(200);
-    //         expect(response.data).toHaveProperty('message');
-    //         expect(response.data).toHaveProperty('count');
-    //         expect(response.data.message).toContain('成功'); // 成功的关键字
-    //     } catch (error) {
-    //         console.error('Query SQL records error:', error.response?.data || error.message);
-    //         throw error;
-    //     }
-    // });
+            console.log('Query SQL records response:', response.data);
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty('message');
+            expect(response.data).toHaveProperty('count');
+            expect(response.data.message).toContain('成功'); // 成功的关键字
+        } catch (error) {
+            console.error('Query SQL records error:', error.response?.data || error.message);
+            throw error;
+        }
+    });
 });

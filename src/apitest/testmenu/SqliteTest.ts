@@ -60,22 +60,22 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 'CREATE INDEX IF NOT EXISTS i_uptime ON sys_log (uptime)'
             ];
 
-            const up = new UpInfo({} as any);
-
+            // 使用当前请求的up对象而不是创建一个新的空对象
             // 执行创建表语句
-            await this.dbService.sqliteM(createSysLogTable, [], up);
+            await this.dbService.sqliteM(createSysLogTable, [], this.up);
 
             // 创建索引
             for (const indexSql of createIndexes) {
-                await this.dbService.sqliteM(indexSql, [], up);
+                await this.dbService.sqliteM(indexSql, [], this.up);
             }
 
             // 创建其他系统表（调用已有的方法）
-            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_warn (uid TEXT NOT NULL DEFAULT '')", [], up);
-            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_sql (cid TEXT NOT NULL DEFAULT '')", [], up);
+            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_warn (uid TEXT NOT NULL DEFAULT '')", [], this.up);
+            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_sql (cid TEXT NOT NULL DEFAULT '')", [], this.up);
 
             return "所有表创建成功";
         } catch (error) {
+            this.logger.error("创建表失败:", error);
             return `创建表失败: ${error}`;
         }
     }
@@ -113,11 +113,12 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 '备注6'
             ];
 
-            const up = new UpInfo({} as any);
-            await this.dbService.sqliteM(insertSql, values, up);
+            // 使用当前请求的up对象而不是创建一个新的空对象
+            await this.dbService.sqliteM(insertSql, values, this.up);
 
             return "日志插入成功";
         } catch (error) {
+            this.logger.error("插入日志失败:", error);
             return `插入日志失败: ${error}`;
         }
     }
@@ -130,8 +131,11 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
         try {
             const querySql = "SELECT * FROM sys_log ORDER BY uptime DESC LIMIT 10";
 
-            const up = new UpInfo({} as any);
-            const rows = await this.dbService.sqliteGet(querySql, [], up);
+            // 使用当前请求的up对象而不是创建一个新的空对象
+            const rows = await this.dbService.sqliteGet(querySql, [], this.up);
+            
+            this.logger.debug(`查询到 ${rows.length} 条日志记录`);
+            this.logger.debug("日志记录内容:", JSON.stringify(rows, null, 2));
 
             return {
                 message: "查询成功",
@@ -139,6 +143,7 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 data: rows
             };
         } catch (error) {
+            this.logger.error("查询日志失败:", error);
             return { error: `查询日志失败: ${error}` };
         }
     }
@@ -149,8 +154,11 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
 
     async queryWarnings(): Promise<any> {
         try {
-            const up = new UpInfo({} as any);
-            const result = await this.dbService.sqliteGet("SELECT * FROM sys_warn LIMIT 5", [], up);
+            // 使用当前请求的up对象而不是创建一个新的空对象
+            const result = await this.dbService.sqliteGet("SELECT * FROM sys_warn LIMIT 5", [], this.up);
+            
+            this.logger.debug(`查询到 ${result.length} 条警告记录`);
+            this.logger.debug("警告记录内容:", JSON.stringify(result, null, 2));
 
             return {
                 message: "警告信息查询成功",
@@ -158,6 +166,7 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 data: result
             };
         } catch (error) {
+            this.logger.error("查询警告信息失败:", error);
             return { error: `查询警告信息失败: ${error}` };
         }
     }
@@ -168,8 +177,11 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
 
     async querySqlRecords(): Promise<any> {
         try {
-            const up = new UpInfo({} as any);
-            const result = await this.dbService.sqliteGet("SELECT * FROM sys_sql LIMIT 5", [], up);
+            // 使用当前请求的up对象而不是创建一个新的空对象
+            const result = await this.dbService.sqliteGet("SELECT * FROM sys_sql LIMIT 5", [], this.up);
+            
+            this.logger.debug(`查询到 ${result.length} 条SQL记录`);
+            this.logger.debug("SQL记录内容:", JSON.stringify(result, null, 2));
 
             return {
                 message: "SQL记录查询成功",
@@ -177,6 +189,7 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 data: result
             };
         } catch (error) {
+            this.logger.error("查询SQL记录失败:", error);
             return { error: `查询SQL记录失败: ${error}` };
         }
     }
