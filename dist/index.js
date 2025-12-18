@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initializeApp = exports.ControllerLoader = exports.ContainerManager = exports.ApiMethod = exports.QueryBuilder = exports.Request78 = exports.Elasticsearch78 = exports.AuthService = exports.CacheService = exports.DatabaseService = exports.DatabaseConnections = exports.tableConfigs = exports.Config = exports.UidBase78 = exports.CidBase78 = exports.Base78 = void 0;
+exports.Server = exports.ControllerLoader = exports.ContainerManager = exports.ApiMethod = exports.QueryBuilder = exports.Request78 = exports.Elasticsearch78 = exports.AuthService = exports.CacheService = exports.DatabaseService = exports.DatabaseConnections = exports.tableConfigs = exports.Config = exports.UidBase78 = exports.CidBase78 = exports.Base78 = void 0;
 var Base78_1 = require("./controllers/Base78");
 Object.defineProperty(exports, "Base78", { enumerable: true, get: function () { return __importDefault(Base78_1).default; } });
 Object.defineProperty(exports, "CidBase78", { enumerable: true, get: function () { return Base78_1.CidBase78; } });
@@ -33,5 +33,5 @@ Object.defineProperty(exports, "ContainerManager", { enumerable: true, get: func
 var ControllerLoader_1 = require("./utils/ControllerLoader");
 Object.defineProperty(exports, "ControllerLoader", { enumerable: true, get: function () { return ControllerLoader_1.ControllerLoader; } });
 var server_1 = require("./server");
-Object.defineProperty(exports, "initializeApp", { enumerable: true, get: function () { return server_1.initializeApp; } });
+Object.defineProperty(exports, "Server", { enumerable: true, get: function () { return __importDefault(server_1).default; } });
 //# sourceMappingURL=index.js.map
