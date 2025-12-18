@@ -1,23 +1,22 @@
-/**
- * 应用初始化函数
- * 用户可以通过此函数一键初始化所有服务
- *
- * 使用方法:
- * ```typescript
- * import { initializeApp } from 'koa78-base78/dist/server';
- *
- * // 通过命令行参数或环境变量指定配置文件路径
- * initializeApp().then(() => {
- *   console.log('应用初始化完成');
- *   // 现在可以通过 global.appContainer 获取服务实例
- *   // const dbService = global.appContainer.get(DatabaseService);
- * }).catch(error => {
- *   console.error('应用初始化失败:', error);
- * });
- * ```
- *
- * @param configPath 配置文件路径（可选）
- * @returns Promise<Container>
- */
-export declare function initializeApp(configPath?: string): Promise<Container>;
-export default initializeApp;
+export declare class Server {
+    /**
+     * 启动服务器
+     * 一键初始化所有服务并启动HTTP服务器
+     *
+     * 使用方法:
+     * ```typescript
+     * import { Server } from 'koa78-base78';
+     *
+     * const server = new Server();
+     * server.start().then(() => {
+     *   console.log('服务器启动完成');
+     * }).catch(error => {
+     *   console.error('服务器启动失败:', error);
+     * });
+     * ```
+     *
+     * @param configPath 配置文件路径（可选）
+     */
+    start(configPath?: string): Promise<void>;
+}
+export default Server;

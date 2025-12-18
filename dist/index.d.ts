@@ -12,4 +12,4 @@ export { QueryBuilder, } from './utils/QueryBuilder';
 export { ApiMethod, } from './interfaces/decorators';
 export { ContainerManager, } from './ContainerManager';
 export { ControllerLoader, } from './utils/ControllerLoader';
-export { initializeApp } from './server';
+export { default as Server } from './server';
