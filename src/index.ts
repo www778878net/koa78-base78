@@ -61,4 +61,4 @@ export {
     ControllerLoader,
 } from './utils/ControllerLoader';
 
-export { initializeApp } from './server';
+export { default as Server } from './server';

@@ -74,7 +74,7 @@ function useDatabaseService() {
 
 ### 方式二：通过重新创建 ContainerManager 实例访问
 
-```typescript
+``typescript
 // 在另一个文件中
 import { ContainerManager } from 'koa78-base78';
 
@@ -97,7 +97,7 @@ function useServices() {
 
 ### 方式三：创建服务访问工具函数
 
-```typescript
+``typescript
 // 创建一个专门的服务访问模块 (services/ServiceAccessor.ts)
 import { ContainerManager } from 'koa78-base78/ContainerManager';
 
@@ -148,7 +148,7 @@ async function businessLogic() {
 
 ## 完整示例
 
-```typescript
+``typescript
 import { ContainerManager } from 'koa78-base78/ContainerManager';
 
 async function main() {
@@ -193,3 +193,94 @@ main();
 4. 返回配置好的容器实例
 
 用户可以通过容器实例获取任何需要的服务，这种方式简单明了，符合类库的使用习惯。
+
+# 快速开始指南
+
+## 简介
+
+本文档介绍了如何快速启动和使用 koa78-base78 框架。
+
+## 安装
+
+``bash
+npm install koa78-base78
+```
+
+## 基本使用
+
+### 使用 Server 类启动服务器
+
+``typescript
+import { Server } from 'koa78-base78';
+
+async function startApp() {
+  try {
+    // 创建 Server 实例
+    const server = new Server();
+    
+    // 启动服务器（一键初始化所有服务并启动HTTP服务器）
+    await server.start();
+    
+    console.log('服务器启动成功');
+  } catch (error) {
+    console.error('服务器启动失败:', error);
+  }
+}
+
+startApp();
+```
+
+## 配置文件
+
+可以通过环境变量或参数指定配置文件路径：
+
+``bash
+TABLE_CONFIG_FILE=path/to/your/config.json npm start
+```
+
+或者在代码中指定：
+
+``typescript
+import { Server } from 'koa78-base78';
+
+const server = new Server();
+// 指定配置文件路径
+await server.start('path/to/your/config.json');
+```
+
+## 自定义表配置
+
+用户可以通过创建自定义表配置文件来定义自己的表结构。
+
+创建一个自定义配置文件 `my-table-config.ts`:
+
+``typescript
+const customTableConfigs = {
+  user_table: {
+    colsImp: ['name', 'email', 'phone'] as const,
+    uidcid: 'uid' as const,
+    apiver: 'api/v1',
+    apisys: 'user'
+  },
+  product_table: {
+    colsImp: ['product_name', 'price', 'category'] as const,
+    uidcid: 'cid' as const,
+    apiver: 'api/v1',
+    apisys: 'product'
+  }
+} as const;
+
+export default customTableConfigs;
+```
+
+然后在配置文件中指定该文件路径：
+
+```json
+{
+  "tableconfigfile": "./my-table-config.ts"
+}
+```
+
+## 启动服务器
+
+初始化完成后，框架会自动启动 HTTP 服务器，默认监听 88 端口。

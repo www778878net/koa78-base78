@@ -8,14 +8,20 @@ const fs = tslib_1.__importStar(require("fs"));
 const Base78_1 = tslib_1.__importDefault(require("../controllers/Base78"));
 const ContainerManager_1 = require("../ContainerManager");
 const tslog78_1 = require("tslog78");
-const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
 let ControllerLoader = class ControllerLoader {
     constructor() {
         this.controllers = new Map();
-        log.detail('ControllerLoader constructed');
-        this.loadControllers();
+        this.loaded = false;
+        // 不在构造函数中加载控制器，避免在模块加载时访问未初始化的日志服务
     }
     loadControllers() {
+        // 确保只加载一次
+        if (this.loaded) {
+            return;
+        }
+        // 获取日志实例（此时容器应该已经初始化完成）
+        const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
+        log.detail('ControllerLoader constructed');
         log.detail('Starting to load controllers');
         const apiDir = path.resolve(__dirname, '..');
         fs.readdirSync(apiDir).forEach((dir) => {
@@ -24,10 +30,13 @@ let ControllerLoader = class ControllerLoader {
             }
         });
         log.detail('Finished loading controllers');
+        this.loaded = true;
     }
     loadControllersFromDirectory(dir) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             var _a;
+            // 获取日志实例
+            const log = ContainerManager_1.ContainerManager.getLogger() || new tslog78_1.TsLog78();
             for (const item of fs.readdirSync(dir)) {
                 const fullPath = path.join(dir, item);
                 if (fs.statSync(fullPath).isDirectory()) {
@@ -59,6 +68,12 @@ let ControllerLoader = class ControllerLoader {
         });
     }
     getController(path) {
+        // 获取日志实例
+        const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
+        // 确保控制器已加载
+        if (!this.loaded) {
+            this.loadControllers();
+        }
         const [apiver, apisys, apiobj] = path.split('/');
         const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();
         log.detail(`Attempting to get controller with key: ${controllerKey}`);
