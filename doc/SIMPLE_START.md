@@ -9,7 +9,7 @@
 ### 方式一：通过构造函数传入配置文件路径
 
 ```typescript
-import { ContainerManager } from 'koa78-base78/ContainerManager';
+import { ContainerManager } from 'koa78-base78';
 
 // 创建容器管理器实例，传入配置文件路径
 const containerManager = new ContainerManager('./config.json');
@@ -33,7 +33,7 @@ node your-app.js config configtest.json
 在这种情况下，您不需要在代码中显式指定配置文件路径：
 
 ```typescript
-import { ContainerManager } from 'koa78-base78/ContainerManager';
+import { ContainerManager } from 'koa78-base78';
 
 // 创建容器管理器实例，不传入配置文件路径
 const containerManager = new ContainerManager();

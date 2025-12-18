@@ -56,3 +56,7 @@ export {
 export {
     ContainerManager,
 } from './ContainerManager';
+
+export {
+    ControllerLoader,
+} from './utils/ControllerLoader';
