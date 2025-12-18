@@ -11,3 +11,4 @@ export { default as Request78 } from './dll78/Request78';
 export { QueryBuilder, } from './utils/QueryBuilder';
 export { ApiMethod, } from './interfaces/decorators';
 export { ContainerManager, } from './ContainerManager';
+export { ControllerLoader, } from './utils/ControllerLoader';
