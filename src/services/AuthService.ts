@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { injectable, inject } from 'inversify';
 import { ContainerManager } from '../ContainerManager';
 
-@injectable()
+
 export class AuthService {
     private log: any = null;
     public static readonly CID_VPS: string = "28401227-bd00-a20f-c561-ddf0def881d9";

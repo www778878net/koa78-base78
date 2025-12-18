@@ -1,7 +1,6 @@
 import { CidBase78 } from '../../controllers/Base78';
-export default class SqliteTest extends CidBase78<any> {
-    private sqliteDb;
-    constructor();
+import { TableSchemas } from '../../config/tableConfig';
+export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
     /**
      * 初始化数据库连接
      */

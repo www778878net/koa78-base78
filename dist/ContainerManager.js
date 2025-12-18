@@ -50,14 +50,6 @@ class ContainerManager {
         if (this.configPath) {
             process.env.TABLE_CONFIG_FILE = this.configPath;
         }
-        // 设置单例实例
-        ContainerManager.instance = this;
-    }
-    /**
-     * 获取ContainerManager实例
-     */
-    static getInstance() {
-        return ContainerManager.instance;
     }
     /**
      * 从命令行参数中解析配置文件路径
@@ -142,7 +134,7 @@ class ContainerManager {
                 const mysqlConfig = config.get('mysql');
                 const memcachedConfig = config.get('memcached');
                 const redisConfig = config.get('redis');
-                const sqliteConfig = config.get('sqlite');
+                const sqliteConfig = config.get('sqlites');
                 // 初始化数据库连接
                 const dbConnections = DatabaseConnections_1.DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);
                 // 使用 toConstantValue 绑定已存在的实例
@@ -189,5 +181,4 @@ class ContainerManager {
     }
 }
 exports.ContainerManager = ContainerManager;
-ContainerManager.instance = null;
 //# sourceMappingURL=ContainerManager.js.map

@@ -8,5 +8,12 @@
         "issave": true,
         "redis": true
     },
+    "sqlites": {
+        "default": {
+            "filename": "./default.db",
+            "isLog": true,
+            "isCount": true
+        }
+    },
     "iplog": true
 }

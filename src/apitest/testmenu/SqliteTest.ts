@@ -2,33 +2,31 @@ import { CidBase78 } from '../../controllers/Base78';
 import { ApiMethod } from '../../interfaces/decorators';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import { TableSchemas } from '../../config/tableConfig';
+import UpInfo from 'koa78-upinfo';
 
-export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
-
+export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
 
     /**
      * 初始化数据库连接
      */
-    @ApiMethod()
+
     async initDb(): Promise<string> {
         try {
-            await this.sqliteDb.initialize();
-            return "数据库初始化成功";
+            // 使用DatabaseService中的方法测试SQLite连接
+            // 使用当前请求的up对象而不是创建一个新的空对象
+            await this.dbService.sqliteGet("SELECT 1", [], this.up);
+            return "数据库连接测试成功";
         } catch (error) {
-            return `数据库初始化失败: ${error}`;
+            return `数据库连接测试失败: ${error}`;
         }
     }
 
     /**
      * 创建系统表（包括sys_log表）
      */
-    @ApiMethod()
+
     async createTables(): Promise<string> {
         try {
-            if (!this.sqliteDb) {
-                return "数据库未初始化";
-            }
-
             // 创建sys_log表
             const createSysLogTable = `
                 CREATE TABLE IF NOT EXISTS sys_log (
@@ -62,25 +60,21 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
                 'CREATE INDEX IF NOT EXISTS i_uptime ON sys_log (uptime)'
             ];
 
+            const up = new UpInfo({} as any);
+
             // 执行创建表语句
-            if (this.sqliteDb) {
-                // 创建sys_log表
-                const db: any = (this.sqliteDb as any)._db;
-                await db.run(createSysLogTable);
+            await this.dbService.sqliteM(createSysLogTable, [], up);
 
-                // 创建索引
-                for (const indexSql of createIndexes) {
-                    await db.run(indexSql);
-                }
-
-                // 创建其他系统表（调用已有的方法）
-                const up = new UpInfo({} as any);
-                await this.sqliteDb.creatTb(up);
-
-                return "所有表创建成功";
+            // 创建索引
+            for (const indexSql of createIndexes) {
+                await this.dbService.sqliteM(indexSql, [], up);
             }
 
-            return "数据库实例为空";
+            // 创建其他系统表（调用已有的方法）
+            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_warn (uid TEXT NOT NULL DEFAULT '')", [], up);
+            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_sql (cid TEXT NOT NULL DEFAULT '')", [], up);
+
+            return "所有表创建成功";
         } catch (error) {
             return `创建表失败: ${error}`;
         }
@@ -89,13 +83,9 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
     /**
      * 插入测试数据到sys_log表
      */
-    @ApiMethod()
+
     async insertLog(): Promise<string> {
         try {
-            if (!this.sqliteDb) {
-                return "数据库未初始化";
-            }
-
             const insertSql = `
                 INSERT INTO sys_log (
                     uid, simple, key1, key2, key3, content, key4, key5, key6, 
@@ -123,8 +113,8 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
                 '备注6'
             ];
 
-            const db: any = (this.sqliteDb as any)._db;
-            await db.run(insertSql, values);
+            const up = new UpInfo({} as any);
+            await this.dbService.sqliteM(insertSql, values, up);
 
             return "日志插入成功";
         } catch (error) {
@@ -135,17 +125,13 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
     /**
      * 查询sys_log表中的数据
      */
-    @ApiMethod()
+
     async queryLogs(): Promise<any> {
         try {
-            if (!this.sqliteDb) {
-                return { error: "数据库未初始化" };
-            }
-
             const querySql = "SELECT * FROM sys_log ORDER BY uptime DESC LIMIT 10";
 
-            const db: any = (this.sqliteDb as any)._db;
-            const rows = await db.all(querySql);
+            const up = new UpInfo({} as any);
+            const rows = await this.dbService.sqliteGet(querySql, [], up);
 
             return {
                 message: "查询成功",
@@ -160,15 +146,11 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
     /**
      * 查询sys_warn表中的数据
      */
-    @ApiMethod()
+
     async queryWarnings(): Promise<any> {
         try {
-            if (!this.sqliteDb) {
-                return { error: "数据库未初始化" };
-            }
-
             const up = new UpInfo({} as any);
-            const result = await this.sqliteDb.doGet("SELECT * FROM sys_warn LIMIT 5", [], up);
+            const result = await this.dbService.sqliteGet("SELECT * FROM sys_warn LIMIT 5", [], up);
 
             return {
                 message: "警告信息查询成功",
@@ -183,15 +165,11 @@ export default class SqliteTest extends CidBase78<TableSchemas['SqliteTest']> {
     /**
      * 查询sys_sql表中的数据
      */
-    @ApiMethod()
+
     async querySqlRecords(): Promise<any> {
         try {
-            if (!this.sqliteDb) {
-                return { error: "数据库未初始化" };
-            }
-
             const up = new UpInfo({} as any);
-            const result = await this.sqliteDb.doGet("SELECT * FROM sys_sql LIMIT 5", [], up);
+            const result = await this.dbService.sqliteGet("SELECT * FROM sys_sql LIMIT 5", [], up);
 
             return {
                 message: "SQL记录查询成功",

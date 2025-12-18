@@ -6,8 +6,12 @@ export function ApiMethod() {
         const originalMethod = descriptor.value;
         descriptor.value = async function (this: Base78<any>, ...args: any[]) {
             try {
+                // 从容器中获取AuthService实例
+                const container = (global as any).appContainer;
+                const authService = container ? container.get(AuthService) : AuthService.getInstance();
+                
                 // 执行 upcheck
-                await AuthService.getInstance().upcheck(this.up, this.tableConfig.cols,this.dbname);
+                await authService.upcheck(this.up, this.tableConfig.cols, this.dbname);
 
                 // 执行原始方法
                 return await originalMethod.apply(this, args);
