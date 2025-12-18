@@ -38,7 +38,6 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         return this.cacheService.redisGet("test");
     }
 
-    @ApiMethod()
     test(): Promise<string> {
         const self = this;
         const up = self.up;
@@ -49,13 +48,14 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         })
     }
 
-    getConfig78(): Promise<string> {
+    getConfig78(): Promise<{}> {
         const self = this;
         const up = self.up;
         console.log("test in getConfig78" + up.uname);
 
         return new Promise(async (resolve, reject) => {
-            resolve(JSON.stringify({ back: "不能公开config测试的时候用用" }));
+            resolve("不能公开config测试的时候用用")
+            //resolve({ Argv: self.Argv, Config: self.Config });
             return;
         })
     }

@@ -37,6 +37,6 @@ describe("no power api test", () => {
 
         console.log(response.data);
         expect(response.data).toHaveProperty("back");
-        expect(response.data.back).toBe("看到我说明路由ok,中文ok,无权限调用OK");
+        expect(response.data.back).toBe("看到我说明路由ok,中文ok,无权限调用OKtest");
     });
 });

@@ -24,6 +24,7 @@ import { Config } from './config/Config';
 import { DatabaseConnections } from './static/DatabaseConnections';
 import { DatabaseService } from './services/DatabaseService';
 import { CacheService } from './services/CacheService';
+import { AuthService } from './services/AuthService';
 import { TsLog78, LogstashServerLog78, FileLog78, ConsoleLog78 } from "tslog78";
 import { ControllerLoader } from './utils/ControllerLoader';
 
@@ -161,6 +162,7 @@ export class ContainerManager {
             // 4. inSingletonScope() 确保在整个应用中只有一个实例
             this.container.bind(DatabaseService).toSelf().inSingletonScope();
             this.container.bind(CacheService).toSelf().inSingletonScope();
+            this.container.bind(AuthService).toSelf().inSingletonScope();
 
             // 绑定ControllerLoader服务
             this.container.bind(ControllerLoader).toSelf().inSingletonScope();
