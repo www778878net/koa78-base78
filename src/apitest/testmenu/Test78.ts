@@ -9,11 +9,7 @@ import { TableSchemas } from '../../config/tableConfig';
 export default class Test78 extends CidBase78<TableSchemas['Test78']> {
 
 
-    @ApiMethod()
-    async getConfig78(): Promise<string> {
-        this.logger.info("getConfig78 method called");  // 使用 .info() 方法
-        return JSON.stringify({ back: "不能公开config测试的时候用用" });
-    }
+
 
     @ApiMethod()
     async testMemcachedAdd(): Promise<any> {
@@ -40,5 +36,27 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
     async testRedis(): Promise<string> {
         this.cacheService.redisSet("test", "testRedis");
         return this.cacheService.redisGet("test");
+    }
+
+    @ApiMethod()
+    test(): Promise<string> {
+        const self = this;
+        const up = self.up;
+        console.log("test in test" + up.uname);
+        return new Promise(async (resolve, reject) => {
+            resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
+            return;
+        })
+    }
+
+    getConfig78(): Promise<string> {
+        const self = this;
+        const up = self.up;
+        console.log("test in getConfig78" + up.uname);
+
+        return new Promise(async (resolve, reject) => {
+            resolve(JSON.stringify({ back: "不能公开config测试的时候用用" }));
+            return;
+        })
     }
 }
