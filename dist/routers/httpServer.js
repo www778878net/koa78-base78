@@ -11,11 +11,12 @@ const router_1 = tslib_1.__importDefault(require("@koa/router"));
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const ControllerLoader_1 = require("../utils/ControllerLoader");
 const esClient = elasticsearch78_1.Elasticsearch78.getInstance();
-const log = new tslog78_1.TsLog78();
+const log = tslog78_1.TsLog78.Instance;
 const router = new router_1.default();
 // 统计中间件
 const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const start = Date.now(); // Request start time
+    console.log('statsMiddleware');
     yield next();
     const ms = Date.now() - start; // Request duration
     // 如果 ctx.params 是 undefined，直接返回
@@ -62,6 +63,7 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
 // 错误处理中间件
 const errorHandler = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log('errorHandler');
         yield next();
     }
     catch (err) {
