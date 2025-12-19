@@ -94,7 +94,7 @@ export default class Base78<T extends BaseSchema> {
         //this.logger.debug(`${className} 的表配置:`, tableConfig);
         if (!tableConfig) {
             this.logger.error(`未找到 ${className} 的表配置`);
-            //this.logger.debug('完整配置:', JSON.stringify(config.get(''), null, 2));
+            this.logger.debug('完整配置:', JSON.stringify(config.get(''), null, 2));
             throw new Error(`未找到 ${className} 的表配置`);
         }
         return tableConfig;

@@ -6,6 +6,7 @@ const tslib_1 = require("tslib");
 const inversify_1 = require("inversify");
 const config_1 = tslib_1.__importDefault(require("config"));
 const fs = tslib_1.__importStar(require("fs"));
+const path = tslib_1.__importStar(require("path"));
 const tableConfig_1 = require("./tableConfig");
 let Config = Config_1 = class Config {
     constructor() {
@@ -25,32 +26,43 @@ let Config = Config_1 = class Config {
                 console.log(`加载环境配置: ${config_1.default.util.getEnv('NODE_ENV')}`);
             }
             // 从环境变量或配置中获取表配置文件路径
-            const tableConfigFilePath = this.configObject.tableconfigfile;
-            // 如果指定了外部配置文件路径且文件存在，则使用外部配置
-            if (tableConfigFilePath && fs.existsSync(tableConfigFilePath)) {
-                try {
-                    delete require.cache[require.resolve(tableConfigFilePath)];
-                    const customConfigs = require(tableConfigFilePath);
-                    this.configObject.tables = customConfigs;
-                    console.log(`成功加载外部表配置: ${tableConfigFilePath}`);
+            let tableConfigFilePath = this.configObject.tableconfigfile;
+            // 如果指定了外部配置文件路径，则相对于用户项目根目录解析路径
+            if (tableConfigFilePath) {
+                // 如果是相对路径，则相对于用户项目根目录解析
+                if (!path.isAbsolute(tableConfigFilePath)) {
+                    tableConfigFilePath = path.resolve(process.cwd(), tableConfigFilePath);
                 }
-                catch (error) {
-                    console.error(`加载外部表配置失败: ${tableConfigFilePath}`, error);
-                    // 失败时回退到默认配置
+                // 如果文件存在，则使用外部配置
+                if (fs.existsSync(tableConfigFilePath)) {
+                    try {
+                        delete require.cache[require.resolve(tableConfigFilePath)];
+                        const customConfigs = require(tableConfigFilePath);
+                        this.configObject.tables = customConfigs;
+                        console.log(`成功加载外部表配置: ${tableConfigFilePath}`);
+                    }
+                    catch (error) {
+                        console.error(`加载外部表配置失败: ${tableConfigFilePath}`, error);
+                        // 失败时回退到默认配置
+                        this.configObject.tables = tableConfig_1.tableConfigs;
+                    }
+                }
+                else {
+                    console.log(`外部表配置文件不存在: ${tableConfigFilePath}，使用默认配置`);
+                    // 文件不存在，使用默认配置
                     this.configObject.tables = tableConfig_1.tableConfigs;
                 }
             }
             else {
-                // 未指定或文件不存在，使用默认配置
+                // 未指定，使用默认配置
                 this.configObject.tables = tableConfig_1.tableConfigs;
+                console.log(`使用默认表配置`);
             }
         }
         catch (error) {
-            console.error('加载配置时出错:', error);
-            // 出错时使用默认配置
-            this.configObject = {
-                tables: tableConfig_1.tableConfigs
-            };
+            console.error('配置加载失败:', error);
+            // 出现任何错误时，使用默认配置
+            this.configObject = Object.assign(Object.assign({}, config_1.default), { tables: tableConfig_1.tableConfigs });
         }
     }
     static getInstance() {
