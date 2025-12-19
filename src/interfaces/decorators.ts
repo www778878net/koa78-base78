@@ -8,7 +8,11 @@ export function ApiMethod() {
             try {
                 // 从容器中获取AuthService实例
                 const container = (global as any).appContainer;
-                const authService = container ? container.get(AuthService) : AuthService.getInstance();
+                if (!container) {
+                    throw new Error('App container not initialized');
+                }
+                
+                const authService = container.get(AuthService);
                 
                 // 执行 upcheck
                 await authService.upcheck(this.up, this.tableConfig.cols, this.dbname);

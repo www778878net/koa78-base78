@@ -1,8 +1,10 @@
-import Base78 from '../../controllers/Base78';
-import { BaseSchema } from '../../controllers/BaseSchema';
-export default class Test78 extends Base78<BaseSchema> {
-    get colsImp(): string[];
-    get uidcid(): string;
+import { CidBase78 } from '../../controllers/Base78';
+import { TableSchemas } from '../../config/tableConfig';
+export default class Test78 extends CidBase78<TableSchemas['Test78']> {
+    testMemcachedAdd(): Promise<any>;
+    testMemcached(): Promise<string>;
+    testRedis(): Promise<string>;
     test2(): Promise<string>;
     test(): Promise<string>;
+    getConfig78(): Promise<{}>;
 }
