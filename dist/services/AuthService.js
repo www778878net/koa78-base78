@@ -1,4 +1,5 @@
 "use strict";
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const tslib_1 = require("tslib");
@@ -8,7 +9,7 @@ const zod_1 = require("zod");
 const inversify_1 = require("inversify");
 const ContainerManager_1 = require("../ContainerManager");
 const Config_1 = require("../config/Config");
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     constructor(dbService, cacheService) {
         this.log = null;
         // 使用新的日志服务方式
@@ -17,10 +18,10 @@ let AuthService = class AuthService {
         this.cacheService = cacheService;
     }
     static get CID_MY() {
-        if (AuthService._CID_MY === null) {
-            AuthService._CID_MY = AuthService.getCidMyFromConfig();
+        if (AuthService_1._CID_MY === null) {
+            AuthService_1._CID_MY = AuthService_1.getCidMyFromConfig();
         }
-        return AuthService._CID_MY;
+        return AuthService_1._CID_MY;
     }
     static getCidMyFromConfig() {
         try {
@@ -44,10 +45,16 @@ let AuthService = class AuthService {
         return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
     }
     static getInstance() {
-        if (!AuthService.instance) {
-            AuthService.instance = global.appContainer.get(AuthService);
+        if (!AuthService_1.instance) {
+            const globalAny = global;
+            if (globalAny.appContainer) {
+                AuthService_1.instance = globalAny.appContainer.get(AuthService_1);
+            }
+            else {
+                throw new Error('App container not found');
+            }
         }
-        return AuthService.instance;
+        return AuthService_1.instance;
     }
     upcheck(up, cols, dbname) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -163,7 +170,8 @@ let AuthService = class AuthService {
 AuthService._CID_MY = null;
 AuthService.CID_GUEST = "GUEST000-8888-8888-8888-GUEST00GUEST";
 AuthService.instance = null;
-AuthService = tslib_1.__decorate([
+AuthService = AuthService_1 = tslib_1.__decorate([
+    (0, inversify_1.injectable)(),
     tslib_1.__param(0, (0, inversify_1.inject)(DatabaseService_1.DatabaseService)),
     tslib_1.__param(1, (0, inversify_1.inject)(CacheService_1.CacheService)),
     tslib_1.__metadata("design:paramtypes", [DatabaseService_1.DatabaseService,
