@@ -21,18 +21,53 @@ class Test78 extends Base78_1.default {
             }));
         });
     }
+    test2() {
+        const self = this;
+        const up = self.up;
+        console.log("test in test" + up.uname);
+        return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            resolve("有权限调用OK" + up.parsn);
+            return;
+        }));
+    }
     test() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const self = this;
-            const up = self.up;
-            console.log("test in test" + up.uname);
-            return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
-                return;
-            }));
-        });
+        const self = this;
+        const up = self.up;
+        console.log("test in test" + up.uname);
+        return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
+            return;
+        }));
+    }
+    getConfig78() {
+        const self = this;
+        const up = self.up;
+        console.log("test in getConfig78" + up.uname);
+        return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            resolve("不能公开config测试的时候用用");
+            //resolve({ Argv: self.Argv, Config: self.Config });
+            return;
+        }));
     }
 }
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", Promise)
+], Test78.prototype, "testMemcachedAdd", null);
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", Promise)
+], Test78.prototype, "testMemcached", null);
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", Promise)
+], Test78.prototype, "testRedis", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),

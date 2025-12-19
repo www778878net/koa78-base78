@@ -37,6 +37,16 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         this.cacheService.redisSet("test", "testRedis");
         return this.cacheService.redisGet("test");
     }
+    @ApiMethod()
+    test2(): Promise<string> {
+        const self = this;
+        const up = self.up;
+        console.log("test in test" + up.uname);
+        return new Promise(async (resolve, reject) => {
+            resolve("有权限调用OK" + up.parsn);
+            return;
+        })
+    }
 
     test(): Promise<string> {
         const self = this;
