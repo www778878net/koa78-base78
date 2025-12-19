@@ -9,7 +9,7 @@ import { Config } from '../config/Config';
 
 export class AuthService {
     private log: any = null;
-    public static readonly CID_MY: string = AuthService.getCidMyFromConfig();
+    private static _CID_MY: string | null = null;
     public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
     private dbService: DatabaseService;
     private cacheService: CacheService;
@@ -25,16 +25,26 @@ export class AuthService {
         this.cacheService = cacheService;
     }
 
+    public static get CID_MY(): string {
+        if (AuthService._CID_MY === null) {
+            AuthService._CID_MY = AuthService.getCidMyFromConfig();
+        }
+        return AuthService._CID_MY;
+    }
+
     private static getCidMyFromConfig(): string {
         try {
-            // 通过容器获取Config实例
-            const container = (global as any).appContainer;
-            const config = container.get(Config);
-            const cidMyFromConfig = config.get('cidmy');
-            
-            // 如果配置中有cidmy且不为空，则使用配置中的值
-            if (cidMyFromConfig && typeof cidMyFromConfig === 'string' && cidMyFromConfig.length > 0) {
-                return cidMyFromConfig;
+            // 检查全局容器是否存在
+            const globalAny: any = global as any;
+            if (globalAny.appContainer) {
+                // 通过容器获取Config实例
+                const config = globalAny.appContainer.get(Config);
+                const cidMyFromConfig = config.get('cidmy');
+                
+                // 如果配置中有cidmy且不为空，则使用配置中的值
+                if (cidMyFromConfig && typeof cidMyFromConfig === 'string' && cidMyFromConfig.length > 0) {
+                    return cidMyFromConfig;
+                }
             }
         } catch (error) {
             // 获取配置失败时使用默认值

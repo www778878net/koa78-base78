@@ -20,7 +20,7 @@ describe("SQLite Database Tests", () => {
 
             console.log('Database initialization response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
+            expect(response.data).toHaveProperty('back');
         } catch (error) {
             console.error('Database initialization error:', error.response?.data || error.message);
             throw error;
@@ -37,8 +37,8 @@ describe("SQLite Database Tests", () => {
 
             console.log('Create tables response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
-            expect(response.data.message).toContain('成功'); // 成功的关键字
+            expect(response.data).toHaveProperty('back');
+            expect(response.data.back).toContain('成功'); // 成功的关键字
         } catch (error) {
             console.error('Create tables error:', error.response?.data || error.message);
             throw error;
@@ -55,8 +55,8 @@ describe("SQLite Database Tests", () => {
 
             console.log('Insert log response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
-            expect(response.data.message).toContain('成功'); // 成功的关键字
+            expect(response.data).toHaveProperty('back');
+            expect(response.data.back).toContain('成功'); // 成功的关键字
         } catch (error) {
             console.error('Insert log error:', error.response?.data || error.message);
             throw error;
@@ -73,14 +73,18 @@ describe("SQLite Database Tests", () => {
 
             console.log('Query logs response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
-            expect(response.data).toHaveProperty('count');
-            expect(response.data.message).toContain('成功'); // 成功的关键字
+            expect(response.data).toHaveProperty('back');
+            
+            // 解析back字段中的JSON数据
+            const result = JSON.parse(response.data.back);
+            expect(result).toHaveProperty('message');
+            expect(result).toHaveProperty('count');
+            expect(result.message).toContain('成功'); // 成功的关键字
 
             // 检查是否有数据返回
-            if (response.data.count > 0) {
-                expect(response.data).toHaveProperty('data');
-                expect(Array.isArray(response.data.data)).toBe(true);
+            if (result.count > 0) {
+                expect(result).toHaveProperty('data');
+                expect(Array.isArray(result.data)).toBe(true);
             }
         } catch (error) {
             console.error('Query logs error:', error.response?.data || error.message);
@@ -98,9 +102,13 @@ describe("SQLite Database Tests", () => {
 
             console.log('Query warnings response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
-            expect(response.data).toHaveProperty('count');
-            expect(response.data.message).toContain('成功'); // 成功的关键字
+            expect(response.data).toHaveProperty('back');
+            
+            // 解析back字段中的JSON数据
+            const result = JSON.parse(response.data.back);
+            expect(result).toHaveProperty('message');
+            expect(result).toHaveProperty('count');
+            expect(result.message).toContain('成功'); // 成功的关键字
         } catch (error) {
             console.error('Query warnings error:', error.response?.data || error.message);
             throw error;
@@ -117,9 +125,13 @@ describe("SQLite Database Tests", () => {
 
             console.log('Query SQL records response:', response.data);
             expect(response.status).toBe(200);
-            expect(response.data).toHaveProperty('message');
-            expect(response.data).toHaveProperty('count');
-            expect(response.data.message).toContain('成功'); // 成功的关键字
+            expect(response.data).toHaveProperty('back');
+            
+            // 解析back字段中的JSON数据
+            const result = JSON.parse(response.data.back);
+            expect(result).toHaveProperty('message');
+            expect(result).toHaveProperty('count');
+            expect(result.message).toContain('成功'); // 成功的关键字
         } catch (error) {
             console.error('Query SQL records error:', error.response?.data || error.message);
             throw error;
