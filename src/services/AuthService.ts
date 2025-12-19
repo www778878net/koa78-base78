@@ -11,16 +11,17 @@ export class AuthService {
     private log: any = null;
     private static _CID_MY: string | null = null;
     public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
-    private dbService: DatabaseService;
-    private cacheService: CacheService;
+    private dbService: DatabaseService | null = null;
+    private cacheService: CacheService | null = null;
     private static instance: AuthService | null = null;
 
-    constructor(
-        @inject(DatabaseService) dbService: DatabaseService,
-        @inject(CacheService) cacheService: CacheService
-    ) {
+    constructor() {
         // 使用新的日志服务方式
         this.log = ContainerManager.getLogger();
+    }
+    
+    // 初始化方法，用于设置依赖项
+    public init(dbService: DatabaseService, cacheService: CacheService): void {
         this.dbService = dbService;
         this.cacheService = cacheService;
     }
@@ -118,7 +119,7 @@ export class AuthService {
             up.cols = cols;
 
         let mem_sid = "lovers_sid2_";
-        let tmp = await this.cacheService.tbget(mem_sid + dbname + up.sid, up.debug);
+        let tmp = await this.cacheService?.tbget(mem_sid + dbname + up.sid, up.debug);
 
         if (tmp === "pool null") tmp = "";
 
@@ -136,12 +137,12 @@ export class AuthService {
                     "  idcoDef,openweixin ,truename,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                     " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t2.cid=companys.id";
             const values = [up.sid, up.sid];
-            const result = await this.dbService.get(cmdtext, values, up, dbname);
-            this.log.debug("upcheck result:", result);
-            if (result.length === 0) tmp = "";
+            const result = await this.dbService?.get(cmdtext, values, up, dbname);
+            this.log?.debug("upcheck result:", result);
+            if (result?.length === 0) tmp = "";
             else {
                 tmp = result[0];
-                await this.cacheService.tbset(mem_sid + dbname + up.sid, tmp);
+                await this.cacheService?.tbset(mem_sid + dbname + up.sid, tmp);
             }
         }
 
@@ -173,10 +174,10 @@ export class AuthService {
 
     async preventReplayAttack(up: UpInfo): Promise<void> {
         const cacheKey = up.ctx.request.path + up.cache;
-        const existingCache = await this.cacheService.get(cacheKey);
+        const existingCache = await this.cacheService?.get(cacheKey);
         if (existingCache) {
             throw new Error("防止重放攻击" + cacheKey);
         }
-        await this.cacheService.set(cacheKey, 1, 2);
+        await this.cacheService?.set(cacheKey, 1, 2);
     }
 }

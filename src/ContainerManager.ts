@@ -174,16 +174,23 @@ export class ContainerManager {
             this.container.bind(CacheService).toSelf().inSingletonScope();
             this.container.bind(AuthService).toSelf().inSingletonScope();
 
+            // 初始化AuthService
+            const authService = this.container.get(AuthService);
+            // 设置服务依赖
+            const databaseService = this.container.get(DatabaseService);
+            databaseService.setDatabaseConnections(dbConnections);
+            const cacheService = this.container.get(CacheService);
+            cacheService.setMemcache(dbConnections);
+            authService.init(databaseService, cacheService);
 
             // 绑定ControllerLoader服务
             this.container.bind(ControllerLoader).toSelf().inSingletonScope();
 
-            // 设置服务依赖
-            const databaseService = this.container.get(DatabaseService);
-            databaseService.setDatabaseConnections(dbConnections);
 
-            const cacheService = this.container.get(CacheService);
-            cacheService.setMemcache(dbConnections);
+
+
+
+
 
             // 预加载控制器，避免第一次请求时出现控制器找不到的问题
             const controllerLoader = this.container.get(ControllerLoader);

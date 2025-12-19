@@ -6,5 +6,4 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
     testRedis(): Promise<string>;
     test2(): Promise<string>;
     test(): Promise<string>;
-    getConfig78(): Promise<{}>;
 }
