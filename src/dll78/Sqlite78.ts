@@ -1,393 +1,394 @@
-import { promises as fs } from 'node:fs';
+//linux下不能正常
+// import { promises as fs } from 'node:fs';
 
-import { createHash } from 'node:crypto';
-// @ts-ignore
-import sqlite3 from 'sqlite3';
-// @ts-ignore
-import { open, Database } from 'sqlite';
-import UpInfo from 'koa78-upinfo';
-import TsLog78 from 'tslog78';
-// @ts-ignore
-import md5 from 'md5';
+// import { createHash } from 'node:crypto';
+// // @ts-ignore
+// import sqlite3 from 'sqlite3';
+// // @ts-ignore
+// import { open, Database } from 'sqlite';
+// import UpInfo from 'koa78-upinfo';
+// import TsLog78 from 'tslog78';
+// // @ts-ignore
+// import md5 from 'md5';
 
-/**
- * SQLite数据库操作类
- * 参考Mysql78类实现
- */
-export default class Sqlite78 {
-    private _db: Database | null = null;
-    private _filename: string = '';
-    public isLog: boolean = false;
-    public isCount: boolean = false;
-    private log: TsLog78 = TsLog78.Instance;
-    private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
+// /**
+//  * SQLite数据库操作类
+//  * 参考Mysql78类实现
+//  */
+// export default class Sqlite78 {
+//     private _db: Database | null = null;
+//     private _filename: string = '';
+//     public isLog: boolean = false;
+//     public isCount: boolean = false;
+//     private log: TsLog78 = TsLog78.Instance;
+//     private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
 
-    // 设置重试次数和重试延迟
-    private readonly maxRetryAttempts: number = 3;
-    private readonly retryDelayMs: number = 1000; // 1秒延迟
+//     // 设置重试次数和重试延迟
+//     private readonly maxRetryAttempts: number = 3;
+//     private readonly retryDelayMs: number = 1000; // 1秒延迟
 
-    constructor(config: {
-        filename: string;
-        isLog?: boolean;
-        isCount?: boolean;
-    }) {
-        if (!config) return;
+//     constructor(config: {
+//         filename: string;
+//         isLog?: boolean;
+//         isCount?: boolean;
+//     }) {
+//         if (!config) return;
 
-        this._filename = config.filename;
-        this.isLog = config.isLog ?? false; // 是否打印日志（影响性能）
-        this.isCount = config.isCount ?? false; // 是否统计效率（影响性能）
-    }
+//         this._filename = config.filename;
+//         this.isLog = config.isLog ?? false; // 是否打印日志（影响性能）
+//         this.isCount = config.isCount ?? false; // 是否统计效率（影响性能）
+//     }
 
 
 
-    /**
-     * 初始化数据库连接
-     */
-    async initialize(): Promise<void> {
-        try {
-            this.log.debug(`正在初始化SQLite数据库连接: ${this._filename}`);
+//     /**
+//      * 初始化数据库连接
+//      */
+//     async initialize(): Promise<void> {
+//         try {
+//             this.log.debug(`正在初始化SQLite数据库连接: ${this._filename}`);
             
-            // 确保目录存在
-            const path = await import('path');
-            const fs = await import('fs');
-            const dir = path.dirname(this._filename);
+//             // 确保目录存在
+//             const path = await import('path');
+//             const fs = await import('fs');
+//             const dir = path.dirname(this._filename);
             
-            try {
-                await fs.promises.access(dir);
-            } catch (err) {
-                this.log.debug(`创建目录: ${dir}`);
-                await fs.promises.mkdir(dir, { recursive: true });
-            }
+//             try {
+//                 await fs.promises.access(dir);
+//             } catch (err) {
+//                 this.log.debug(`创建目录: ${dir}`);
+//                 await fs.promises.mkdir(dir, { recursive: true });
+//             }
             
-            this._db = await open({
-                filename: this._filename,
-                driver: sqlite3.Database
-            });
+//             this._db = await open({
+//                 filename: this._filename,
+//                 driver: sqlite3.Database
+//             });
             
-            // 启用外键约束
-            await this._db.run('PRAGMA foreign_keys = ON');
-            // 设置WAL模式以提高并发性能
-            await this._db.run('PRAGMA journal_mode = WAL');
+//             // 启用外键约束
+//             await this._db.run('PRAGMA foreign_keys = ON');
+//             // 设置WAL模式以提高并发性能
+//             await this._db.run('PRAGMA journal_mode = WAL');
             
-            this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
-        } catch (err) {
-            this.log.error(err as Error, `SQLite数据库连接初始化失败: ${this._filename}`);
-            throw err;
-        }
-    }
+//             this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
+//         } catch (err) {
+//             this.log.error(err as Error, `SQLite数据库连接初始化失败: ${this._filename}`);
+//             throw err;
+//         }
+//     }
 
-    /**
-     * 创建系统常用表
-     * Create system common table
-     */
-    async creatTb(up: UpInfo): Promise<string> {
-        if (!this._db) {
-            return 'database not initialized';
-        }
+//     /**
+//      * 创建系统常用表
+//      * Create system common table
+//      */
+//     async creatTb(up: UpInfo): Promise<string> {
+//         if (!this._db) {
+//             return 'database not initialized';
+//         }
 
-        const cmdtext1 = `CREATE TABLE IF NOT EXISTS sys_warn (
-            uid TEXT NOT NULL DEFAULT '',
-            kind TEXT NOT NULL DEFAULT '',
-            apisys TEXT NOT NULL DEFAULT '',
-            apiobj TEXT NOT NULL DEFAULT '',
-            content TEXT NOT NULL,
-            upid TEXT NOT NULL DEFAULT '',
-            upby TEXT DEFAULT '',
-            uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
-            remark TEXT NOT NULL DEFAULT '',
-            remark2 TEXT NOT NULL DEFAULT '',
-            remark3 TEXT NOT NULL DEFAULT '',
-            remark4 TEXT NOT NULL DEFAULT '',
-            remark5 TEXT NOT NULL DEFAULT '',
-            remark6 TEXT NOT NULL DEFAULT ''
-        )`;
+//         const cmdtext1 = `CREATE TABLE IF NOT EXISTS sys_warn (
+//             uid TEXT NOT NULL DEFAULT '',
+//             kind TEXT NOT NULL DEFAULT '',
+//             apisys TEXT NOT NULL DEFAULT '',
+//             apiobj TEXT NOT NULL DEFAULT '',
+//             content TEXT NOT NULL,
+//             upid TEXT NOT NULL DEFAULT '',
+//             upby TEXT DEFAULT '',
+//             uptime DATETIME NOT NULL,
+//             idpk INTEGER PRIMARY KEY AUTOINCREMENT,
+//             id TEXT NOT NULL,
+//             remark TEXT NOT NULL DEFAULT '',
+//             remark2 TEXT NOT NULL DEFAULT '',
+//             remark3 TEXT NOT NULL DEFAULT '',
+//             remark4 TEXT NOT NULL DEFAULT '',
+//             remark5 TEXT NOT NULL DEFAULT '',
+//             remark6 TEXT NOT NULL DEFAULT ''
+//         )`;
 
-        const cmdtext2 = `CREATE TABLE IF NOT EXISTS sys_sql (
-            cid TEXT NOT NULL DEFAULT '',
-            apiv TEXT NOT NULL DEFAULT '',
-            apisys TEXT NOT NULL DEFAULT '',
-            apiobj TEXT NOT NULL DEFAULT '',
-            cmdtext TEXT NOT NULL,
-            uname TEXT NOT NULL DEFAULT '',
-            num INTEGER NOT NULL DEFAULT 0,
-            dlong INTEGER NOT NULL DEFAULT 0,
-            downlen INTEGER NOT NULL DEFAULT 0,
-            upby TEXT NOT NULL DEFAULT '',
-            cmdtextmd5 TEXT NOT NULL DEFAULT '',
-            uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
-            remark TEXT NOT NULL DEFAULT '',
-            remark2 TEXT NOT NULL DEFAULT '',
-            remark3 TEXT NOT NULL DEFAULT '',
-            remark4 TEXT NOT NULL DEFAULT '',
-            remark5 TEXT NOT NULL DEFAULT '',
-            remark6 TEXT NOT NULL DEFAULT '',
-            UNIQUE(apiv, apisys, apiobj, cmdtext)
-        )`;
+//         const cmdtext2 = `CREATE TABLE IF NOT EXISTS sys_sql (
+//             cid TEXT NOT NULL DEFAULT '',
+//             apiv TEXT NOT NULL DEFAULT '',
+//             apisys TEXT NOT NULL DEFAULT '',
+//             apiobj TEXT NOT NULL DEFAULT '',
+//             cmdtext TEXT NOT NULL,
+//             uname TEXT NOT NULL DEFAULT '',
+//             num INTEGER NOT NULL DEFAULT 0,
+//             dlong INTEGER NOT NULL DEFAULT 0,
+//             downlen INTEGER NOT NULL DEFAULT 0,
+//             upby TEXT NOT NULL DEFAULT '',
+//             cmdtextmd5 TEXT NOT NULL DEFAULT '',
+//             uptime DATETIME NOT NULL,
+//             idpk INTEGER PRIMARY KEY AUTOINCREMENT,
+//             id TEXT NOT NULL,
+//             remark TEXT NOT NULL DEFAULT '',
+//             remark2 TEXT NOT NULL DEFAULT '',
+//             remark3 TEXT NOT NULL DEFAULT '',
+//             remark4 TEXT NOT NULL DEFAULT '',
+//             remark5 TEXT NOT NULL DEFAULT '',
+//             remark6 TEXT NOT NULL DEFAULT '',
+//             UNIQUE(apiv, apisys, apiobj, cmdtext)
+//         )`;
 
-        try {
-            await this._db.run(cmdtext1);
-            await this._db.run(cmdtext2);
-            return 'ok';
-        } catch (err) {
-            this.log.error(err as Error);
-            return 'error';
-        }
-    }
+//         try {
+//             await this._db.run(cmdtext1);
+//             await this._db.run(cmdtext2);
+//             return 'ok';
+//         } catch (err) {
+//             this.log.error(err as Error);
+//             return 'error';
+//         }
+//     }
 
-    /**
-     * SQL查询方法
-     * @param cmdtext SQL语句
-     * @param values 参数值
-     * @param up 用户信息
-     */
-    async doGet(cmdtext: string, values: any[], up: UpInfo): Promise<any[]> {
-        if (!this._db) {
-            return [];
-        }
+//     /**
+//      * SQL查询方法
+//      * @param cmdtext SQL语句
+//      * @param values 参数值
+//      * @param up 用户信息
+//      */
+//     async doGet(cmdtext: string, values: any[], up: UpInfo): Promise<any[]> {
+//         if (!this._db) {
+//             return [];
+//         }
 
-        const debug = up.debug ?? false;
-        const dstart = new Date();
+//         const debug = up.debug ?? false;
+//         const dstart = new Date();
 
-        try {
-            // SQLite的占位符是?，不需要转换
-            const stmt = await this._db.prepare(cmdtext);
-            const rows = await stmt.all(values);
-            await stmt.finalize();
+//         try {
+//             // SQLite的占位符是?，不需要转换
+//             const stmt = await this._db.prepare(cmdtext);
+//             const rows = await stmt.all(values);
+//             await stmt.finalize();
 
-            if (debug) {
-                this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
+//             if (debug) {
+//                 this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+//             }
 
-            const lendown = JSON.stringify(rows).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
+//             const lendown = JSON.stringify(rows).length;
+//             this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            return rows;
-        } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doGet');
-            throw err;
-        }
-    }
+//             return rows;
+//         } catch (err) {
+//             this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
+//             this.log.error(err as Error, 'sqlite_doGet');
+//             throw err;
+//         }
+//     }
 
-    /**
-     * 执行事务
-     * @param cmds SQL语句数组
-     * @param values 参数值二维数组
-     * @param errtexts 错误文本数组
-     * @param logtext 日志文本
-     * @param logvalue 日志参数
-     * @param up 用户信息
-     */
-    async doT(cmds: string[], values: string[][], errtexts: string[], logtext: string, logvalue: string[], up: UpInfo): Promise<any> {
-        if (!this._db) {
-            return 'database not initialized';
-        }
+//     /**
+//      * 执行事务
+//      * @param cmds SQL语句数组
+//      * @param values 参数值二维数组
+//      * @param errtexts 错误文本数组
+//      * @param logtext 日志文本
+//      * @param logvalue 日志参数
+//      * @param up 用户信息
+//      */
+//     async doT(cmds: string[], values: string[][], errtexts: string[], logtext: string, logvalue: string[], up: UpInfo): Promise<any> {
+//         if (!this._db) {
+//             return 'database not initialized';
+//         }
 
-        const debug = up.debug ?? false;
-        const dstart = new Date();
+//         const debug = up.debug ?? false;
+//         const dstart = new Date();
 
-        try {
-            // 开始事务
-            await this._db.run('BEGIN TRANSACTION');
+//         try {
+//             // 开始事务
+//             await this._db.run('BEGIN TRANSACTION');
 
-            const results: any[] = [];
-            for (let i = 0; i < cmds.length; i++) {
-                const stmt = await this._db.prepare(cmds[i]);
-                const result = await stmt.run(values[i]);
-                await stmt.finalize();
-                results.push(result);
-            }
+//             const results: any[] = [];
+//             for (let i = 0; i < cmds.length; i++) {
+//                 const stmt = await this._db.prepare(cmds[i]);
+//                 const result = await stmt.run(values[i]);
+//                 await stmt.finalize();
+//                 results.push(result);
+//             }
 
-            let errmsg = "err!";
-            let haveAff0 = false;
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].changes === 0) {
-                    errmsg += errtexts[i];
-                    haveAff0 = true;
-                    break;
-                }
-            }
+//             let errmsg = "err!";
+//             let haveAff0 = false;
+//             for (let i = 0; i < results.length; i++) {
+//                 if (results[i].changes === 0) {
+//                     errmsg += errtexts[i];
+//                     haveAff0 = true;
+//                     break;
+//                 }
+//             }
 
-            if (haveAff0 || results.length < cmds.length) {
-                await this._db.run('ROLLBACK');
-                return errmsg;
-            }
+//             if (haveAff0 || results.length < cmds.length) {
+//                 await this._db.run('ROLLBACK');
+//                 return errmsg;
+//             }
 
-            await this._db.run('COMMIT');
+//             await this._db.run('COMMIT');
 
-            this._saveLog(logtext, logvalue, new Date().getTime() - dstart.getTime(), 1, up);
-            return "ok";
-        } catch (err) {
-            try {
-                await this._db.run('ROLLBACK');
-            } catch (rollbackErr) {
-                this.log.error(rollbackErr as Error, 'sqlite_doT_rollback');
-            }
-            this.log.error(err as Error, 'sqlite_doT');
-            return 'error';
-        }
-    }
+//             this._saveLog(logtext, logvalue, new Date().getTime() - dstart.getTime(), 1, up);
+//             return "ok";
+//         } catch (err) {
+//             try {
+//                 await this._db.run('ROLLBACK');
+//             } catch (rollbackErr) {
+//                 this.log.error(rollbackErr as Error, 'sqlite_doT_rollback');
+//             }
+//             this.log.error(err as Error, 'sqlite_doT');
+//             return 'error';
+//         }
+//     }
 
-    /**
-     * SQL更新方法，返回受影响的行数
-     * @param cmdtext SQL语句
-     * @param values 参数值
-     * @param up 用户信息
-     */
-    async doM(cmdtext: string, values: any[], up: UpInfo): Promise<number> {
-        if (!this._db) {
-            return 0;
-        }
+//     /**
+//      * SQL更新方法，返回受影响的行数
+//      * @param cmdtext SQL语句
+//      * @param values 参数值
+//      * @param up 用户信息
+//      */
+//     async doM(cmdtext: string, values: any[], up: UpInfo): Promise<number> {
+//         if (!this._db) {
+//             return 0;
+//         }
 
-        const debug = up.debug ?? false;
-        const dstart = new Date();
+//         const debug = up.debug ?? false;
+//         const dstart = new Date();
 
-        try {
-            const stmt = await this._db.prepare(cmdtext);
-            const result = await stmt.run(values);
-            await stmt.finalize();
+//         try {
+//             const stmt = await this._db.prepare(cmdtext);
+//             const result = await stmt.run(values);
+//             await stmt.finalize();
 
-            if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
+//             if (debug) {
+//                 this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+//             }
 
-            const lendown = JSON.stringify(result).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
+//             const lendown = JSON.stringify(result).length;
+//             this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            return result.changes!;
-        } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doM');
-            return -1;
-        }
-    }
+//             return result.changes!;
+//         } catch (err) {
+//             this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+//             this.log.error(err as Error, 'sqlite_doM');
+//             return -1;
+//         }
+//     }
 
-    /**
-     * 插入数据，返回插入的行ID
-     * @param cmdtext SQL语句
-     * @param values 参数值
-     * @param up 用户信息
-     */
-    async doMAdd(cmdtext: string, values: any[], up: UpInfo): Promise<number> {
-        if (!this._db) {
-            return 0;
-        }
+//     /**
+//      * 插入数据，返回插入的行ID
+//      * @param cmdtext SQL语句
+//      * @param values 参数值
+//      * @param up 用户信息
+//      */
+//     async doMAdd(cmdtext: string, values: any[], up: UpInfo): Promise<number> {
+//         if (!this._db) {
+//             return 0;
+//         }
 
-        const debug = up.debug ?? false;
-        const dstart = new Date();
+//         const debug = up.debug ?? false;
+//         const dstart = new Date();
 
-        try {
-            const stmt = await this._db.prepare(cmdtext);
-            const result = await stmt.run(values);
-            await stmt.finalize();
+//         try {
+//             const stmt = await this._db.prepare(cmdtext);
+//             const result = await stmt.run(values);
+//             await stmt.finalize();
 
-            if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
+//             if (debug) {
+//                 this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+//             }
 
-            const lendown = JSON.stringify(result).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
+//             const lendown = JSON.stringify(result).length;
+//             this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            return result.lastID!;
-        } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doMAdd');
-            return 0;
-        }
-    }
+//             return result.lastID!;
+//         } catch (err) {
+//             this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+//             this.log.error(err as Error, 'sqlite_doMAdd');
+//             return 0;
+//         }
+//     }
 
-    /**
-     * 设置警告处理器
-     * @param handler 处理警告的函数
-     */
-    setWarnHandler(handler: (info: string, kind: string, up: UpInfo) => Promise<any>): void {
-        this.warnHandler = handler;
-    }
+//     /**
+//      * 设置警告处理器
+//      * @param handler 处理警告的函数
+//      */
+//     setWarnHandler(handler: (info: string, kind: string, up: UpInfo) => Promise<any>): void {
+//         this.warnHandler = handler;
+//     }
 
-    /**
-     * 调试函数，用于跟踪SQL调用的在线调试问题
-     * 可以设置跟踪用户、表、目录或函数等
-     * 开启会影响性能，建议主要用于跟踪开发者和正在开发的目录
-     * 如果设置了自定义的warnHandler，将优先使用它处理警告
-     * 否则，将警告信息插入sys_warn表
-     * @param info 日志信息
-     * @param kind 日志类型
-     * @param up 用户上传信息
-     */
-    private async _addWarn(info: string, kind: string, up: UpInfo): Promise<string | number> {
-        if (this.warnHandler) {
-            try {
-                return await this.warnHandler(info, kind, up);
-            } catch (err) {
-                this.log.error(err as Error, 'sqlite__addWarn_handler');
-            }
-        }
+//     /**
+//      * 调试函数，用于跟踪SQL调用的在线调试问题
+//      * 可以设置跟踪用户、表、目录或函数等
+//      * 开启会影响性能，建议主要用于跟踪开发者和正在开发的目录
+//      * 如果设置了自定义的warnHandler，将优先使用它处理警告
+//      * 否则，将警告信息插入sys_warn表
+//      * @param info 日志信息
+//      * @param kind 日志类型
+//      * @param up 用户上传信息
+//      */
+//     private async _addWarn(info: string, kind: string, up: UpInfo): Promise<string | number> {
+//         if (this.warnHandler) {
+//             try {
+//                 return await this.warnHandler(info, kind, up);
+//             } catch (err) {
+//                 this.log.error(err as Error, 'sqlite__addWarn_handler');
+//             }
+//         }
 
-        if (!this._db || !this.isLog) {
-            return this.isLog ? 'database not initialized' : 'isLog is false';
-        }
+//         if (!this._db || !this.isLog) {
+//             return this.isLog ? 'database not initialized' : 'isLog is false';
+//         }
 
-        const cmdtext = 'INSERT INTO sys_warn (kind,apisys,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+//         const cmdtext = 'INSERT INTO sys_warn (kind,apisys,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
+//         const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
 
-        try {
-            const stmt = await this._db.prepare(cmdtext);
-            const result = await stmt.run(values);
-            await stmt.finalize();
-            return result.changes!;
-        } catch (err) {
-            this.log.error(err as Error, 'sqlite__addWarn');
-            return 0;
-        }
-    }
+//         try {
+//             const stmt = await this._db.prepare(cmdtext);
+//             const result = await stmt.run(values);
+//             await stmt.finalize();
+//             return result.changes!;
+//         } catch (err) {
+//             this.log.error(err as Error, 'sqlite__addWarn');
+//             return 0;
+//         }
+//     }
 
-    /**
-     * 如果开启了SYS_SQL表功能，会影响性能
-     * @param cmdtext SQL语句
-     * @param values 参数值
-     * @param dlong 执行时间
-     * @param lendown 下载字节数
-     * @param up 用户信息
-     */
-    private async _saveLog(cmdtext: string, values: any[], dlong: number, lendown: number, up: UpInfo): Promise<string> {
-        if (!this.isCount || !this._db) {
-            return this.isCount ? 'database not initialized' : 'isCount is false';
-        }
+//     /**
+//      * 如果开启了SYS_SQL表功能，会影响性能
+//      * @param cmdtext SQL语句
+//      * @param values 参数值
+//      * @param dlong 执行时间
+//      * @param lendown 下载字节数
+//      * @param up 用户信息
+//      */
+//     private async _saveLog(cmdtext: string, values: any[], dlong: number, lendown: number, up: UpInfo): Promise<string> {
+//         if (!this.isCount || !this._db) {
+//             return this.isCount ? 'database not initialized' : 'isCount is false';
+//         }
 
-        const cmdtextmd5 = md5(cmdtext);
-        const sb = `INSERT OR IGNORE INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
+//         const cmdtextmd5 = md5(cmdtext);
+//         const sb = `INSERT OR IGNORE INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
-        try {
-            const stmt = await this._db.prepare(sb);
-            await stmt.run([
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5
-            ]);
-            await stmt.finalize();
+//         try {
+//             const stmt = await this._db.prepare(sb);
+//             await stmt.run([
+//                 up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5
+//             ]);
+//             await stmt.finalize();
 
-            // 更新计数器
-            const updateStmt = await this._db.prepare(
-                'UPDATE sys_sql SET num=num+1,dlong=dlong+?,downlen=downlen+? WHERE cmdtextmd5=?'
-            );
-            await updateStmt.run([dlong, lendown, cmdtextmd5]);
-            await updateStmt.finalize();
+//             // 更新计数器
+//             const updateStmt = await this._db.prepare(
+//                 'UPDATE sys_sql SET num=num+1,dlong=dlong+?,downlen=downlen+? WHERE cmdtextmd5=?'
+//             );
+//             await updateStmt.run([dlong, lendown, cmdtextmd5]);
+//             await updateStmt.finalize();
 
-            return 'ok';
-        } catch (err) {
-            this.log.error(err as Error);
-            return 'error';
-        }
-    }
+//             return 'ok';
+//         } catch (err) {
+//             this.log.error(err as Error);
+//             return 'error';
+//         }
+//     }
 
-    /**
-     * 关闭数据库连接
-     */
-    async close() {
-        if (this._db) {
-            await this._db.close();
-        }
-    }
-}
+//     /**
+//      * 关闭数据库连接
+//      */
+//     async close() {
+//         if (this._db) {
+//             await this._db.close();
+//         }
+//     }
+// }

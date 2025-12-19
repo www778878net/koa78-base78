@@ -21,7 +21,12 @@ class DatabaseConnections {
             const sqliteEntries = Object.entries(sqlites);
             for (const [name, sqliteConfig] of sqliteEntries) {
                 console.warn(`SQLite ${name} ${sqliteConfig.filename}`);
-                this.sqliteConnections.set(name, new Sqlite78_1.default(sqliteConfig));
+                const sqliteInstance = new Sqlite78_1.default(sqliteConfig);
+                // 初始化连接
+                sqliteInstance.initialize().catch(err => {
+                    console.error(`Failed to initialize SQLite connection ${name}:`, err);
+                });
+                this.sqliteConnections.set(name, sqliteInstance);
             }
         }
         // 只有当配置存在且为对象时才创建memcache和redis实例

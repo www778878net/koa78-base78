@@ -47,8 +47,9 @@ class ContainerManager {
             this.configPath = configPath || this.getConfigPathFromArgs();
         }
         // 如果提供了配置文件路径，设置环境变量
+        // 这样做是为了让 Config 类能够读取到配置文件路径
         if (this.configPath) {
-            process.env.TABLE_CONFIG_FILE = this.configPath;
+            process.env.CONFIG_FILE = this.configPath;
         }
     }
     /**
@@ -92,7 +93,7 @@ class ContainerManager {
             loggerInstance.setup(serverLogger, new tslog78_1.FileLog78(), new tslog78_1.ConsoleLog78());
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(0, 0, 50);
+                loggerInstance.setupLevel(20, 20, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }

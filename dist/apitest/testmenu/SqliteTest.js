@@ -2,8 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const Base78_1 = require("../../controllers/Base78");
-const decorators_1 = require("../../interfaces/decorators");
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 class sqlitetest extends Base78_1.CidBase78 {
     /**
      * 初始化数据库连接
@@ -12,8 +10,8 @@ class sqlitetest extends Base78_1.CidBase78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 // 使用DatabaseService中的方法测试SQLite连接
-                const up = new koa78_upinfo_1.default({});
-                yield this.dbService.sqliteGet("SELECT 1", [], up);
+                // 使用当前请求的up对象而不是创建一个新的空对象
+                yield this.dbService.sqliteGet("SELECT 1", [], this.up);
                 return "数据库连接测试成功";
             }
             catch (error) {
@@ -25,9 +23,24 @@ class sqlitetest extends Base78_1.CidBase78 {
      * 创建系统表（包括sys_log表）
      */
     createTables() {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                // 创建sys_log表
+                // 先确保连接正常
+                yield this.dbService.sqliteGet("SELECT 1", [], this.up);
+                // 获取SQLite连接实例
+                const sqlite = (_a = this.dbService.dbConnections) === null || _a === void 0 ? void 0 : _a.getSQLiteConnection();
+                if (sqlite) {
+                    // 使用Sqlite78内置的creatTb方法创建系统表
+                    const createResult = yield sqlite.creatTb(this.up);
+                    if (createResult !== 'ok') {
+                        throw new Error(`创建表失败: ${createResult}`);
+                    }
+                }
+                else {
+                    throw new Error('无法获取SQLite连接');
+                }
+                // 创建sys_log表（这个表不在creatTb方法中）
                 const createSysLogTable = `
                 CREATE TABLE IF NOT EXISTS sys_log (
                     uid TEXT NOT NULL DEFAULT '',
@@ -58,19 +71,16 @@ class sqlitetest extends Base78_1.CidBase78 {
                     'CREATE INDEX IF NOT EXISTS i_key3 ON sys_log (key3)',
                     'CREATE INDEX IF NOT EXISTS i_uptime ON sys_log (uptime)'
                 ];
-                const up = new koa78_upinfo_1.default({});
                 // 执行创建表语句
-                yield this.dbService.sqliteM(createSysLogTable, [], up);
+                yield this.dbService.sqliteM(createSysLogTable, [], this.up);
                 // 创建索引
                 for (const indexSql of createIndexes) {
-                    yield this.dbService.sqliteM(indexSql, [], up);
+                    yield this.dbService.sqliteM(indexSql, [], this.up);
                 }
-                // 创建其他系统表（调用已有的方法）
-                yield this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_warn (uid TEXT NOT NULL DEFAULT '')", [], up);
-                yield this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_sql (cid TEXT NOT NULL DEFAULT '')", [], up);
                 return "所有表创建成功";
             }
             catch (error) {
+                this.logger.error("创建表失败:", error);
                 return `创建表失败: ${error}`;
             }
         });
@@ -106,11 +116,12 @@ class sqlitetest extends Base78_1.CidBase78 {
                     '备注5',
                     '备注6'
                 ];
-                const up = new koa78_upinfo_1.default({});
-                yield this.dbService.sqliteM(insertSql, values, up);
+                // 使用当前请求的up对象而不是创建一个新的空对象
+                yield this.dbService.sqliteM(insertSql, values, this.up);
                 return "日志插入成功";
             }
             catch (error) {
+                this.logger.error("插入日志失败:", error);
                 return `插入日志失败: ${error}`;
             }
         });
@@ -122,8 +133,10 @@ class sqlitetest extends Base78_1.CidBase78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const querySql = "SELECT * FROM sys_log ORDER BY uptime DESC LIMIT 10";
-                const up = new koa78_upinfo_1.default({});
-                const rows = yield this.dbService.sqliteGet(querySql, [], up);
+                // 使用当前请求的up对象而不是创建一个新的空对象
+                const rows = yield this.dbService.sqliteGet(querySql, [], this.up);
+                this.logger.debug(`查询到 ${rows.length} 条日志记录`);
+                this.logger.debug("日志记录内容:", JSON.stringify(rows, null, 2));
                 return {
                     message: "查询成功",
                     count: rows.length,
@@ -131,6 +144,7 @@ class sqlitetest extends Base78_1.CidBase78 {
                 };
             }
             catch (error) {
+                this.logger.error("查询日志失败:", error);
                 return { error: `查询日志失败: ${error}` };
             }
         });
@@ -141,8 +155,10 @@ class sqlitetest extends Base78_1.CidBase78 {
     queryWarnings() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const up = new koa78_upinfo_1.default({});
-                const result = yield this.dbService.sqliteGet("SELECT * FROM sys_warn LIMIT 5", [], up);
+                // 使用当前请求的up对象而不是创建一个新的空对象
+                const result = yield this.dbService.sqliteGet("SELECT * FROM sys_warn LIMIT 5", [], this.up);
+                this.logger.debug(`查询到 ${result.length} 条警告记录`);
+                this.logger.debug("警告记录内容:", JSON.stringify(result, null, 2));
                 return {
                     message: "警告信息查询成功",
                     count: result.length,
@@ -150,6 +166,7 @@ class sqlitetest extends Base78_1.CidBase78 {
                 };
             }
             catch (error) {
+                this.logger.error("查询警告信息失败:", error);
                 return { error: `查询警告信息失败: ${error}` };
             }
         });
@@ -160,8 +177,10 @@ class sqlitetest extends Base78_1.CidBase78 {
     querySqlRecords() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const up = new koa78_upinfo_1.default({});
-                const result = yield this.dbService.sqliteGet("SELECT * FROM sys_sql LIMIT 5", [], up);
+                // 使用当前请求的up对象而不是创建一个新的空对象
+                const result = yield this.dbService.sqliteGet("SELECT * FROM sys_sql LIMIT 5", [], this.up);
+                this.logger.debug(`查询到 ${result.length} 条SQL记录`);
+                this.logger.debug("SQL记录内容:", JSON.stringify(result, null, 2));
                 return {
                     message: "SQL记录查询成功",
                     count: result.length,
@@ -169,40 +188,11 @@ class sqlitetest extends Base78_1.CidBase78 {
                 };
             }
             catch (error) {
+                this.logger.error("查询SQL记录失败:", error);
                 return { error: `查询SQL记录失败: ${error}` };
             }
         });
     }
 }
-tslib_1.__decorate([
-    (0, decorators_1.ApiMethod)(),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", Promise)
-], sqlitetest.prototype, "createTables", null);
-tslib_1.__decorate([
-    (0, decorators_1.ApiMethod)(),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", Promise)
-], sqlitetest.prototype, "insertLog", null);
-tslib_1.__decorate([
-    (0, decorators_1.ApiMethod)(),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", Promise)
-], sqlitetest.prototype, "queryLogs", null);
-tslib_1.__decorate([
-    (0, decorators_1.ApiMethod)(),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", Promise)
-], sqlitetest.prototype, "queryWarnings", null);
-tslib_1.__decorate([
-    (0, decorators_1.ApiMethod)(),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", Promise)
-], sqlitetest.prototype, "querySqlRecords", null);
 exports.default = sqlitetest;
-//# sourceMappingURL=sqlitetest.js.map
+//# sourceMappingURL=SqliteTest.js.map
