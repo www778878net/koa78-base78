@@ -33,7 +33,7 @@ class Test78 extends Base78_1.CidBase78 {
     test2() {
         const self = this;
         const up = self.up;
-        console.log("test in test" + up.uname);
+        console.log("test   in3 test2" + up.uname);
         return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             resolve("有权限调用OK" + up.parsn);
             return;
@@ -42,7 +42,7 @@ class Test78 extends Base78_1.CidBase78 {
     test() {
         const self = this;
         const up = self.up;
-        console.log("test in test" + up.uname);
+        console.log("testtb in test" + up.uname);
         return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
             return;

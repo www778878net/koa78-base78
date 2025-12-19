@@ -41,7 +41,7 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
     test2(): Promise<string> {
         const self = this;
         const up = self.up;
-        console.log("test in test" + up.uname);
+        console.log("test   in3 test2" + up.uname);
         return new Promise(async (resolve, reject) => {
             resolve("有权限调用OK" + up.parsn);
             return;
@@ -51,7 +51,7 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
     test(): Promise<string> {
         const self = this;
         const up = self.up;
-        console.log("test in test" + up.uname);
+        console.log("testtb in test" + up.uname);
         return new Promise(async (resolve, reject) => {
             resolve("看到我说明路由ok,中文ok,无权限调用OK" + up.parsn);
             return;
