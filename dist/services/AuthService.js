@@ -1,5 +1,4 @@
 "use strict";
-var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const tslib_1 = require("tslib");
@@ -20,10 +19,10 @@ class AuthService {
         this.cacheService = cacheService;
     }
     static get CID_MY() {
-        if (AuthService_1._CID_MY === null) {
-            AuthService_1._CID_MY = AuthService_1.getCidMyFromConfig();
+        if (AuthService._CID_MY === null) {
+            AuthService._CID_MY = AuthService.getCidMyFromConfig();
         }
-        return AuthService_1._CID_MY;
+        return AuthService._CID_MY;
     }
     static getCidMyFromConfig() {
         try {
@@ -47,16 +46,10 @@ class AuthService {
         return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
     }
     static getInstance() {
-        if (!AuthService_1.instance) {
-            const globalAny = global;
-            if (globalAny.appContainer) {
-                AuthService_1.instance = globalAny.appContainer.get(AuthService_1);
-            }
-            else {
-                throw new Error('App container not found');
-            }
+        if (!AuthService.instance) {
+            AuthService.instance = global.appContainer.get(AuthService);
         }
-        return AuthService_1.instance;
+        return AuthService.instance;
     }
     upcheck(up, cols, dbname) {
         var _a, _b, _c, _d;
