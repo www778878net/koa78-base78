@@ -35,13 +35,14 @@ export class Config {
                 if (!path.isAbsolute(tableConfigFilePath)) {
                     tableConfigFilePath = path.resolve(process.cwd(), tableConfigFilePath);
                 }
-                
+
                 // 如果文件存在，则使用外部配置
                 if (fs.existsSync(tableConfigFilePath)) {
                     try {
                         delete require.cache[require.resolve(tableConfigFilePath)];
                         const customConfigs = require(tableConfigFilePath);
-                        this.configObject.tables = customConfigs;
+                        // 处理多一层结构的问题
+                        this.configObject.tables = customConfigs.tableConfigs || customConfigs;
                         console.log(`成功加载外部表配置: ${tableConfigFilePath}`);
                     } catch (error) {
                         console.error(`加载外部表配置失败: ${tableConfigFilePath}`, error);
@@ -100,6 +101,7 @@ export class Config {
         const tableConfig = this.configObject.tables[tableName];
         //console.log(`Raw table config for ${tableName}:`, tableConfig);
         if (!tableConfig) {
+            //console.log('完整配置:', JSON.stringify(this.configObject, null, 2));
             //console.log(`Table config for ${tableName} not found`);
             return undefined;
         }
