@@ -10,8 +10,4 @@ export declare class DatabaseService {
     m(sql: string, values: any[], up: UpInfo, dbName?: string): Promise<any>;
     doT(cmds: string[], values: string[][], errtexts: string[], logtext: string, logvalue: string[], up: UpInfo, dbName?: string): Promise<string>;
     mAdd(sql: string, values: any[], up: UpInfo, dbName?: string): Promise<number>;
-    sqliteGet(sql: string, values: any[], up: UpInfo, dbName?: string): Promise<any>;
-    sqliteM(sql: string, values: any[], up: UpInfo, dbName?: string): Promise<any>;
-    sqliteDoT(cmds: string[], values: string[][], errtexts: string[], logtext: string, logvalue: string[], up: UpInfo, dbName?: string): Promise<string>;
-    sqliteMAdd(sql: string, values: any[], up: UpInfo, dbName?: string): Promise<number>;
 }
