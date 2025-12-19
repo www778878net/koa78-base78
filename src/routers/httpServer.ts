@@ -22,10 +22,10 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     }
     // 确保参数存在后再解构
     const { apiver, apisys, apiobj, apifun } = ctx.params;
-    
+
     // 如果是测试接口，直接返回
     if (apiobj == "testtb") return;
-    
+
     const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
     //const uploadSize = ctx.request.headers['content-length'];  // Request body size (in characters)
     const downloadSize = back.length;  // Response body size
@@ -98,13 +98,7 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
 
     const app = new Koa();
 
-    log.info("正在设置路由...");
-    await setupRoutes(app);
-    log.info("路由设置成功");
 
-    // 路由
-    app.use(router.routes());
-    app.use(router.allowedMethods());
 
     // 使用统计中间件（放在路由之后，避免影响路由匹配）
     app.use(statsMiddleware);
@@ -122,6 +116,14 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
             ctx.throw('body parse error', 422);
         }
     }));
+
+    log.info("正在设置路由...");
+    await setupRoutes(app);
+    log.info("路由设置成功");
+
+    // 路由
+    app.use(router.routes());
+    app.use(router.allowedMethods());
 
     return new Promise((resolve, reject) => {
         const httpServer = app.listen(httpPort, () => {
