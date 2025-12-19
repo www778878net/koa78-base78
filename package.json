@@ -27,6 +27,7 @@
     "scripts": {
         "start": "cross-env NODE_ENV=development ts-node src/startserver.ts",
         "build": "tsc",
+        "start:svc": "cross-env NODE_ENV=development node ./dist/startserver.js",
         "startback": "npm run build && cross-env NODE_ENV=production node ./dist/index.js",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
         "postversion": "git push --follow-tags  && git checkout develop && git merge main && git push origin develop",
@@ -71,6 +72,7 @@
         "koa": "^3.1.1",
         "koa-convert": "^2.0.0",
         "koa78-upinfo": "^4.1.1",
+        "md5": "^2.3.0",
         "memcache78": "^2.1.6",
         "mysql78": "^2.5.1",
         "redis78": "^0.1.3",

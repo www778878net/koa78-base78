@@ -1,4 +1,5 @@
 export declare class Server {
+    private httpServer;
     /**
      * 启动服务器
      * 一键初始化所有服务并启动HTTP服务器
@@ -17,6 +18,10 @@ export declare class Server {
      *
      * @param configPath 配置文件路径（可选）
      */
-    start(configPath?: string): Promise<void>;
+    start(configPath?: string): Promise<any>;
+    /**
+     * 关闭服务器
+     */
+    close(): Promise<void>;
 }
 export default Server;
