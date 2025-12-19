@@ -2,7 +2,7 @@ import UpInfo from 'koa78-upinfo';
 import { DatabaseConnections } from '../static/DatabaseConnections';
 export declare class DatabaseService {
     static instance: DatabaseService;
-    private dbConnections?;
+    dbConnections?: DatabaseConnections;
     private log;
     constructor();
     setDatabaseConnections(dbConnections: DatabaseConnections): void;

@@ -37,6 +37,18 @@ class Sqlite78 {
     initialize() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
+                this.log.debug(`正在初始化SQLite数据库连接: ${this._filename}`);
+                // 确保目录存在
+                const path = yield Promise.resolve().then(() => tslib_1.__importStar(require('path')));
+                const fs = yield Promise.resolve().then(() => tslib_1.__importStar(require('fs')));
+                const dir = path.dirname(this._filename);
+                try {
+                    yield fs.promises.access(dir);
+                }
+                catch (err) {
+                    this.log.debug(`创建目录: ${dir}`);
+                    yield fs.promises.mkdir(dir, { recursive: true });
+                }
                 this._db = yield (0, sqlite_1.open)({
                     filename: this._filename,
                     driver: sqlite3_1.default.Database
@@ -45,9 +57,10 @@ class Sqlite78 {
                 yield this._db.run('PRAGMA foreign_keys = ON');
                 // 设置WAL模式以提高并发性能
                 yield this._db.run('PRAGMA journal_mode = WAL');
+                this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
             }
             catch (err) {
-                this.log.error(err, 'sqlite_initialize');
+                this.log.error(err, `SQLite数据库连接初始化失败: ${this._filename}`);
                 throw err;
             }
         });
