@@ -39,7 +39,13 @@ let loggerInstance = null;
 class ContainerManager {
     constructor(configPath) {
         this.container = null;
-        this.configPath = configPath || this.getConfigPathFromArgs();
+        // 检查是否有环境变量 CONFIG_FILE
+        if (process.env.CONFIG_FILE) {
+            this.configPath = process.env.CONFIG_FILE;
+        }
+        else {
+            this.configPath = configPath || this.getConfigPathFromArgs();
+        }
         // 如果提供了配置文件路径，设置环境变量
         if (this.configPath) {
             process.env.TABLE_CONFIG_FILE = this.configPath;
@@ -128,8 +134,9 @@ class ContainerManager {
                 const mysqlConfig = config.get('mysql');
                 const memcachedConfig = config.get('memcached');
                 const redisConfig = config.get('redis');
+                const sqliteConfig = config.get('sqlites');
                 // 初始化数据库连接
-                const dbConnections = DatabaseConnections_1.DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig);
+                const dbConnections = DatabaseConnections_1.DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);
                 // 使用 toConstantValue 绑定已存在的实例
                 // 这种方式适用于:
                 // 1. 已经创建好的实例（如通过 getInstance 获取的单例）
@@ -152,6 +159,9 @@ class ContainerManager {
                 databaseService.setDatabaseConnections(dbConnections);
                 const cacheService = this.container.get(CacheService_1.CacheService);
                 cacheService.setMemcache(dbConnections);
+                // 预加载控制器，避免第一次请求时出现控制器找不到的问题
+                const controllerLoader = this.container.get(ControllerLoader_1.ControllerLoader);
+                controllerLoader.loadControllers();
                 // 将容器挂载到 global 对象，方便在应用程序的其他部分访问
                 global.appContainer = this.container;
                 console.log('所有服务初始化完成');

@@ -133,7 +133,7 @@ let AuthService = AuthService_1 = class AuthService {
         });
     }
 };
-AuthService.CID_VPS = "28401227-bd00-a20f-c561-ddf0def881d9";
+
 AuthService.CID_MY = "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
 AuthService.CID_GUEST = "GUEST000-8888-8888-8888-GUEST00GUEST";
 AuthService.instance = null;

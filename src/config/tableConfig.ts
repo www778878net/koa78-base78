@@ -21,6 +21,12 @@ export const tableConfigs = {
         apiver: 'apitest',
         apisys: 'testmenu'
     },
+    sqlitetest: {
+        colsImp: ['field1', 'field2'] as const,
+        uidcid: 'cid' as const,
+        apiver: 'apitest',
+        apisys: 'testmenu'
+    },
     Test78: {
         colsImp: ['field1', 'field2'] as const,
         uidcid: 'cid' as const,

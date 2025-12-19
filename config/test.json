@@ -1,52 +1,63 @@
 {
-  "location": "test",
-  "host": "localhost",
-  "nodejslog": {
-    "issave": false,
-    "redis": false
-  },
-  "iplog": false,
-  "mysql2": {
+    "location": "test",
     "host": "localhost",
-    "port": "3306",
-    "password": "testpass",
-    "database": "testdb",
-    "user": "testuser",
-    "isLog": false,
-    "isCount": false
-  },
-  "mysql": {
-    "host": "localhost",
-    "port": "3306",
-    "password": "testpass",
-    "database": "testdb",
-    "user": "testuser",
-    "isLog": false,
-    "isCount": false
-  },
-  "apiqq": {
-    "appid": "test_appid",
-    "secret": "test_secret",
-    "encodingAESKey": "test_encodingAESKey",
-    "token": "test_token",
-    "myuserid": "test_myuserid",
-    "mch_id": "test_mch_id",
-    "mch_key": "test_mch_key",
-    "apppayid": "test_apppayid",
-    "apppaySecrect": "test_apppaySecrect",
-    "host": ""
-  },
-  "memcached": {
-    "host": "localhost",
-    "port": 11211,
-    "max": 10,
-    "local": "test"
-  },
-  "redis": {
-    "host": "localhost",
-    "port": 6379,
-    "pwd": "testpass",
-    "max": 10,
-    "local": "test"
-  }
+    "cidvps": "28401227-bd00-a20f-c561-ddf0def881d9",
+    "cidmy": "d4856531-e9d3-20f3-4c22-fe3c65fb009c",
+    "nodejslog": {
+        "issave": false,
+        "redis": false
+    },
+    "iplog": false,
+    "mysqls": {
+        "mysql2": {
+            "host": "localhost",
+            "port": "3306",
+            "password": "testpass",
+            "database": "testdb",
+            "user": "testuser",
+            "isLog": false,
+            "isCount": false
+        },
+        "default": {
+            "host": "localhost",
+            "port": "3306",
+            "password": "testpass",
+            "database": "testdb",
+            "user": "testuser",
+            "isLog": false,
+            "isCount": false
+        }
+    },
+    "sqlites": {
+        "default": {
+            "filename": "./default.db",
+            "isLog": true,
+            "isCount": true
+        }
+    },
+    "apiqq": {
+        "appid": "test_appid",
+        "secret": "test_secret",
+        "encodingAESKey": "test_encodingAESKey",
+        "token": "test_token",
+        "myuserid": "test_myuserid",
+        "mch_id": "test_mch_id",
+        "mch_key": "test_mch_key",
+        "apppayid": "test_apppayid",
+        "apppaySecrect": "test_apppaySecrect",
+        "host": ""
+    },
+    "memcached": {
+        "host": "localhost",
+        "port": 11211,
+        "max": 10,
+        "local": "test"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "pwd": "testpass",
+        "max": 10,
+        "local": "test"
+    }
 }

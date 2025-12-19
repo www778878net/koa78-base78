@@ -3,7 +3,6 @@
     "isdebug": true,
     "tableconfigfile": "",
     "host": "oa.778878.net",
-    "cidmy": "d4856531-e9d3-20f3-4c22-fe3c65fb009c",
     "nodejslog": {
         "issave": true,
         "redis": true
@@ -12,7 +11,7 @@
     "mysql2": {
         "host": "192.168.31.101",
         "port": "3306",
-        "password": "www778878net",
+        "password": "wwwet",
         "database": "saas",
         "user": "root",
         "isLog": true,
@@ -21,7 +20,7 @@
     "mysql": {
         "host": "192.168.31.101",
         "port": "3306",
-        "password": "www778878net",
+        "password": "wt",
         "database": "saas",
         "user": "root",
         "isLog": true,
@@ -34,7 +33,7 @@
         "token": "www778e8",
         "myuserid": "gh_5a810d4bd22a",
         "mch_id": "1514618581",
-        "mch_key": "2e1035f127b78df4a7fc45",
+        "mch_key": "2e1035ff4a7fc45",
         "apppayid": "wx7b7073",
         "apppaySecrect": "86c68a409c65",
         "host": ""
@@ -48,7 +47,7 @@
     "redis": {
         "host": "192.168.31.101",
         "port": 6379,
-        "pwd": "www778878net",
+        "pwd": "wet",
         "max": 100,
         "local": "local"
     },

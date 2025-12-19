@@ -9,12 +9,21 @@ export class Config {
     private configObject: any;
 
     constructor() {
+        // 修改配置加载逻辑，优先使用 CONFIG_FILE 环境变量指定的配置文件
+        const configFile = process.env.CONFIG_FILE;
         const env = process.env.NODE_ENV || 'development';
         console.log(`初始加载 ${env} 环境的配置`);
 
         try {
-            this.configObject = config;
-            console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
+            if (configFile && fs.existsSync(configFile)) {
+                // 如果指定了 CONFIG_FILE 环境变量且文件存在，则直接加载该文件
+                console.log(`使用 CONFIG_FILE 指定的配置文件: ${configFile}`);
+                this.configObject = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+            } else {
+                // 否则使用 config 包按环境加载配置
+                this.configObject = config;
+                console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
+            }
 
             // 从环境变量或配置中获取表配置文件路径
             const tableConfigFilePath = this.configObject.tableconfigfile;

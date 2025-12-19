@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  nodejs-app-1:
+    image: docker.cnb.cool/778878/logsvc
+    ports:
+      - "8081:88"
+    environment:
+      - NODE_ENV=production
+      - CONFIG_FILE=/app/config.json
+    volumes:
+      - ./config.json:/app/config.json
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:88/Api7822/TestMenu/Test78/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  nodejs-app-2:
+    image: docker.cnb.cool/778878/logsvc
+    ports:
+      - "8082:88"
+    environment:
+      - NODE_ENV=production
+      - CONFIG_FILE=/app/config.json
+    volumes:
+      - ./config.json:/app/config.json
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:88/Api7822/TestMenu/Test78/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ../webmin:/usr/share/nginx/html:ro
+    depends_on:
+      - nodejs-app-1
+      - nodejs-app-2
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

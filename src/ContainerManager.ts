@@ -28,6 +28,7 @@ import { AuthService } from './services/AuthService';
 import { TsLog78, LogstashServerLog78, FileLog78, ConsoleLog78 } from "tslog78";
 import { ControllerLoader } from './utils/ControllerLoader';
 
+
 // 日志实例
 // 采用全局变量而非依赖注入的方式，原因如下：
 // 1. 日志服务需要在容器初始化早期就能使用，用于记录初始化过程中的信息
@@ -36,15 +37,23 @@ import { ControllerLoader } from './utils/ControllerLoader';
 let loggerInstance: TsLog78 | null = null;
 
 export class ContainerManager {
-    private configPath: string | undefined;
+    // 注意：这个字段目前未被使用，因为配置文件路径现在通过环境变量CONFIG_FILE传递
+    // TODO: 考虑在未来的版本中移除这个字段
+    private configPath: string | undefined; // 未使用的字段
     private container: Container | null = null;
 
     constructor(configPath?: string) {
-        this.configPath = configPath || this.getConfigPathFromArgs();
+        // 检查是否有环境变量 CONFIG_FILE
+        if (process.env.CONFIG_FILE) {
+            this.configPath = process.env.CONFIG_FILE;
+        } else {
+            this.configPath = configPath || this.getConfigPathFromArgs();
+        }
 
         // 如果提供了配置文件路径，设置环境变量
+        // 这样做是为了让 Config 类能够读取到配置文件路径
         if (this.configPath) {
-            process.env.TABLE_CONFIG_FILE = this.configPath;
+            process.env.CONFIG_FILE = this.configPath;
         }
     }
 
@@ -96,7 +105,7 @@ export class ContainerManager {
 
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(0, 0, 50);
+                loggerInstance.setupLevel(20, 20, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -143,9 +152,10 @@ export class ContainerManager {
             const mysqlConfig = config.get('mysql');
             const memcachedConfig = config.get('memcached');
             const redisConfig = config.get('redis');
+            const sqliteConfig = config.get('sqlites');
 
             // 初始化数据库连接
-            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig);
+            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);
 
             // 使用 toConstantValue 绑定已存在的实例
             // 这种方式适用于:
@@ -164,6 +174,7 @@ export class ContainerManager {
             this.container.bind(CacheService).toSelf().inSingletonScope();
             this.container.bind(AuthService).toSelf().inSingletonScope();
 
+
             // 绑定ControllerLoader服务
             this.container.bind(ControllerLoader).toSelf().inSingletonScope();
 
@@ -173,6 +184,10 @@ export class ContainerManager {
 
             const cacheService = this.container.get(CacheService);
             cacheService.setMemcache(dbConnections);
+
+            // 预加载控制器，避免第一次请求时出现控制器找不到的问题
+            const controllerLoader = this.container.get(ControllerLoader);
+            controllerLoader.loadControllers();
 
             // 将容器挂载到 global 对象，方便在应用程序的其他部分访问
             (global as any).appContainer = this.container;
