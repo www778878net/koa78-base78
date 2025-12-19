@@ -1,24 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const Base78_1 = tslib_1.__importDefault(require("../../controllers/Base78"));
+const Base78_1 = require("../../controllers/Base78");
 const decorators_1 = require("../../interfaces/decorators");
-class Test78 extends Base78_1.default {
-    get colsImp() {
-        return ["field1", "field2"];
-    }
-    get uidcid() {
-        return "cid";
-    }
-    test2() {
+class Test78 extends Base78_1.CidBase78 {
+    testMemcachedAdd() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const self = this;
-            const up = self.up;
-            console.log("test in test" + up.uname);
-            return new Promise((resolve, reject) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                resolve("有权限调用OK" + up.parsn);
-                return;
-            }));
+            const lockKey = `${this.constructor.name}_2day_report_lock_test`;
+            // 尝试获取锁
+            const lock = yield this.cacheService.add(lockKey, 'locked');
+            const reback = yield this.cacheService.get(lockKey);
+            const back = {
+                lock: lock,
+                lockKey: lockKey,
+                reback: reback
+            };
+            return back;
+        });
+    }
+    testMemcached() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.cacheService.set("test", "testMemcached");
+            return this.cacheService.get("test");
+        });
+    }
+    testRedis() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.cacheService.redisSet("test", "testRedis");
+            return this.cacheService.redisGet("test");
         });
     }
     test2() {

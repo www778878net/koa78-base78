@@ -14,7 +14,7 @@ function ApiMethod() {
                     if (!container) {
                         throw new Error('App container not initialized');
                     }
-                    const authService = AuthService_1.AuthService.getInstance();
+                    const authService = container ? container.get(AuthService_1.AuthService) : AuthService_1.AuthService.getInstance();
                     // 执行 upcheck
                     yield authService.upcheck(this.up, this.tableConfig.cols, this.dbname);
                     // 执行原始方法
