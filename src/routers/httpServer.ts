@@ -11,20 +11,16 @@ import Base78 from '../controllers/Base78';
 import UpInfo from 'koa78-upinfo';
 import { ControllerLoader } from '../utils/ControllerLoader';
 
-// 扩展Koa的Context和Request接口
+// 扩展Koa的Request接口以支持body和fields属性
 declare module 'koa' {
     interface Request {
         body?: any;
         fields?: any;
     }
-
-    interface Context {
-        body?: any;
-    }
 }
 
 const esClient = Elasticsearch78.getInstance();
-const log = TsLog78.Instance;
+const log = new TsLog78();
 const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
@@ -32,16 +28,15 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     console.log('statsMiddleware')
     await next();
     const ms = Date.now() - start;  // Request duration
-    // 如果 ctx.params 是 undefined，进行处理
-    if (!ctx.params) {
-        //console.warn(ctx);
-        return; // 或者可以选择抛出一个错误，或者执行其他操作
-    }
+    // 如果 ctx.params 是 undefined，直接返回
+    // if (!ctx.params) {
+    //     return; // 直接返回，不进行统计
+    // }
     // // 确保参数存在后再解构
     // const { apiver, apisys, apiobj, apifun } = ctx.params;
 
     // // 如果是测试接口，直接返回
-    // //if (apiobj == "testtb") return;
+    // if (apiobj == "testtb") return;
 
     // const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
     // //const uploadSize = ctx.request.headers['content-length'];  // Request body size (in characters)
@@ -115,30 +110,72 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
     log.info(`尝试在端口 ${httpPort} 上启动服务器`);
 
     const app = new Koa();
+
+
+    // 中间件注册：按顺序加载
+    app.use(errorHandler);           // 错误处理应在最外层
+    app.use(statsMiddleware);        // 统计信息收集
+    app.use(loggerMiddleware);       // 日志记录
+
+    // 自定义中间件：解析 JSON 和 urlencoded 请求体
+    app.use(async (ctx, next) => {
+        // 兼容已有设置
+        if (ctx.request.body !== undefined) return await next();
+        console.log(ctx)
+        const contentType = ctx.get('Content-Type') || '';
+        let body;
+
+        try {
+            if (contentType.includes('application/json')) {
+                const rawBody = await readBody(ctx.req);
+                body = rawBody.trim().length ? JSON.parse(rawBody) : {};
+            } else if (contentType.includes('application/x-www-form-urlencoded')) {
+                const rawBody = await readBody(ctx.req);
+                body = parseUrlEncoded(rawBody);
+            } else if (contentType.includes('text/') || contentType === '') {
+                // 处理文本内容或无Content-Type的情况
+                body = await readBody(ctx.req);
+            } else {
+                // 其他类型的Content-Type也读取body内容为字符串
+                body = await readBody(ctx.req);
+            }
+        } catch (e) {
+            ctx.throw(422, `Body parse error: ${e.message}`);
+        }
+
+        ctx.request.body = body || {};
+        await next();
+    });
+
+    // 辅助函数：读取流中的请求体
+    async function readBody(readable: any): Promise<string> {
+        // 如果不是流对象，直接返回空字符串
+        if (!readable || typeof readable.on !== 'function') {
+            return '';
+        }
+
+        const chunks: any[] = [];
+        for await (const chunk of readable) {
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+        }
+        return Buffer.concat(chunks).toString('utf8');
+    }
+
+    // 简易 application/x-www-form-urlencoded 解析器
+    function parseUrlEncoded(body: string): Record<string, any> {
+        if (!body) return {};
+        return body.split('&').reduce((acc, pair) => {
+            const [key, value] = pair.split('=').map(decodeURIComponent);
+            acc[key] = value;
+            return acc;
+        }, {} as Record<string, any>);
+    }
     log.info("正在设置路由...");
     await setupRoutes(app);
     log.info("路由设置成功");
 
-    // 路由
-    app.use(router.routes());
-    app.use(router.allowedMethods());
 
-    // 使用统计中间件（放在路由之后，避免影响路由匹配）
-    app.use(statsMiddleware);
-    // 中间件
-    app.use(errorHandler);
-    app.use(loggerMiddleware);
 
-    // 使用 koa-bodyparser 作为唯一的 body 解析器
-    app.use(bodyParser({
-        enableTypes: ['json', 'form', 'text'],
-        extendTypes: {
-            text: ['text/xml', 'application/xml']
-        },
-        onerror: function (err, ctx) {
-            ctx.throw('body parse error', 422);
-        }
-    }));
 
 
 

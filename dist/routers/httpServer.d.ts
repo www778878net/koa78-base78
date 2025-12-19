@@ -6,9 +6,6 @@ declare module 'koa' {
         body?: any;
         fields?: any;
     }
-    interface Context {
-        body?: any;
-    }
 }
 export declare function startServer(port?: number): Promise<{
     app: Koa;
