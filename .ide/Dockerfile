@@ -1,6 +1,6 @@
 # 可将 node 替换为需要的基础镜像
 FROM node:24
-Dockerfile
+
 RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension cnbcool.cnb-welcome \
   && code-server --install-extension Alibaba-Cloud.tongyi-lingma \
