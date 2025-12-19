@@ -6,5 +6,4 @@ export default class testtb extends CidBase78<TableSchemas['testtb']> {
     customMethod(): Promise<string>;
     get(): Promise<any>;
     m(): Promise<string>;
-    testProto(): Promise<Uint8Array | null>;
 }
