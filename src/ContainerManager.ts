@@ -105,7 +105,7 @@ export class ContainerManager {
 
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(20, 20, 50);
+                loggerInstance.setupLevel(0, 0, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }

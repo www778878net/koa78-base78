@@ -1,4 +1,4 @@
-3/**
+/**
  * API测试文件 - TypeScript版本
  * 复刻原来JavaScript版本test.js的核心功能
  */
@@ -12,32 +12,27 @@ import UpInfo from 'koa78-upinfo';
 // const testPort = config.get('nodeport');
 // const testip = config.get('ip');
 const testPort = 88;
-const testip = "127.0.0.1";
+const testip = "localhost";
 const BASE_URL = `http://${testip}:${testPort}`;
-import restler from 'restler';
+// import restler from 'restler';
 describe('API Tests', () => {
     // 增加整体测试超时时间
-    jest.setTimeout(30000);
+    jest.setTimeout(5000);
 
-    beforeAll(async () => {
-        // 等待服务器启动
-        await new Promise(resolve => setTimeout(resolve, 5000));
+    it('TestMenu/Test78/test', async () => {
+        // 设置单个测试的超时时间
+        jest.setTimeout(10000);
+
+        // 尝试调用API，如果失败则让测试真正失败
+        const response = await axios.get("http://localhost:88/apitest/testmenu/Test78/test", {
+            params: {
+                pars: ["test"]
+            }
+        });
+
+        expect(response.data).toHaveProperty("back");
+        expect(response.data.back).toBe("看到我说明路由ok,中文ok,无权限调用OKtest");
     });
-
-    // it('TestMenu/Test78/test', async () => {
-    //     // 设置单个测试的超时时间
-    //     jest.setTimeout(10000);
-
-    //     // 尝试调用API，如果失败则让测试真正失败
-    //     const response = await axios.get("http://localhost:88/apitest/testmenu/Test78/test", {
-    //         params: {
-    //             pars: ["test"]
-    //         }
-    //     });
-
-    //     expect(response.data).toHaveProperty("back");
-    //     expect(response.data.back).toBe("看到我说明路由ok,中文ok,无权限调用OKtest");
-    // });
 
     // it('TestMenu/Test78/test2 should fail with auth error', async () => {
     //     // 设置单个测试的超时时间
@@ -101,43 +96,44 @@ describe('API Tests', () => {
             pars: data.pars
         });
 
-        try {
-            const response: any = await new Promise((resolve, reject) => {
-                (restler as any).post(`${BASE_URL}/apitest/testmenu/testtb/m`, { data: data })
-                    .on('complete', function (data: any, response: any) {
-                        console.log('Response:', response?.statusCode ?? 'N/A', data);
-                        resolve({ statusCode: response?.statusCode ?? 500, body: data });
-                    })
-                    .on('error', function (error: any) {
-                        reject(error);
-                    });
-            });
 
-            console.log('Response received:', response.status, response.data);
-
-            expect(response.status).toBe(200);
-
-            let responseBody = response.data;
-            if (typeof responseBody === 'string') {
-                try {
-                    responseBody = JSON.parse(responseBody);
-                } catch (e) {
-                    console.error('Failed to parse response body:', e);
-                }
+        console.log('Requesting:', `${BASE_URL}/apitest/testmenu/testtb/m`);
+        // 使用axios替代restler发送POST请求
+        const response: any = await axios.post(`${BASE_URL}/apitest/testmenu/testtb/m`, data, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
-
-            console.log('Parsed response body:', responseBody);
-            expect(responseBody).toHaveProperty('back');
-            expect(responseBody.back).toBe(up.mid);
-        } catch (error: any) {
-            // 避免循环引用问题，只输出特定字段
-            console.error('Test error:', {
-                message: error.message,
-                code: error.code,
-                status: error.response?.status,
-                data: error.response?.data
-            });
+        }).then(res => ({
+            status: res.status,
+            data: res.data
+        })).catch(error => {
+            if (error.response) {
+                // 服务器响应了错误状态码
+                return {
+                    status: error.response.status,
+                    data: error.response.data
+                };
+            }
+            // 请求本身出错
             throw error;
+        });
+
+        console.log('Response received:', response.status, response.data);
+
+        expect(response.status).toBe(200);
+
+        let responseBody = response.data;
+        if (typeof responseBody === 'string') {
+            try {
+                responseBody = JSON.parse(responseBody);
+            } catch (e) {
+                console.error('Failed to parse response body:', e);
+            }
         }
-    }, 10000);
+
+        console.log('Parsed response body:', responseBody);
+        expect(responseBody).toHaveProperty('back');
+        expect(responseBody.back).toBe(up.mid);
+
+    }, 5000);
 });

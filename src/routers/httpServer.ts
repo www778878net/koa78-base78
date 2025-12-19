@@ -4,6 +4,7 @@ import { setupRoutes, router } from './route-registry';
 import { Config } from '../config/Config';
 import { ContainerManager } from '../ContainerManager';
 import { TsLog78 } from 'tslog78';
+
 import http from 'http';
 import { Elasticsearch78 } from '../services/elasticsearch78';  // 假设您的 Elasticsearch 客户端类
 const esClient = Elasticsearch78.getInstance();
@@ -13,6 +14,7 @@ const log = new TsLog78();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     const start = Date.now();  // Request start time
+    console.log('statsMiddleware')
     await next();
     const ms = Date.now() - start;  // Request duration
     // 如果 ctx.params 是 undefined，进行处理
@@ -20,56 +22,57 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
         //console.warn(ctx);
         return; // 或者可以选择抛出一个错误，或者执行其他操作
     }
-    // 确保参数存在后再解构
-    const { apiver, apisys, apiobj, apifun } = ctx.params;
+    // // 确保参数存在后再解构
+    // const { apiver, apisys, apiobj, apifun } = ctx.params;
 
-    // 如果是测试接口，直接返回
-    if (apiobj == "testtb") return;
+    // // 如果是测试接口，直接返回
+    // //if (apiobj == "testtb") return;
 
-    const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
-    //const uploadSize = ctx.request.headers['content-length'];  // Request body size (in characters)
-    const downloadSize = back.length;  // Response body size
+    // const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
+    // //const uploadSize = ctx.request.headers['content-length'];  // Request body size (in characters)
+    // const downloadSize = back.length;  // Response body size
 
-    // 当前时间戳
-    const timestamp = new Date().toISOString();
+    // // 当前时间戳
+    // const timestamp = new Date().toISOString();
 
-    // Prepare the document for Elasticsearch
-    const doc = {
-        apiv: apiver,            // API version
-        apisys: apisys,        // API system
-        apiobj: apiobj,        // API object
-        method: apifun,        // HTTP method
-        num: 1,                // Invocation count (this will be incremented later)
-        dlong: ms,             // Duration in milliseconds
-        //uplen: uploadSize,     // Upload size in bytes
-        downlen: downloadSize, // Download size in bytes      
-        timestamp: timestamp
-    };
+    // // Prepare the document for Elasticsearch
+    // const doc = {
+    //     apiv: apiver,            // API version
+    //     apisys: apisys,        // API system
+    //     apiobj: apiobj,        // API object
+    //     method: apifun,        // HTTP method
+    //     num: 1,                // Invocation count (this will be incremented later)
+    //     dlong: ms,             // Duration in milliseconds
+    //     //uplen: uploadSize,     // Upload size in bytes
+    //     downlen: downloadSize, // Download size in bytes      
+    //     timestamp: timestamp
+    // };
 
-    try {
-        // Elasticsearch index and document ID are based on the method, apisys, and apiobj
-        const index = 'sys_nodejs-main';
-        const id = `${apifun}-${apisys}-${apiobj}-${apiver}`;
+    // try {
+    //     // Elasticsearch index and document ID are based on the method, apisys, and apiobj
+    //     const index = 'sys_nodejs-main';
+    //     const id = `${apifun}-${apisys}-${apiobj}-${apiver}`;
 
-        // Prepare update fields for the upsert operation
-        const updateData = {
-            num: 1,              // Increment this field for each API call
-            dlong: ms,           // Update the duration
-            //uplen: uploadSize,   // Update upload size
-            downlen: downloadSize// Update download size
+    //     // Prepare update fields for the upsert operation
+    //     const updateData = {
+    //         num: 1,              // Increment this field for each API call
+    //         dlong: ms,           // Update the duration
+    //         //uplen: uploadSize,   // Update upload size
+    //         downlen: downloadSize// Update download size
 
-        };
+    //     };
 
 
-        await esClient.upsertData(index, id, doc, updateData);
-    } catch (error) {
-        console.error('Error writing data to Elasticsearch:', error);
-    }
+    //     await esClient.upsertData(index, id, doc, updateData);
+    // } catch (error) {
+    //     console.error('Error writing data to Elasticsearch:', error);
+    // }
 };
 
 // 错误处理中间件
 const errorHandler = async (ctx: Koa.Context, next: () => Promise<any>) => {
     try {
+        console.log('errorHandler')
         await next();
     } catch (err) {
         log.error('服务器错误:', err);
@@ -97,8 +100,13 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
     log.info(`尝试在端口 ${httpPort} 上启动服务器`);
 
     const app = new Koa();
+    log.info("正在设置路由...");
+    await setupRoutes(app);
+    log.info("路由设置成功");
 
-
+    // 路由
+    app.use(router.routes());
+    app.use(router.allowedMethods());
 
     // 使用统计中间件（放在路由之后，避免影响路由匹配）
     app.use(statsMiddleware);
@@ -117,13 +125,8 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         }
     }));
 
-    log.info("正在设置路由...");
-    await setupRoutes(app);
-    log.info("路由设置成功");
 
-    // 路由
-    app.use(router.routes());
-    app.use(router.allowedMethods());
+
 
     return new Promise((resolve, reject) => {
         const httpServer = app.listen(httpPort, () => {
