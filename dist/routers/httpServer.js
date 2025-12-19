@@ -88,6 +88,17 @@ function startServer(port) {
         const httpPort = port || config.get('port') || config.get('httpPort') || 3000;
         log.info(`尝试在端口 ${httpPort} 上启动服务器`);
         const app = new koa_1.default();
+        // 使用 koa-bodyparser 作为唯一的 body 解析器
+        // 根据项目规范，body parser中间件必须在路由中间件前注册，确保POST数据正确解析
+        app.use((0, koabody78_1.default)({
+            enableTypes: ['json', 'form', 'text'],
+            extendTypes: {
+                text: ['text/xml', 'application/xml']
+            },
+            onerror: function (err, ctx) {
+                ctx.throw('body parse error', 422);
+            }
+        }));
         log.info("正在设置路由...");
         yield (0, route_registry_1.setupRoutes)(app);
         log.info("路由设置成功");
@@ -99,16 +110,6 @@ function startServer(port) {
         // 中间件
         app.use(errorHandler);
         app.use(loggerMiddleware);
-        // 使用 koa-bodyparser 作为唯一的 body 解析器
-        app.use((0, koabody78_1.default)({
-            enableTypes: ['json', 'form', 'text'],
-            extendTypes: {
-                text: ['text/xml', 'application/xml']
-            },
-            onerror: function (err, ctx) {
-                ctx.throw('body parse error', 422);
-            }
-        }));
         return new Promise((resolve, reject) => {
             const httpServer = app.listen(httpPort, () => {
                 log.info(`HTTP 服务器正在端口 ${httpPort} 上运行`);

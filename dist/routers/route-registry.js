@@ -39,7 +39,8 @@ function setupRoutes(app) {
                 const controller = new ControllerClass();
                 log.detail(`Controller instance created: ${controller.constructor.name}`);
                 const upInfo = new koa78_upinfo_1.default(ctx);
-                log.detail(`UpInfo created: ${JSON.stringify(upInfo)}`);
+                // 修复：避免序列化包含循环引用的upInfo对象导致错误
+                log.detail(`UpInfo created with sid: ${upInfo.sid}, method: ${upInfo.method}`);
                 controller.setup(upInfo);
                 log.detail('Controller setup completed');
                 if (typeof controller[apifun] !== 'function' || apifun.startsWith('_')) {
@@ -50,7 +51,8 @@ function setupRoutes(app) {
                 }
                 log.debug(`Executing controller method: ${apifun}`);
                 let result = yield controller[apifun]();
-                log.detail(`Controller method ${apifun} executed, result: ${JSON.stringify(result)}`);
+                // 修复：避免序列化result对象导致循环引用错误
+                log.detail(`Controller method ${apifun} executed successfully`);
                 if (controller.up.backtype === "protobuf") {
                     log.debug("Setting response type to protobuf");
                     ctx.set('Content-Type', 'application/x-protobuf');
