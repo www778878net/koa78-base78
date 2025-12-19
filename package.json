@@ -51,6 +51,7 @@
         "@types/node": "^25.0.2",
         "jest": "^29.7.0",
         "reflect-metadata": "^0.2.2",
+        "restler": "^3.4.0",
         "shelljs": "^0.8.5",
         "ts-jest": "^29.2.5",
         "ts-node": "^10.9.2",

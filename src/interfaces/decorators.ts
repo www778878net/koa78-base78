@@ -12,7 +12,7 @@ export function ApiMethod() {
                     throw new Error('App container not initialized');
                 }
 
-                const authService = container ? container.get(AuthService) : AuthService.getInstance();
+                const authService: AuthService = container ? container.get(AuthService) : AuthService.getInstance();
 
                 // 执行 upcheck
                 await authService.upcheck(this.up, this.tableConfig.cols, this.dbname);

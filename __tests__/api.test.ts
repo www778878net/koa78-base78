@@ -11,15 +11,13 @@ import UpInfo from 'koa78-upinfo';
 // const config = Config.getInstance();
 // const testPort = config.get('nodeport');
 // const testip = config.get('ip');
-const testPort = 888;
+const testPort = 88;
 const testip = "localhost";
 const BASE_URL = `http://${testip}:${testPort}`;
 // import restler from 'restler';
 describe('API Tests', () => {
     // 增加整体测试超时时间
     jest.setTimeout(5000);
-
-
 
     it('TestMenu/Test78/test', async () => {
         // 设置单个测试的超时时间
@@ -83,7 +81,7 @@ describe('API Tests', () => {
             bcid: up.bcid,
             mid: "9009408d-6430-f43b-2b56-c94a453b7f4d",
             v: 24,
-
+            cols: ['kind'],
             pars: parsData
         };
 
@@ -94,6 +92,7 @@ describe('API Tests', () => {
             bcid: data.bcid,
             mid: data.mid,
             v: data.v,
+            cols: data.cols,
             pars: data.pars
         });
 
