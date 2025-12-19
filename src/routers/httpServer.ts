@@ -20,7 +20,7 @@ declare module 'koa' {
 }
 
 const esClient = Elasticsearch78.getInstance();
-const log = new TsLog78();
+const log = TsLog78.Instance;
 const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
