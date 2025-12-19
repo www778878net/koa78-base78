@@ -4,12 +4,12 @@ import { CacheService } from './CacheService';
 import { z } from 'zod';
 import { injectable, inject } from 'inversify';
 import { ContainerManager } from '../ContainerManager';
+import { Config } from '../config/Config';
 
 
 export class AuthService {
     private log: any = null;
-    public static readonly CID_VPS: string = "28401227-bd00-a20f-c561-ddf0def881d9";
-    public static readonly CID_MY: string = "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
+    public static readonly CID_MY: string = AuthService.getCidMyFromConfig();
     public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
     private dbService: DatabaseService;
     private cacheService: CacheService;
@@ -23,6 +23,26 @@ export class AuthService {
         this.log = ContainerManager.getLogger();
         this.dbService = dbService;
         this.cacheService = cacheService;
+    }
+
+    private static getCidMyFromConfig(): string {
+        try {
+            // 通过容器获取Config实例
+            const container = (global as any).appContainer;
+            const config = container.get(Config);
+            const cidMyFromConfig = config.get('cidmy');
+            
+            // 如果配置中有cidmy且不为空，则使用配置中的值
+            if (cidMyFromConfig && typeof cidMyFromConfig === 'string' && cidMyFromConfig.length > 0) {
+                return cidMyFromConfig;
+            }
+        } catch (error) {
+            // 获取配置失败时使用默认值
+            console.warn('Failed to get cidmy from config, using default value:', error);
+        }
+        
+        // 默认值
+        return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
     }
 
     public static getInstance(): AuthService {

@@ -3,6 +3,7 @@
     "isdebug": true,
     "tableconfigfile": "",
     "host": "oa.778878.net",
+    "cidmy": "d4856531-e9d3-20f3-4c22-fe3c65fb009c",
     "nodejslog": {
         "issave": true,
         "redis": true

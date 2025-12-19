@@ -37,7 +37,9 @@ import { ControllerLoader } from './utils/ControllerLoader';
 let loggerInstance: TsLog78 | null = null;
 
 export class ContainerManager {
-    private configPath: string | undefined;
+    // 注意：这个字段目前未被使用，因为配置文件路径现在通过环境变量CONFIG_FILE传递
+    // TODO: 考虑在未来的版本中移除这个字段
+    private configPath: string | undefined; // 未使用的字段
     private container: Container | null = null;
 
     constructor(configPath?: string) {
@@ -49,8 +51,9 @@ export class ContainerManager {
         }
 
         // 如果提供了配置文件路径，设置环境变量
+        // 这样做是为了让 Config 类能够读取到配置文件路径
         if (this.configPath) {
-            process.env.TABLE_CONFIG_FILE = this.configPath;
+            process.env.CONFIG_FILE = this.configPath;
         }
     }
 

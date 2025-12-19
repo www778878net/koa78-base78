@@ -6,7 +6,7 @@ import { ContainerManager } from '../ContainerManager';
 @injectable()
 export class DatabaseService {
     public static instance: DatabaseService;
-    private dbConnections?: DatabaseConnections;
+    public dbConnections?: DatabaseConnections;
     private log: any = null;
 
     constructor() {

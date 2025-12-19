@@ -27,7 +27,22 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
 
     async createTables(): Promise<string> {
         try {
-            // 创建sys_log表
+            // 先确保连接正常
+            await this.dbService.sqliteGet("SELECT 1", [], this.up);
+            
+            // 获取SQLite连接实例
+            const sqlite = this.dbService.dbConnections?.getSQLiteConnection();
+            if (sqlite) {
+                // 使用Sqlite78内置的creatTb方法创建系统表
+                const createResult = await sqlite.creatTb(this.up);
+                if (createResult !== 'ok') {
+                    throw new Error(`创建表失败: ${createResult}`);
+                }
+            } else {
+                throw new Error('无法获取SQLite连接');
+            }
+
+            // 创建sys_log表（这个表不在creatTb方法中）
             const createSysLogTable = `
                 CREATE TABLE IF NOT EXISTS sys_log (
                     uid TEXT NOT NULL DEFAULT '',
@@ -60,7 +75,6 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
                 'CREATE INDEX IF NOT EXISTS i_uptime ON sys_log (uptime)'
             ];
 
-            // 使用当前请求的up对象而不是创建一个新的空对象
             // 执行创建表语句
             await this.dbService.sqliteM(createSysLogTable, [], this.up);
 
@@ -68,10 +82,6 @@ export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
             for (const indexSql of createIndexes) {
                 await this.dbService.sqliteM(indexSql, [], this.up);
             }
-
-            // 创建其他系统表（调用已有的方法）
-            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_warn (uid TEXT NOT NULL DEFAULT '')", [], this.up);
-            await this.dbService.sqliteM("CREATE TABLE IF NOT EXISTS sys_sql (cid TEXT NOT NULL DEFAULT '')", [], this.up);
 
             return "所有表创建成功";
         } catch (error) {

@@ -22,3 +22,4 @@ pnpm-lock.yaml
 # 其他常见的需要忽略的文件和目录
 
 *.log
+data/*
