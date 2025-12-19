@@ -153,13 +153,16 @@ class ContainerManager {
                 this.container.bind(DatabaseService_1.DatabaseService).toSelf().inSingletonScope();
                 this.container.bind(CacheService_1.CacheService).toSelf().inSingletonScope();
                 this.container.bind(AuthService_1.AuthService).toSelf().inSingletonScope();
-                // 绑定ControllerLoader服务
-                this.container.bind(ControllerLoader_1.ControllerLoader).toSelf().inSingletonScope();
+                // 初始化AuthService
+                const authService = this.container.get(AuthService_1.AuthService);
                 // 设置服务依赖
                 const databaseService = this.container.get(DatabaseService_1.DatabaseService);
                 databaseService.setDatabaseConnections(dbConnections);
                 const cacheService = this.container.get(CacheService_1.CacheService);
                 cacheService.setMemcache(dbConnections);
+                authService.init(databaseService, cacheService);
+                // 绑定ControllerLoader服务
+                this.container.bind(ControllerLoader_1.ControllerLoader).toSelf().inSingletonScope();
                 // 预加载控制器，避免第一次请求时出现控制器找不到的问题
                 const controllerLoader = this.container.get(ControllerLoader_1.ControllerLoader);
                 controllerLoader.loadControllers();

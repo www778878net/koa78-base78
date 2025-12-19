@@ -8,7 +8,8 @@ export declare class AuthService {
     private dbService;
     private cacheService;
     private static instance;
-    constructor(dbService: DatabaseService, cacheService: CacheService);
+    constructor();
+    init(dbService: DatabaseService, cacheService: CacheService): void;
     static get CID_MY(): string;
     private static getCidMyFromConfig;
     static getInstance(): AuthService;

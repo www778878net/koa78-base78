@@ -3,17 +3,19 @@ var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const tslib_1 = require("tslib");
-const DatabaseService_1 = require("./DatabaseService");
-const CacheService_1 = require("./CacheService");
 const zod_1 = require("zod");
-const inversify_1 = require("inversify");
 const ContainerManager_1 = require("../ContainerManager");
 const Config_1 = require("../config/Config");
-let AuthService = AuthService_1 = class AuthService {
-    constructor(dbService, cacheService) {
+class AuthService {
+    constructor() {
         this.log = null;
+        this.dbService = null;
+        this.cacheService = null;
         // 使用新的日志服务方式
         this.log = ContainerManager_1.ContainerManager.getLogger();
+    }
+    // 初始化方法，用于设置依赖项
+    init(dbService, cacheService) {
         this.dbService = dbService;
         this.cacheService = cacheService;
     }
@@ -57,6 +59,7 @@ let AuthService = AuthService_1 = class AuthService {
         return AuthService_1.instance;
     }
     upcheck(up, cols, dbname) {
+        var _a, _b, _c, _d;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (up.errmsg === "ok") {
                 return "ok";
@@ -108,7 +111,7 @@ let AuthService = AuthService_1 = class AuthService {
             if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
                 up.cols = cols;
             let mem_sid = "lovers_sid2_";
-            let tmp = yield this.cacheService.tbget(mem_sid + dbname + up.sid, up.debug);
+            let tmp = yield ((_a = this.cacheService) === null || _a === void 0 ? void 0 : _a.tbget(mem_sid + dbname + up.sid, up.debug));
             if (tmp === "pool null")
                 tmp = "";
             if (!tmp) {
@@ -125,13 +128,13 @@ let AuthService = AuthService_1 = class AuthService {
                         "  idcoDef,openweixin ,truename,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                         " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t2.cid=companys.id";
                 const values = [up.sid, up.sid];
-                const result = yield this.dbService.get(cmdtext, values, up, dbname);
-                this.log.debug("upcheck result:", result);
-                if (result.length === 0)
+                const result = yield ((_b = this.dbService) === null || _b === void 0 ? void 0 : _b.get(cmdtext, values, up, dbname));
+                (_c = this.log) === null || _c === void 0 ? void 0 : _c.debug("upcheck result:", result);
+                if ((result === null || result === void 0 ? void 0 : result.length) === 0)
                     tmp = "";
                 else {
                     tmp = result[0];
-                    yield this.cacheService.tbset(mem_sid + dbname + up.sid, tmp);
+                    yield ((_d = this.cacheService) === null || _d === void 0 ? void 0 : _d.tbset(mem_sid + dbname + up.sid, tmp));
                 }
             }
             if (tmp) {
@@ -157,25 +160,19 @@ let AuthService = AuthService_1 = class AuthService {
         });
     }
     preventReplayAttack(up) {
+        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const cacheKey = up.ctx.request.path + up.cache;
-            const existingCache = yield this.cacheService.get(cacheKey);
+            const existingCache = yield ((_a = this.cacheService) === null || _a === void 0 ? void 0 : _a.get(cacheKey));
             if (existingCache) {
                 throw new Error("防止重放攻击" + cacheKey);
             }
-            yield this.cacheService.set(cacheKey, 1, 2);
+            yield ((_b = this.cacheService) === null || _b === void 0 ? void 0 : _b.set(cacheKey, 1, 2));
         });
     }
-};
+}
+exports.AuthService = AuthService;
 AuthService._CID_MY = null;
 AuthService.CID_GUEST = "GUEST000-8888-8888-8888-GUEST00GUEST";
 AuthService.instance = null;
-AuthService = AuthService_1 = tslib_1.__decorate([
-    (0, inversify_1.injectable)(),
-    tslib_1.__param(0, (0, inversify_1.inject)(DatabaseService_1.DatabaseService)),
-    tslib_1.__param(1, (0, inversify_1.inject)(CacheService_1.CacheService)),
-    tslib_1.__metadata("design:paramtypes", [DatabaseService_1.DatabaseService,
-        CacheService_1.CacheService])
-], AuthService);
-exports.AuthService = AuthService;
 //# sourceMappingURL=AuthService.js.map
