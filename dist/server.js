@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Server = void 0;
 const tslib_1 = require("tslib");
 // import Koa = require('koa');//不能修改这里 因为我们要动态导入模块的 改这个没意义不修改tsconfig.json
 const httpServer_1 = require("./routers/httpServer");
@@ -42,7 +41,5 @@ class Server {
         });
     }
 }
-exports.Server = Server;
-// 默认导出Server类
 exports.default = Server;
 //# sourceMappingURL=server.js.map
