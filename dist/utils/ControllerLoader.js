@@ -22,7 +22,6 @@ let ControllerLoader = class ControllerLoader {
         if (this.loaded) {
             return;
         }
-        log.detail('ControllerLoader constructed');
         log.detail('Starting to load controllers');
         // 检测运行环境并确定用户项目控制器目录
         const userProjectDir = this.getUserProjectDir();
