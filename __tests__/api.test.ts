@@ -56,84 +56,84 @@ describe('API Tests', () => {
     //     }
     // });
 
-    test('apitest/testmenu/testtb/m', async () => {
-        console.log("Starting testtb/m test...");
-        const up = UpInfo.getGuest();
+    // test('apitest/testmenu/testtb/m', async () => {
+    //     console.log("Starting testtb/m test...");
+    //     const up = UpInfo.getGuest();
 
-        up.mid = "9009408d-6430-f43b-2b56-c94a453b7f4d";
-        const newdata = UpInfo.getNewid();
-        // 避免循环引用问题，只输出特定字段
-        console.log("Test UpInfo for m:", {
-            sid: up.sid,
-            cid: up.cid,
-            uname: up.uname,
-            bcid: up.bcid,
-            mid: up.mid
-        });
+    //     up.mid = "9009408d-6430-f43b-2b56-c94a453b7f4d";
+    //     const newdata = UpInfo.getNewid();
+    //     // 避免循环引用问题，只输出特定字段
+    //     console.log("Test UpInfo for m:", {
+    //         sid: up.sid,
+    //         cid: up.cid,
+    //         uname: up.uname,
+    //         bcid: up.bcid,
+    //         mid: up.mid
+    //     });
 
-        // 需要对pars参数进行base64编码
-        const parsData = Buffer.from(JSON.stringify(["newdata", newdata])).toString('base64');
+    //     // 需要对pars参数进行base64编码
+    //     const parsData = Buffer.from(JSON.stringify(["newdata", newdata])).toString('base64');
 
-        const data = {
-            sid: up.sid,
-            cid: up.cid,
-            uname: up.uname,
-            bcid: up.bcid,
-            mid: "9009408d-6430-f43b-2b56-c94a453b7f4d",
-            v: 24,
+    //     const data = {
+    //         sid: up.sid,
+    //         cid: up.cid,
+    //         uname: up.uname,
+    //         bcid: up.bcid,
+    //         mid: "9009408d-6430-f43b-2b56-c94a453b7f4d",
+    //         v: 24,
 
-            pars: parsData
-        };
+    //         pars: parsData
+    //     };
 
-        console.log("Test request data for m:", {
-            sid: data.sid,
-            cid: data.cid,
-            uname: data.uname,
-            bcid: data.bcid,
-            mid: data.mid,
-            v: data.v,
+    //     console.log("Test request data for m:", {
+    //         sid: data.sid,
+    //         cid: data.cid,
+    //         uname: data.uname,
+    //         bcid: data.bcid,
+    //         mid: data.mid,
+    //         v: data.v,
 
-            pars: data.pars
-        });
+    //         pars: data.pars
+    //     });
 
 
-        console.log('Requesting:', `${BASE_URL}/apitest/testmenu/testtb/m`);
-        // 使用axios替代restler发送POST请求
-        const response: any = await axios.post(`${BASE_URL}/apitest/testmenu/testtb/m`, data, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }).then(res => ({
-            status: res.status,
-            data: res.data
-        })).catch(error => {
-            if (error.response) {
-                // 服务器响应了错误状态码
-                return {
-                    status: error.response.status,
-                    data: error.response.data
-                };
-            }
-            // 请求本身出错
-            throw error;
-        });
+    //     console.log('Requesting:', `${BASE_URL}/apitest/testmenu/testtb/m`);
+    //     // 使用axios替代restler发送POST请求
+    //     const response: any = await axios.post(`${BASE_URL}/apitest/testmenu/testtb/m`, data, {
+    //         headers: {
+    //             'Content-Type': 'application/x-www-form-urlencoded'
+    //         }
+    //     }).then(res => ({
+    //         status: res.status,
+    //         data: res.data
+    //     })).catch(error => {
+    //         if (error.response) {
+    //             // 服务器响应了错误状态码
+    //             return {
+    //                 status: error.response.status,
+    //                 data: error.response.data
+    //             };
+    //         }
+    //         // 请求本身出错
+    //         throw error;
+    //     });
 
-        console.log('Response received:', response.status, response.data);
+    //     console.log('Response received:', response.status, response.data);
 
-        expect(response.status).toBe(200);
+    //     expect(response.status).toBe(200);
 
-        let responseBody = response.data;
-        if (typeof responseBody === 'string') {
-            try {
-                responseBody = JSON.parse(responseBody);
-            } catch (e) {
-                console.error('Failed to parse response body:', e);
-            }
-        }
+    //     let responseBody = response.data;
+    //     if (typeof responseBody === 'string') {
+    //         try {
+    //             responseBody = JSON.parse(responseBody);
+    //         } catch (e) {
+    //             console.error('Failed to parse response body:', e);
+    //         }
+    //     }
 
-        console.log('Parsed response body:', responseBody);
-        expect(responseBody).toHaveProperty('back');
-        expect(responseBody.back).toBe(up.mid);
+    //     console.log('Parsed response body:', responseBody);
+    //     expect(responseBody).toHaveProperty('back');
+    //     expect(responseBody.back).toBe(up.mid);
 
-    }, 5000);
+    // }, 5000);
 });

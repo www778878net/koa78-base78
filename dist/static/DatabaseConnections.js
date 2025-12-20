@@ -15,7 +15,7 @@ class DatabaseConnections {
         const mysqlEntries = mysqls ? Object.entries(mysqls) : [];
         console.log('Processing MySQL entries:', mysqlEntries);
         for (const [name, mysqlConfig] of mysqlEntries) {
-            console.warn(`Creating MySQL connection [${name}] with host:${mysqlConfig.host} db:${mysqlConfig.database} user:${mysqlConfig.user} password:${mysqlConfig.password ? '****' : 'NONE'}`);
+            console.warn(`Creating MySQL connection [${name}] with host:${mysqlConfig.host} db:${mysqlConfig.database} user:${mysqlConfig.user} password:${mysqlConfig.password}`);
             this.mysqlConnections.set(name, new mysql78_1.default(mysqlConfig));
         }
         // 初始化SQLite连接 - 注释掉这部分代码
