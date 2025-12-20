@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package apitest_testmenu;
+
+// 定义单项数据结构
+message sys_ipItem {
+  // 固定字段放在前面
+  string id = 1;
+  int32 idpk = 2;
+  string uid = 3;
+  string ip = 4;
+}
+
+// 定义包含多项的数据结构
+message sys_ip {
+  repeated sys_ipItem items = 1;
+}

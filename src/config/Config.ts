@@ -20,7 +20,7 @@ export class Config {
      */
     public init(): void {
 
-
+        Config.instance = this;
         // 修改配置加载逻辑，优先使用 CONFIG_FILE 环境变量指定的配置文件
         const configFile = process.env.CONFIG_FILE;
         const env = process.env.NODE_ENV || 'development';
