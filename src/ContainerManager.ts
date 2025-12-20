@@ -144,7 +144,7 @@ export class ContainerManager {
             // 初始化配置服务
             this.container.bind(Config).toSelf().inSingletonScope();
             const config = this.container.get(Config);
-
+            config.init();
             // 初始化日志服务
             // 日志服务在其他服务之前初始化，以便记录后续初始化过程
             this.initializeLogger();
