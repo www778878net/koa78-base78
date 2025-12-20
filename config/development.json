@@ -3,7 +3,7 @@
     "port": 888,
     "isdebug": true,
     "host": "oa.778878.net",
-    "tableconfigfile": "./src/config/tableConfig.ts",
+    "tableconfigfile": "./src/config/tabledef.ts",
     "iplog": true,
     "nodejslog": {
         "issave": true,
@@ -15,5 +15,5 @@
             "isLog": true,
             "isCount": true
         }
-    },
+    }
 }

@@ -105,7 +105,7 @@ export class ContainerManager {
 
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(20, 20, 50);
+                loggerInstance.setupLevel(20, 0, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -140,6 +140,7 @@ export class ContainerManager {
         this.container = new Container();
 
         try {
+            console.log('容器初始化开始');
             // 初始化配置服务
             this.container.bind(Config).toSelf().inSingletonScope();
             const config = this.container.get(Config);
@@ -183,13 +184,9 @@ export class ContainerManager {
             cacheService.setMemcache(dbConnections);
             authService.init(databaseService, cacheService);
 
+            console.log('控制器初始化开始');
             // 绑定ControllerLoader服务
             this.container.bind(ControllerLoader).toSelf().inSingletonScope();
-
-
-
-
-
 
 
             // 预加载控制器，避免第一次请求时出现控制器找不到的问题

@@ -4,10 +4,10 @@ export declare class ControllerLoader {
     constructor();
     loadControllers(): void;
     /**
-     * 检测运行环境并返回用户项目src目录路径
-     * 用户的控制器始终在项目根目录下的src目录中
+     * 检测运行环境并返回用户项目控制器目录路径
+     * 在开发环境中返回src目录，在生产环境中返回dist目录
      */
-    private getUserProjectSrcDir;
+    private getUserProjectDir;
     private loadControllersFromDirectory;
     getController(path: string): any;
     /**

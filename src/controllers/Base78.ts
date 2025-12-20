@@ -13,6 +13,7 @@ import { ContainerManager } from '../ContainerManager';
 import { TsLog78 } from 'tslog78';
 import Elasticsearch78 from '../services/elasticsearch78';
 
+// 确保使用CommonJS模块导出方式
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
     protected logger: TsLog78;

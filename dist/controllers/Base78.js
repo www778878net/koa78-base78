@@ -11,6 +11,7 @@ const decorators_1 = require("../interfaces/decorators");
 const ContainerManager_1 = require("../ContainerManager");
 const tslog78_1 = require("tslog78");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
+// 确保使用CommonJS模块导出方式
 class Base78 {
     constructor() {
         this.dbname = "default"; //mysql数据库名（非表名） 

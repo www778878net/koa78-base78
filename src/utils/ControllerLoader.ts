@@ -17,46 +17,53 @@ export class ControllerLoader {
     }
 
     public loadControllers() {
+        // 获取日志实例（此时容器应该已经初始化完成）
+        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
+        log.detail('ControllerLoader loadControllers');
         // 确保只加载一次
         if (this.loaded) {
             return;
         }
 
-        // 获取日志实例（此时容器应该已经初始化完成）
-        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
 
-        log.detail('ControllerLoader constructed');
+
         log.detail('Starting to load controllers');
-        
+
         // 检测运行环境并确定用户项目控制器目录
-        const userProjectSrcDir = this.getUserProjectSrcDir();
-        log.debug(`Looking for controllers in: ${userProjectSrcDir}`);
-        
-        if (fs.existsSync(userProjectSrcDir) && fs.statSync(userProjectSrcDir).isDirectory()) {
-            fs.readdirSync(userProjectSrcDir).forEach((dir) => {
-                if (dir.toLowerCase().startsWith('api') && fs.statSync(path.join(userProjectSrcDir, dir)).isDirectory()) {
-                    this.loadControllersFromDirectory(path.join(userProjectSrcDir, dir));
+        const userProjectDir = this.getUserProjectDir();
+        log.debug(`Looking for controllers in: ${userProjectDir}`);
+
+        if (fs.existsSync(userProjectDir) && fs.statSync(userProjectDir).isDirectory()) {
+            fs.readdirSync(userProjectDir).forEach((dir) => {
+                if (dir.toLowerCase().startsWith('api') && fs.statSync(path.join(userProjectDir, dir)).isDirectory()) {
+                    this.loadControllersFromDirectory(path.join(userProjectDir, dir));
                 }
             });
         } else {
-            log.warn(`User project src directory not found at ${userProjectSrcDir}`);
+            log.warn(`User project directory not found at ${userProjectDir}`);
         }
-        
+
+        log.info(`Total controllers loaded: ${this.controllers.size}`);
         log.detail('Finished loading controllers');
         this.loaded = true;
     }
 
     /**
-     * 检测运行环境并返回用户项目src目录路径
-     * 用户的控制器始终在项目根目录下的src目录中
+     * 检测运行环境并返回用户项目控制器目录路径
+     * 在开发环境中返回src目录，在生产环境中返回dist目录
      */
-    private getUserProjectSrcDir(): string {
+    private getUserProjectDir(): string {
         // 获取用户项目根目录
         const userProjectRoot = process.cwd();
-        
-        // 用户的控制器始终在项目根目录下的src目录中
-        // 无论是TypeScript运行时还是JavaScript运行时都是如此
-        return path.resolve(userProjectRoot, 'src');
+
+        // 检查NODE_ENV环境变量判断运行环境
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        // 在生产环境中加载编译后的JavaScript文件（dist目录）
+        // 在开发环境中加载TypeScript源文件（src目录）
+        const controllerDir = isProduction ? 'dist' : 'src';
+
+        return path.resolve(userProjectRoot, controllerDir);
     }
 
     private async loadControllersFromDirectory(dir: string) {
@@ -66,24 +73,39 @@ export class ControllerLoader {
         for (const item of fs.readdirSync(dir)) {
             const fullPath = path.join(dir, item);
             const stat = fs.statSync(fullPath);
-            
+
+            // 确定要加载的文件扩展名
+            const isProduction = process.env.NODE_ENV === 'production';
+            const validExtensions = isProduction
+                ? ['.js'] // 生产环境只加载JavaScript文件
+                : ['.ts', '.js']; // 开发环境加载TypeScript和JavaScript文件
+
             if (stat.isDirectory()) {
                 await this.loadControllersFromDirectory(fullPath);
-            } else if ((item.endsWith('.ts') || item.endsWith('.js')) && !item.endsWith('.d.ts')) {
+            } else if (validExtensions.includes(path.extname(item)) && !item.endsWith('.d.ts')) {
                 try {
+                    // 构造正确的文件路径（在生产环境中需要将.ts转换为.js）
+                    let importPath = fullPath;
+                    if (isProduction && path.extname(importPath) === '.ts') {
+                        // 在生产环境中，TypeScript文件已经被编译为JavaScript文件
+                        importPath = fullPath.replace(/\.ts$/, '.js');
+                    }
+
+                    log.debug(`Attempting to load controller from: ${importPath}`);
+
                     // 使用动态导入替代 require
-                    const module = await import(fullPath);
+                    const module = await import(importPath);
                     const controllerClass = module.default;
                     if (controllerClass && controllerClass.prototype instanceof Base78) {
-                        const apiDir = path.basename(path.dirname(path.dirname(fullPath))).toLowerCase();
-                        const menuDir = path.basename(path.dirname(fullPath)).toLowerCase();
-                        const controllerName = path.basename(fullPath, path.extname(fullPath)).toLowerCase();
+                        const apiDir = path.basename(path.dirname(path.dirname(importPath))).toLowerCase();
+                        const menuDir = path.basename(path.dirname(importPath)).toLowerCase();
+                        const controllerName = path.basename(importPath, path.extname(importPath)).toLowerCase();
                         const controllerKey = `${apiDir}/${menuDir}/${controllerName}`;
 
                         this.controllers.set(controllerKey, controllerClass);
                         log.debug(`Loaded controller: ${controllerKey}`);
                     } else {
-                        log.warn(`File ${fullPath} does not export a valid controller class`);
+                        log.warn(`File ${importPath} does not export a valid controller class`);
                     }
                 } catch (error) {
                     log.error(`Error loading controller from ${fullPath}:`, error);
@@ -104,16 +126,22 @@ export class ControllerLoader {
         const [apiver, apisys, apiobj] = path.split('/');
         const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();
         log.detail(`Attempting to get controller with key: ${controllerKey}`);
-        return this.controllers.get(controllerKey);
+
+        const controller = this.controllers.get(controllerKey);
+        if (!controller) {
+            log.warn(`Controller not found for key: ${controllerKey}. Available controllers: ${Array.from(this.controllers.keys()).join(', ')}`);
+        }
+
+        return controller;
     }
-    
+
     /**
      * 获取已加载的控制器数量，用于调试和测试
      */
     getControllerCount(): number {
         return this.controllers.size;
     }
-    
+
     /**
      * 获取所有已加载的控制器键名列表，用于调试
      */

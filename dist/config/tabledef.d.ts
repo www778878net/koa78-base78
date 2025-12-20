@@ -1,15 +1,3 @@
-import { CidSchema, BaseSchema } from '../controllers/BaseSchema';
-export interface TableSet {
-    tbname: string;
-    cols: string[];
-    colsImp: string[];
-    uidcid: 'cid' | 'uid';
-}
-export interface TableConfig {
-    colsImp: readonly string[];
-    apiver: string;
-    apisys: string;
-}
 export declare const tableConfigs: {
     readonly sys_ip: {
         readonly colsImp: readonly ["ip"];
@@ -30,12 +18,5 @@ export declare const tableConfigs: {
         readonly colsImp: readonly ["kind", "item", "data"];
         readonly apiver: "apitest";
         readonly apisys: "testmenu";
-    };
-};
-export type TableSchemas = {
-    [K in keyof typeof tableConfigs]: CidSchema & Record<typeof tableConfigs[K]['colsImp'][number], string>;
-} & {
-    [key: string]: BaseSchema & {
-        [k: string]: any;
     };
 };
