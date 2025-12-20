@@ -1,0 +1,66 @@
+# .cnb.yml
+main:
+  push:
+    - runner:
+        cpus: 1
+        memory: 2Gi
+      docker:
+        image: node:20
+      stages:
+        - name: install-deps
+          script:
+            - npm install -g typescript pnpm cross-env
+            - pnpm install
+        - name: build-project
+          script:
+            - tsc
+        - name: test
+          script:
+            - |
+              # 使用更优雅的方式启动和停止服务
+              cross-env NODE_ENV=development node ./dist/index.js &
+              SERVER_PID=$!
+              sleep 5
+              npm test
+              sleep 2
+              kill $SERVER_PID 2>/dev/null || true
+              wait $SERVER_PID 2>/dev/null || true
+    - services:
+        - docker
+      runner:
+        cpus: 1
+        memory: 2Gi
+      stages:
+        - name: set docker tag
+          script: echo -n "${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest"
+          exports:
+            info: IMAGE_TAG
+        - name: docker build
+          script: docker build -t $IMAGE_TAG .
+        - name: push image
+          script: docker push $IMAGE_TAG
+       
+            
+$:
+  vscode:
+    - runner:
+        cpus: 2
+        memory: 4Gi
+      docker:
+        build: .ide/Dockerfile
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: start-services
+          script:
+            - /workspace/doc/start-services.sh
+        - name: init-database
+          script:
+            - /workspace/doc/init-db.sh
+        - name: install-deps
+          script:    
+            - pnpm install   
+      endStages:
+        - name: end stage 1
+          script: echo "end stage 1"

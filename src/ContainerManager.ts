@@ -105,7 +105,7 @@ export class ContainerManager {
 
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(0, 0, 50);
+                loggerInstance.setupLevel(20, 20, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -149,7 +149,7 @@ export class ContainerManager {
             this.initializeLogger();
 
             // 获取数据库和缓存配置
-            const mysqlConfig = config.get('mysql');
+            const mysqlConfig = config.get('mysqls');
             const memcachedConfig = config.get('memcached');
             const redisConfig = config.get('redis');
             const sqliteConfig = config.get('sqlites');

@@ -25,7 +25,7 @@ const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     const start = Date.now();  // Request start time
-    console.log('statsMiddleware')
+
     await next();
     const ms = Date.now() - start;  // Request duration
     // 如果 ctx.params 是 undefined，直接返回
@@ -82,7 +82,7 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
 // 错误处理中间件
 const errorHandler = async (ctx: Koa.Context, next: () => Promise<any>) => {
     try {
-        console.log('errorHandler')
+
         await next();
     } catch (err) {
         log.error('服务器错误:', err);
@@ -121,7 +121,7 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
     app.use(async (ctx, next) => {
         // 兼容已有设置
         if (ctx.request.body !== undefined) return await next();
-        console.log(ctx)
+
         const contentType = ctx.get('Content-Type') || '';
         let body;
 
@@ -144,6 +144,7 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         }
 
         ctx.request.body = body || {};
+        log.detail("Request body:", body);
         await next();
     });
 

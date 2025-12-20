@@ -23,8 +23,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
             const mysql = this.dbConnections.getMySQLConnection(dbName);
             if (!mysql) {
-                this.log.error('Default MySQL connection not found');
-                throw new Error('Default MySQL connection not found');
+                this.log.error('Default MySQL connection not found' + dbName);
+                throw new Error('Default MySQL connection not found' + dbName);
             }
             try {
                 return yield mysql.doGet(sql, values, up);

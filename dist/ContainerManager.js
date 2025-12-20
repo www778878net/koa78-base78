@@ -93,7 +93,7 @@ class ContainerManager {
             loggerInstance.setup(serverLogger, new tslog78_1.FileLog78(), new tslog78_1.ConsoleLog78());
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(0, 0, 50);
+                loggerInstance.setupLevel(20, 20, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -132,7 +132,7 @@ class ContainerManager {
                 // 日志服务在其他服务之前初始化，以便记录后续初始化过程
                 this.initializeLogger();
                 // 获取数据库和缓存配置
-                const mysqlConfig = config.get('mysql');
+                const mysqlConfig = config.get('mysqls');
                 const memcachedConfig = config.get('memcached');
                 const redisConfig = config.get('redis');
                 const sqliteConfig = config.get('sqlites');
