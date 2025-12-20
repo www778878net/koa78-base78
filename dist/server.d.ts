@@ -1,4 +1,4 @@
-export default class Server {
+declare class Server {
     /**
      * 启动服务器
      * 一键初始化所有服务并启动HTTP服务器
@@ -19,3 +19,5 @@ export default class Server {
      */
     start(configPath?: string): Promise<void>;
 }
+export { Server };
+export default Server;
