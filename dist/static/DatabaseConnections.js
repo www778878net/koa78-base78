@@ -13,7 +13,6 @@ class DatabaseConnections {
         console.log('DatabaseConnections constructor called with mysqls:', JSON.stringify(mysqls, null, 2));
         // 允许空的mysql配置
         const mysqlEntries = mysqls ? Object.entries(mysqls) : [];
-        console.log('Processing MySQL entries:', mysqlEntries);
         for (const [name, mysqlConfig] of mysqlEntries) {
             console.warn(`Creating MySQL connection [${name}] with host:${mysqlConfig.host} db:${mysqlConfig.database} user:${mysqlConfig.user} password:${mysqlConfig.password}`);
             this.mysqlConnections.set(name, new mysql78_1.default(mysqlConfig));

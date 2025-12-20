@@ -10,6 +10,13 @@ const path = tslib_1.__importStar(require("path"));
 const tableConfig_1 = require("./tableConfig");
 let Config = Config_1 = class Config {
     constructor() {
+        // 构造函数中不再自动加载配置，等待显式调用init方法
+    }
+    /**
+     * 初始化配置
+     * 这个方法应该在容器初始化时被显式调用
+     */
+    init() {
         // 修改配置加载逻辑，优先使用 CONFIG_FILE 环境变量指定的配置文件
         const configFile = process.env.CONFIG_FILE;
         const env = process.env.NODE_ENV || 'development';
@@ -37,18 +44,7 @@ let Config = Config_1 = class Config {
                 }
                 // 如果文件存在，则使用外部配置
                 if (fs.existsSync(tableConfigFilePath)) {
-                    try {
-                        delete require.cache[require.resolve(tableConfigFilePath)];
-                        const customConfigs = require(tableConfigFilePath);
-                        // 处理多一层结构的问题
-                        this.configObject.tables = customConfigs.tableConfigs || customConfigs;
-                        console.log(`成功加载外部表配置: ${tableConfigFilePath}`);
-                    }
-                    catch (error) {
-                        console.error(`加载外部表配置失败: ${tableConfigFilePath}`, error);
-                        // 失败时回退到默认配置
-                        this.configObject.tables = tableConfig_1.tableConfigs;
-                    }
+                    this.loadExternalConfig(tableConfigFilePath);
                 }
                 else {
                     console.log(`外部表配置文件不存在: ${tableConfigFilePath}，使用默认配置`);
@@ -112,6 +108,20 @@ let Config = Config_1 = class Config {
     }
     has(key) {
         return config_1.default.has(key);
+    }
+    loadExternalConfig(filePath) {
+        try {
+            delete require.cache[require.resolve(filePath)];
+            const customConfigs = require(filePath);
+            // 处理多一层结构的问题
+            this.configObject.tables = customConfigs.tableConfigs || customConfigs;
+            console.log(`成功加载外部表配置: ${filePath}`);
+        }
+        catch (error) {
+            console.error(`加载外部表配置失败: ${filePath}`, error);
+            // 失败时回退到默认配置
+            this.configObject.tables = tableConfig_1.tableConfigs;
+        }
     }
 };
 Config.instance = null;
