@@ -8,26 +8,6 @@
         "redis": false
     },
     "iplog": false,
-    "mysqls": {
-        "mysql2": {
-            "host": "localhost",
-            "port": "3306",
-            "password": "testpass",
-            "database": "testdb",
-            "user": "testuser",
-            "isLog": false,
-            "isCount": false
-        },
-        "default": {
-            "host": "localhost",
-            "port": "3306",
-            "password": "testpass",
-            "database": "testdb",
-            "user": "testuser",
-            "isLog": false,
-            "isCount": false
-        }
-    },
     "sqlites": {
         "default": {
             "filename": "./default.db",
@@ -35,29 +15,29 @@
             "isCount": true
         }
     },
-    "apiqq": {
-        "appid": "test_appid",
-        "secret": "test_secret",
-        "encodingAESKey": "test_encodingAESKey",
-        "token": "test_token",
-        "myuserid": "test_myuserid",
-        "mch_id": "test_mch_id",
-        "mch_key": "test_mch_key",
-        "apppayid": "test_apppayid",
-        "apppaySecrect": "test_apppaySecrect",
-        "host": ""
+    "mysqls": {
+        "default": {
+            "host": "127.0.0.1",
+            "port": "3306",
+            "password": "rootpassword",
+            "database": "testdb",
+            "user": "root",
+            "isLog": true,
+            "isCount": true,
+            "max": 10
+        }
     },
     "memcached": {
         "host": "localhost",
         "port": 11211,
-        "max": 10,
-        "local": "test"
+        "max": 100,
+        "local": "dev"
     },
     "redis": {
         "host": "localhost",
         "port": 6379,
-        "pwd": "testpass",
-        "max": 10,
-        "local": "test"
+        "pwd": "",
+        "max": 100,
+        "local": "dev"
     }
 }
