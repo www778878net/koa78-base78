@@ -12,9 +12,7 @@ export interface BaseSchema {
 }
 export interface CidSchema extends BaseSchema {
     cid: string;
-    uidcid: 'cid';
 }
 export interface UidSchema extends BaseSchema {
     uid: string;
-    uidcid: 'uid';
 }

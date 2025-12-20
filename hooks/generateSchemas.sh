@@ -56,6 +56,9 @@ for tableName in $TABLES; do
     
     # 提取uidcid
     uidcid=$(echo "$tableDefinition" | grep "uidcid:" | sed -n "s/.*uidcid:[[:space:]]*'\([^']*\)'.*/\1/p" | head -1)
+    if [ -z "$uidcid" ]; then
+        uidcid="uid"
+    fi
     echo "  uidcid: $uidcid"
     
     # 提取colsImp字段（处理两种格式）
@@ -145,6 +148,7 @@ EOF
         # 将colsImp转换为数组
         IFS=',' read -ra COLS <<< "$colsImp"
         
+        # 添加固定字段到Item消息（按指定顺序）
         cat > "$PROTO_FILE" << EOF
 syntax = "proto3";
 
@@ -152,10 +156,13 @@ package $PACKAGE_NAME;
 
 // 定义单项数据结构
 message ${tableName}Item {
+  // 固定字段放在前面
+  string id = 1;
+  int32 idpk = 2;
+  string $uidcid = 3;
 EOF
-        
-        # 添加字段到Item消息
-        index=1
+        # 添加colsImp字段（从索引4开始）
+        index=4
         for col in "${COLS[@]}"; do
             if [ -n "$col" ]; then
                 echo "  string $col = $index;" >> "$PROTO_FILE"
@@ -163,10 +170,6 @@ EOF
             fi
         done
         
-        # 添加id和idpk字段到Item消息
-        echo "  string id = $index;" >> "$PROTO_FILE"
-        index=$((index + 1))
-        echo "  int32 idpk = $index;" >> "$PROTO_FILE"
         echo "}" >> "$PROTO_FILE"
         
         # 添加主消息类型（包含重复项）

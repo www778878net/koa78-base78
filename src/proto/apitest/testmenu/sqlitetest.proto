@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package apitest_testmenu;
+
+// 定义单项数据结构
+message sqlitetestItem {
+  // 固定字段放在前面
+  string id = 1;
+  int32 idpk = 2;
+  string cid = 3;
+  string field1 = 4;
+  string field2 = 5;
+}
+
+// 定义包含多项的数据结构
+message sqlitetest {
+  repeated sqlitetestItem items = 1;
+}

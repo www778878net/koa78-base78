@@ -17,6 +17,7 @@ let Config = Config_1 = class Config {
      * 这个方法应该在容器初始化时被显式调用
      */
     init() {
+        Config_1.instance = this;
         // 修改配置加载逻辑，优先使用 CONFIG_FILE 环境变量指定的配置文件
         const configFile = process.env.CONFIG_FILE;
         const env = process.env.NODE_ENV || 'development';
