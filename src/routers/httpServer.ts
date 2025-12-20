@@ -19,7 +19,7 @@ declare module 'koa' {
     }
 }
 
-const esClient = Elasticsearch78.getInstance();
+// const esClient = Elasticsearch78.getInstance();
 const log = TsLog78.Instance;
 const router = new Router();
 // 统计中间件
@@ -253,7 +253,17 @@ async function setupRoutes(app: Koa) {
             if (controller.up.backtype === "protobuf") {
                 log.debug("Setting response type to protobuf");
                 ctx.set('Content-Type', 'application/x-protobuf');
-                ctx.body = result;
+                // 确保返回的是二进制数据而不是字符串
+                if (typeof result === 'string') {
+                    // 如果是字符串，尝试转换为Buffer
+                    ctx.body = Buffer.from(result, 'binary');
+                } else if (result instanceof Uint8Array) {
+                    // 如果已经是Uint8Array，直接使用
+                    ctx.body = Buffer.from(result);
+                } else {
+                    // 其他情况，尝试转换为Buffer
+                    ctx.body = result;
+                }
                 return;
             }
 

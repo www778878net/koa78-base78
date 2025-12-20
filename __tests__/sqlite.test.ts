@@ -139,8 +139,60 @@
 //     }
 // });
 
-// 添加一个简单的测试用例，确保测试套件能够通过
-it('should pass with a simple placeholder test', () => {
-    // 这是一个占位测试，确保至少有一个测试用例
-    expect(true).toBe(true);
-});
+// 添加axios和protobufjs导入以修复找不到名称"axios"的错误
+import axios from 'axios';
+import * as protobuf from 'protobufjs';
+import * as path from 'path';
+
+// 添加一个测试用例来测试testProto方法
+it('should test testProto method and return protobuf data', async () => {
+    // 设置单个测试的超时时间
+    jest.setTimeout(15000);
+
+    try {
+        // 调用testProto方法
+        const response = await axios.get(`http://localhost:888/apitest/testmenu/testtb/testProto`, {
+            responseType: 'arraybuffer' // 确保以ArrayBuffer的形式接收响应
+        });
+        
+        console.log('testProto response status:', response.status);
+        console.log('testProto response headers:', response.headers);
+        console.log('testProto response data type:', typeof response.data);
+        console.log('testProto response data length:', response.data.byteLength);
+        
+        // 验证响应
+        expect(response.status).toBe(200);
+        // 验证返回的是protobuf数据 (注意：实际返回的是application/x-protobuf)
+        expect(response.headers['content-type']).toContain('application/x-protobuf');
+        // 数据应该是一个Buffer或者ArrayBuffer
+        expect(response.data).toBeDefined();
+        
+        // 尝试解析protobuf数据
+        const protoPath = path.resolve(__dirname, '../src/proto/apitest/testmenu/testtb.proto');
+        console.log('Proto file path:', protoPath);
+        
+        const root = await protobuf.load(protoPath);
+        const TesttbMessage = root.lookupType('apitest_testmenu.testtb');
+        
+        // 解析收到的protobuf数据
+        const decodedMessage: any = TesttbMessage.decode(new Uint8Array(response.data));
+        console.log('Decoded protobuf message:', JSON.stringify(decodedMessage, null, 2));
+        
+        // 验证解析后的数据结构
+        expect(decodedMessage).toHaveProperty('items');
+        expect(Array.isArray(decodedMessage.items)).toBe(true);
+        expect(decodedMessage.items.length).toBeGreaterThan(0);
+        
+        // 验证数据内容
+        const firstItem = decodedMessage.items[0];
+        expect(firstItem).toHaveProperty('kind');
+        expect(firstItem).toHaveProperty('item');
+        expect(firstItem).toHaveProperty('data');
+        expect(firstItem).toHaveProperty('id');
+        expect(firstItem).toHaveProperty('idpk');
+        
+    } catch (error) {
+        console.error('testProto error:', error.response?.data || error.message);
+        throw error;
+    }
+}, 15000);

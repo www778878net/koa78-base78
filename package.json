@@ -26,6 +26,7 @@
     ],
     "scripts": {
         "start": "cross-env NODE_ENV=development ts-node src/startserver.ts",
+        "dev:gen": "bash hooks/generateSchemas.sh",
         "build": "tsc",
         "start:svc": "cross-env NODE_ENV=production node ./dist/startserver.js",
         "startback": "npm run build && cross-env NODE_ENV=production node ./dist/index.js",
@@ -81,6 +82,7 @@
         "request": "^2.88.2",
         "tslog78": "^1.7.2",
         "urlencode": "^2.0.0",
-        "zod": "^3.22.4"
+        "zod": "^3.22.4",
+        "protobufjs": "^7.2.4"
     }
 }
