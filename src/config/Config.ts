@@ -26,6 +26,9 @@ export class Config {
                 console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
             }
 
+            // 添加调试日志，输出配置内容
+            console.log('Loaded config object:', JSON.stringify(this.configObject, null, 2));
+
             // 从环境变量或配置中获取表配置文件路径
             let tableConfigFilePath = this.configObject.tableconfigfile;
 

@@ -52,15 +52,15 @@ $:
         - vscode
         - docker
       stages:
-        - name: install-deps
-          script:    
-            - pnpm install   
         - name: start-services
           script:
             - /workspace/doc/start-services.sh
         - name: init-database
           script:
             - /workspace/doc/init-db.sh
+        - name: install-deps
+          script:    
+            - pnpm install   
       endStages:
         - name: end stage 1
           script: echo "end stage 1"

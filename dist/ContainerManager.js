@@ -132,7 +132,7 @@ class ContainerManager {
                 // 日志服务在其他服务之前初始化，以便记录后续初始化过程
                 this.initializeLogger();
                 // 获取数据库和缓存配置
-                const mysqlConfig = config.get('mysql');
+                const mysqlConfig = config.get('mysqls');
                 const memcachedConfig = config.get('memcached');
                 const redisConfig = config.get('redis');
                 const sqliteConfig = config.get('sqlites');

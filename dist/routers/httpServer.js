@@ -16,7 +16,6 @@ const router = new router_1.default();
 // 统计中间件
 const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const start = Date.now(); // Request start time
-    console.log('statsMiddleware');
     yield next();
     const ms = Date.now() - start; // Request duration
     // 如果 ctx.params 是 undefined，直接返回
@@ -63,7 +62,6 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
 // 错误处理中间件
 const errorHandler = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('errorHandler');
         yield next();
     }
     catch (err) {
@@ -99,7 +97,6 @@ function startServer(port) {
             // 兼容已有设置
             if (ctx.request.body !== undefined)
                 return yield next();
-            console.log(ctx);
             const contentType = ctx.get('Content-Type') || '';
             let body;
             try {
@@ -124,6 +121,7 @@ function startServer(port) {
                 ctx.throw(422, `Body parse error: ${e.message}`);
             }
             ctx.request.body = body || {};
+            log.detail("Request body:", body);
             yield next();
         }));
         // 辅助函数：读取流中的请求体
