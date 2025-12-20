@@ -3,7 +3,7 @@
     "port": 888,
     "isdebug": true,
     "host": "oa.778878.net",
-    "tableconfigfile": "./src/config/tableConfig.ts",
+    "tableconfigfile": "./src/config/tabledef.ts",
     "iplog": true,
     "nodejslog": {
         "issave": true,
@@ -15,30 +15,5 @@
             "isLog": true,
             "isCount": true
         }
-    },
-    "mysqls": {
-        "default": {
-            "host": "127.0.0.1",
-            "port": "3306",
-            "password": "rootpassword",
-            "database": "testdb",
-            "user": "root",
-            "isLog": true,
-            "isCount": true,
-            "max": 10
-        }
-    },
-    "memcached": {
-        "host": "localhost",
-        "port": 11211,
-        "max": 100,
-        "local": "dev"
-    },
-    "redis": {
-        "host": "localhost",
-        "port": 6379,
-        "pwd": "",
-        "max": 100,
-        "local": "dev"
     }
 }

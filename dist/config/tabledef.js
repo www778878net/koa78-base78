@@ -23,4 +23,4 @@ exports.tableConfigs = {
         apisys: 'testmenu'
     },
 };
-//# sourceMappingURL=tableConfig.js.map
+//# sourceMappingURL=tabledef.js.map

@@ -93,7 +93,7 @@ class ContainerManager {
             loggerInstance.setup(serverLogger, new tslog78_1.FileLog78(), new tslog78_1.ConsoleLog78());
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(20, 20, 50);
+                loggerInstance.setupLevel(20, 0, 50);
                 loggerInstance.setupDetailFile("detail.log");
                 loggerInstance.clearDetailLog();
             }
@@ -125,6 +125,7 @@ class ContainerManager {
             // 创建新的容器
             this.container = new inversify_1.Container();
             try {
+                console.log('容器初始化开始');
                 // 初始化配置服务
                 this.container.bind(Config_1.Config).toSelf().inSingletonScope();
                 const config = this.container.get(Config_1.Config);
@@ -161,6 +162,7 @@ class ContainerManager {
                 const cacheService = this.container.get(CacheService_1.CacheService);
                 cacheService.setMemcache(dbConnections);
                 authService.init(databaseService, cacheService);
+                console.log('控制器初始化开始');
                 // 绑定ControllerLoader服务
                 this.container.bind(ControllerLoader_1.ControllerLoader).toSelf().inSingletonScope();
                 // 预加载控制器，避免第一次请求时出现控制器找不到的问题

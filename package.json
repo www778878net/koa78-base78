@@ -27,7 +27,7 @@
     "scripts": {
         "start": "cross-env NODE_ENV=development ts-node src/startserver.ts",
         "build": "tsc",
-        "start:svc": "cross-env NODE_ENV=development node ./dist/startserver.js",
+        "start:svc": "cross-env NODE_ENV=production node ./dist/startserver.js",
         "startback": "npm run build && cross-env NODE_ENV=production node ./dist/index.js",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
         "postversion": "git push --follow-tags  && git checkout develop && git merge main && git push origin develop",
