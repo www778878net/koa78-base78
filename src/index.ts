@@ -1,64 +1,114 @@
-export {
+// 创建一个默认导出对象，将所有导出项挂载在其上
+import {
     BaseSchema,
     CidSchema,
     UidSchema,
 } from './controllers/BaseSchema';
 
-export {
+import {
     default as Base78,
     CidBase78,
     UidBase78
 } from './controllers/Base78';
 
-export {
+import {
     Config,
 } from './config/Config';
 
-export {
+import {
     TableSet,
     TableConfig,
     tableConfigs,
     TableSchemas
 } from './config/tableConfig';
 
-export {
+import {
     DatabaseConnections,
 } from './static/DatabaseConnections';
 
-export {
+import {
     DatabaseService,
 } from './services/DatabaseService';
 
-export {
+import {
     CacheService,
 } from './services/CacheService';
 
-export {
+import {
     AuthService,
 } from './services/AuthService';
 
-export {
+import {
     default as Elasticsearch78
 } from './services/elasticsearch78';
 
-export {
+import {
     default as Request78
 } from './dll78/Request78';
 
-export {
+import {
     QueryBuilder,
 } from './utils/QueryBuilder';
 
-export {
+import {
     ApiMethod,
 } from './interfaces/decorators';
 
-export {
+import {
     ContainerManager,
 } from './ContainerManager';
 
-export {
+import {
     ControllerLoader,
 } from './utils/ControllerLoader';
 
-export { default as Server } from './server';
+import { Server } from './server';
+
+// 创建默认导出对象
+const koa78Base78 = {
+    Base78,
+    CidBase78,
+    UidBase78,
+    Config,
+    tableConfigs,
+    DatabaseConnections,
+    DatabaseService,
+    CacheService,
+    AuthService,
+    Elasticsearch78,
+    Request78,
+    QueryBuilder,
+    ApiMethod,
+    ContainerManager,
+    ControllerLoader,
+    Server
+};
+
+// 导出所有内容
+export {
+    BaseSchema,
+    CidSchema,
+    UidSchema,
+    Base78,
+    CidBase78,
+    UidBase78,
+    Config,
+    TableSet,
+    TableConfig,
+    tableConfigs,
+    TableSchemas,
+    DatabaseConnections,
+    DatabaseService,
+    CacheService,
+    AuthService,
+    Elasticsearch78,
+    Request78,
+    QueryBuilder,
+    ApiMethod,
+    ContainerManager,
+    ControllerLoader,
+    Server
+};
+
+// 默认导出整个对象
+export default koa78Base78;
