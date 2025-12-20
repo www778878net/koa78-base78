@@ -2,7 +2,7 @@
 import { startServer } from './routers/httpServer';
 import { ContainerManager } from './ContainerManager';
 
-export class Server {
+export default class Server {
     /**
      * 启动服务器
      * 一键初始化所有服务并启动HTTP服务器
@@ -39,5 +39,3 @@ export class Server {
     }
 }
 
-// 默认导出Server类
-export default Server;
