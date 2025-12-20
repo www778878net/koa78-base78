@@ -19,7 +19,7 @@ export class AuthService {
         // 使用新的日志服务方式
         this.log = ContainerManager.getLogger();
     }
-    
+
     // 初始化方法，用于设置依赖项
     public init(dbService: DatabaseService, cacheService: CacheService): void {
         this.dbService = dbService;
@@ -41,7 +41,7 @@ export class AuthService {
                 // 通过容器获取Config实例
                 const config = globalAny.appContainer.get(Config);
                 const cidMyFromConfig = config.get('cidmy');
-                
+
                 // 如果配置中有cidmy且不为空，则使用配置中的值
                 if (cidMyFromConfig && typeof cidMyFromConfig === 'string' && cidMyFromConfig.length > 0) {
                     return cidMyFromConfig;
@@ -51,7 +51,7 @@ export class AuthService {
             // 获取配置失败时使用默认值
             console.warn('Failed to get cidmy from config, using default value:', error);
         }
-        
+
         // 默认值
         return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
     }
@@ -72,7 +72,7 @@ export class AuthService {
         const bcidSchema = z.string().length(36).refine(val => val.indexOf("-") === 8 && val.indexOf("-", 19) === 23);
         const midSchema = z.string().length(36);
         const numericSchema = z.string().regex(/^\d+$/);
-        this.log.debug(`upcheck sid: ${JSON.stringify(up)}`);
+        this.log.detail(`upcheck sid: ${JSON.stringify(up)}`);
 
         try {
             sidSchema.parse(up.sid);

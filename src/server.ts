@@ -1,4 +1,4 @@
-import Koa = require('koa');
+import Koa = require('koa');//不能修改这里 因为我们要动态导入模块的 改这个没意义不修改tsconfig.json
 import { startServer } from './routers/httpServer';
 import { ContainerManager } from './ContainerManager';
 
@@ -26,7 +26,7 @@ export class Server {
             // 初始化容器管理器
             const containerManager = new ContainerManager(configPath);
             const container = await containerManager.initialize();
-            
+
             console.info('Application services initialized successfully');
 
             // 启动HTTP服务器
