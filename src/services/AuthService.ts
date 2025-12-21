@@ -149,7 +149,7 @@ export class AuthService {
         if (tmp) {
             up.uid = tmp["id"];
             up.uname = tmp["uname"];
-            up.cid = tmp["cid"];
+            up.cid = tmp["cid"] || tmp["id"];  // 当 cid 为 null 时使用 uid (id) 作为后备值
             up.coname = tmp["coname"];
             up.idceo = tmp["idceo"];
             up.weixin = tmp["openweixin"];
