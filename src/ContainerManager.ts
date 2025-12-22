@@ -155,7 +155,7 @@ export class ContainerManager {
             const sqliteConfig = config.get('sqlites');
 
             // 初始化数据库连接
-            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig);//, sqliteConfig
+            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);//, sqliteConfig
 
             // 使用 toConstantValue 绑定已存在的实例
             // 这种方式适用于:
