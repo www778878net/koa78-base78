@@ -79,7 +79,7 @@
         "md5": "^2.3.0",
         "memcache78": "^2.1.6",
         "mysql78": "^2.5.3",
-        "protobufjs": "^7.2.4",
+        "protobufjs": "^7.5.4",
         "raw-body": "^3.0.2",
         "redis78": "^0.1.3",
         "request": "^2.88.2",
