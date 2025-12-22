@@ -139,7 +139,7 @@ class ContainerManager {
                 const redisConfig = config.get('redis');
                 const sqliteConfig = config.get('sqlites');
                 // 初始化数据库连接
-                const dbConnections = DatabaseConnections_1.DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig); //, sqliteConfig
+                const dbConnections = DatabaseConnections_1.DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig); //, sqliteConfig
                 // 使用 toConstantValue 绑定已存在的实例
                 // 这种方式适用于:
                 // 1. 已经创建好的实例（如通过 getInstance 获取的单例）
