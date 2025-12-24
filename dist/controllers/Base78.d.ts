@@ -12,8 +12,6 @@ interface ShardingConfig {
     type: 'daily' | 'monthly' | 'none';
     tableSQL?: string;
     retentionDays?: number;
-    createFutureDays?: number;
-    createPastDays?: number;
 }
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;

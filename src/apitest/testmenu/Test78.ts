@@ -11,9 +11,7 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         // 设置分表配置示例 - 按天分表
         this.setShardingConfig({
             type: 'daily',
-            retentionDays: 5,           // 保留5天的表
-            createFutureDays: 5,       // 预创建未来5天的表
-            createPastDays: 2,         // 预创建过去2天的表
+            retentionDays: 5,           // 保留5天的表   
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                     id VARCHAR(36) NOT NULL DEFAULT '',
@@ -61,8 +59,7 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         return {
             shardingType: this.shardingConfig?.type,
             retentionDays: this.shardingConfig?.retentionDays,
-            createFutureDays: this.shardingConfig?.createFutureDays,
-            createPastDays: this.shardingConfig?.createPastDays,
+
             hasTableSQL: !!this.shardingConfig?.tableSQL
         };
     }

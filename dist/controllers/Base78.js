@@ -108,13 +108,12 @@ class Base78 {
                 const dropResult = yield this.dropOldShardingTable(retentionDays);
                 if (dropResult === 1) {
                     // 如果删除成功，只新建第retentionDays天的表
-                    const createFutureDays = this.shardingConfig.createFutureDays || 5;
                     let futureDate;
                     if (this.shardingConfig.type === 'daily') {
-                        futureDate = (0, dayjs_1.default)().add(createFutureDays, 'day');
+                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'day');
                     }
                     else { // monthly
-                        futureDate = (0, dayjs_1.default)().add(createFutureDays, 'month');
+                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'month');
                     }
                     const dateStr = this.shardingConfig.type === 'daily' ?
                         futureDate.format('YYYYMMDD') :
@@ -122,10 +121,10 @@ class Base78 {
                     yield this.createShardingTable(dateStr);
                 }
                 else {
-                    // 如果删除失败，新建从后退pastDays天开始到未来futureDays天的表
-                    const createPastDays = this.shardingConfig.createPastDays || 4;
-                    const createFutureDays = this.shardingConfig.createFutureDays || 5;
-                    for (let i = -createPastDays; i <= createFutureDays; i++) {
+                    // 如果删除失败，新建从后退(retentionDays-1)天开始到未来retentionDays天的表
+                    const pastDays = retentionDays - 1;
+                    const futureDays = retentionDays;
+                    for (let i = -pastDays; i <= futureDays; i++) {
                         let date;
                         if (this.shardingConfig.type === 'daily') {
                             date = (0, dayjs_1.default)().add(i, 'day');
@@ -248,8 +247,8 @@ class Base78 {
             const self = this;
             const up = self.up;
             // 防注入: 校验cid和uname
-            if (up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy') && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
-                throw new Error(`err:只有管理员可以操作 ${up.uname} ${up.cid} ${this.config.get('cidmy')}`);
+            if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
+                throw new Error("err:只有管理员可以操作");
             }
             let colp = colpin || this.up.cols || self.tableConfig.colsImp; // 修改列
             let order = up.order; // 主键，暂时只支持一个

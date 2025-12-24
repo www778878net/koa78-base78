@@ -10,8 +10,6 @@ class Test78 extends Base78_1.CidBase78 {
         this.setShardingConfig({
             type: 'daily',
             retentionDays: 5,
-            createFutureDays: 5,
-            createPastDays: 2,
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                     id VARCHAR(36) NOT NULL DEFAULT '',
@@ -52,15 +50,13 @@ class Test78 extends Base78_1.CidBase78 {
         });
     }
     testShardingConfig() {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // 测试分表配置是否正确设置
             return {
                 shardingType: (_a = this.shardingConfig) === null || _a === void 0 ? void 0 : _a.type,
                 retentionDays: (_b = this.shardingConfig) === null || _b === void 0 ? void 0 : _b.retentionDays,
-                createFutureDays: (_c = this.shardingConfig) === null || _c === void 0 ? void 0 : _c.createFutureDays,
-                createPastDays: (_d = this.shardingConfig) === null || _d === void 0 ? void 0 : _d.createPastDays,
-                hasTableSQL: !!((_e = this.shardingConfig) === null || _e === void 0 ? void 0 : _e.tableSQL)
+                hasTableSQL: !!((_c = this.shardingConfig) === null || _c === void 0 ? void 0 : _c.tableSQL)
             };
         });
     }
