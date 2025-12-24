@@ -31,6 +31,7 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string = "default";//mysql数据库名（非表名） 
     protected tbname: string;//表名
     public tableConfig: TableSet;
+    //维护命令
     private static lastMaintenanceDate: string = '';
     // 新增：分表配置对象
     protected shardingConfig?: ShardingConfig;
@@ -141,22 +142,22 @@ export default class Base78<T extends BaseSchema> {
                 // 如果删除成功，只新建第retentionDays天的表
                 const createFutureDays = this.shardingConfig.createFutureDays || 5;
                 let futureDate;
-                
+
                 if (this.shardingConfig.type === 'daily') {
                     futureDate = dayjs().add(createFutureDays, 'day');
                 } else { // monthly
                     futureDate = dayjs().add(createFutureDays, 'month');
                 }
-                
-                const dateStr = this.shardingConfig.type === 'daily' ? 
-                    futureDate.format('YYYYMMDD') : 
+
+                const dateStr = this.shardingConfig.type === 'daily' ?
+                    futureDate.format('YYYYMMDD') :
                     futureDate.format('YYYYMM');
                 await this.createShardingTable(dateStr);
             } else {
                 // 如果删除失败，新建从后退pastDays天开始到未来futureDays天的表
                 const createPastDays = this.shardingConfig.createPastDays || 4;
                 const createFutureDays = this.shardingConfig.createFutureDays || 5;
-                
+
                 for (let i = -createPastDays; i <= createFutureDays; i++) {
                     let date;
                     if (this.shardingConfig.type === 'daily') {
@@ -164,9 +165,9 @@ export default class Base78<T extends BaseSchema> {
                     } else { // monthly
                         date = dayjs().add(i, 'month');
                     }
-                    
-                    const dateStr = this.shardingConfig.type === 'daily' ? 
-                        date.format('YYYYMMDD') : 
+
+                    const dateStr = this.shardingConfig.type === 'daily' ?
+                        date.format('YYYYMMDD') :
                         date.format('YYYYMM');
                     await this.createShardingTable(dateStr);
                 }
@@ -343,6 +344,8 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mAdd(colp?: string[]): Promise<number> {
+        await this.performShardingTableMaintenance();
+
         colp = colp || this.tableConfig.colsImp;
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
