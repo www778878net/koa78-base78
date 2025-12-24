@@ -1,3 +1,4 @@
+Base78.ts
 import 'reflect-metadata';
 import { DatabaseService } from '../services/DatabaseService';
 import { CacheService } from '../services/CacheService';
@@ -12,14 +13,28 @@ import { ApiMethod } from '../interfaces/decorators';
 import { ContainerManager } from '../ContainerManager';
 import { TsLog78 } from 'tslog78';
 import Elasticsearch78 from '../services/elasticsearch78';
+import dayjs from 'dayjs'; // 导入dayjs
 
 // 确保使用CommonJS模块导出方式
+
+// 分表配置接口
+interface ShardingConfig {
+    type: 'daily' | 'monthly' | 'none';
+    tableSQL?: string;
+    retentionDays?: number; // 保留天数，默认为5
+    createFutureDays?: number; // 预创建未来天数，默认为5
+    createPastDays?: number; // 预创建过去天数，默认为4
+}
+
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
     protected logger: TsLog78;
     protected dbname: string = "default";//mysql数据库名（非表名） 
     protected tbname: string;//表名
     public tableConfig: TableSet;
+    private static lastMaintenanceDate: string = '';
+    // 新增：分表配置对象
+    protected shardingConfig?: ShardingConfig;
 
     constructor() {
         // 使用新的日志服务方式，与DatabaseService中完全一致
@@ -27,6 +42,142 @@ export default class Base78<T extends BaseSchema> {
         this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
+    }
+
+    // 新增：设置分表配置的方法
+    public setShardingConfig(config: ShardingConfig): void {
+        this.shardingConfig = config;
+    }
+
+    // 新增：获取动态表名的方法
+    protected getDynamicTableName(): string {
+        if (!this.shardingConfig || this.shardingConfig.type === 'none') {
+            return this.tableConfig.tbname;
+        }
+
+        const currentDate = dayjs();
+        let dateSuffix: string;
+
+        switch (this.shardingConfig.type) {
+            case 'daily':
+                dateSuffix = currentDate.format('YYYYMMDD');
+                break;
+            case 'monthly':
+                dateSuffix = currentDate.format('YYYYMM');
+                break;
+            default:
+                return this.tableConfig.tbname;
+        }
+
+        return `${this.tableConfig.tbname}_${dateSuffix}`;
+    }
+
+    // 新增：创建分表的方法
+    private async createShardingTable(dateStr: string): Promise<void> {
+        if (!this.shardingConfig || !this.shardingConfig.tableSQL) {
+            throw new Error('分表建表SQL未定义');
+        }
+
+        const tableName = `${this.tableConfig.tbname}_${dateStr}`;
+        // 替换SQL中的表名占位符（如果有的话）为实际的表名
+        const sqlWithTableName = this.shardingConfig.tableSQL.replace(/\{TABLE_NAME\}/g, tableName);
+        await this.dbService.m(sqlWithTableName, [], this.up, this.dbname);
+    }
+
+    // 新增：删除指定日期之前的分表
+    private async dropOldShardingTable(daysAgo: number): Promise<number> {
+        if (!this.shardingConfig) {
+            return 0; // 没有配置分表，直接返回
+        }
+
+        let targetDate: string;
+        if (this.shardingConfig.type === 'daily') {
+            targetDate = dayjs().subtract(daysAgo, 'day').format('YYYYMMDD');
+        } else if (this.shardingConfig.type === 'monthly') {
+            targetDate = dayjs().subtract(daysAgo, 'month').format('YYYYMM');
+        } else {
+            return 0; // 不是分表类型，返回
+        }
+
+        const tableName = `${this.tableConfig.tbname}_${targetDate}`;
+        const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+
+        try {
+            // 先检查表是否存在
+            const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
+            const tableExists = await this.dbService.get(checkTableSQL, [], this.up, this.dbname);
+
+            // 如果表不存在，直接返回0
+            if (tableExists.length === 0) {
+                return 0;
+            }
+
+            await this.dbService.m(dropTableSQL, [], this.up, this.dbname);
+            return 1; // 成功删除返回1
+        } catch (error) {
+            this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+            return 0; // 删除失败返回0
+        }
+    }
+
+    // 新增：执行分表维护任务
+    protected async performShardingTableMaintenance(): Promise<void> {
+        if (!this.shardingConfig || this.shardingConfig.type === 'none') {
+            return; // 如果没有启用分表，则不执行维护任务
+        }
+
+        const today = dayjs().format('YYYY-MM-DD');
+        const retentionDays = this.shardingConfig.retentionDays || 5;
+
+        // 如果今天已经执行过维护任务，则跳过
+        if (Base78.lastMaintenanceDate === today) {
+            return;
+        }
+
+        try {
+            // 正常情况下：删除retentionDays天前的分表
+            const dropResult = await this.dropOldShardingTable(retentionDays);
+
+            if (dropResult === 1) {
+                // 如果删除成功，只新建第retentionDays天的表
+                const createFutureDays = this.shardingConfig.createFutureDays || 5;
+                let futureDate;
+                
+                if (this.shardingConfig.type === 'daily') {
+                    futureDate = dayjs().add(createFutureDays, 'day');
+                } else { // monthly
+                    futureDate = dayjs().add(createFutureDays, 'month');
+                }
+                
+                const dateStr = this.shardingConfig.type === 'daily' ? 
+                    futureDate.format('YYYYMMDD') : 
+                    futureDate.format('YYYYMM');
+                await this.createShardingTable(dateStr);
+            } else {
+                // 如果删除失败，新建从后退pastDays天开始到未来futureDays天的表
+                const createPastDays = this.shardingConfig.createPastDays || 4;
+                const createFutureDays = this.shardingConfig.createFutureDays || 5;
+                
+                for (let i = -createPastDays; i <= createFutureDays; i++) {
+                    let date;
+                    if (this.shardingConfig.type === 'daily') {
+                        date = dayjs().add(i, 'day');
+                    } else { // monthly
+                        date = dayjs().add(i, 'month');
+                    }
+                    
+                    const dateStr = this.shardingConfig.type === 'daily' ? 
+                        date.format('YYYYMMDD') : 
+                        date.format('YYYYMM');
+                    await this.createShardingTable(dateStr);
+                }
+            }
+
+            // 更新最后维护日期
+            Base78.lastMaintenanceDate = today;
+        } catch (error) {
+            this.logger.error(`执行分表维护任务失败: ${error}`);
+        }
     }
 
     public setup(upInfo: UpInfo): void {
@@ -38,6 +189,36 @@ export default class Base78<T extends BaseSchema> {
             throw new Error('UpInfo not set. Call setup() before using up.');
         }
         return this._up;
+    }
+
+
+
+    /**
+  * 删除指定日期之前的日志表
+  * @param daysAgo 距离今天多少天前的表
+  * @returns Promise<number> 返回1表示删除成功，其他值表示删除失败
+  */
+    private async dropOldLogTable(daysAgo: number): Promise<number> {
+        const targetDate = dayjs().subtract(daysAgo, 'day').format('YYYYMMDD');
+        const tableName = `sys_log_${targetDate}`;
+        const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+
+        try {
+            // 先检查表是否存在
+            const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
+            const tableExists = await this.dbService.get(checkTableSQL, [], this.up);
+
+            // 如果表不存在，直接返回0
+            if (tableExists.length === 0) {
+                return 0;
+            }
+
+            await this.dbService.m(dropTableSQL, [], this.up);
+            return 1; // 成功删除返回1
+        } catch (error) {
+            this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+            return 0; // 删除失败返回0
+        }
     }
 
     @ApiMethod()
@@ -134,7 +315,7 @@ export default class Base78<T extends BaseSchema> {
         }
 
         // 构建 SQL 查询
-        let sb = `UPDATE ${self.tableConfig.tbname} SET `;
+        let sb = `UPDATE ${self.getDynamicTableName()} SET `;
         for (let i = 0; i < colp.length; i++) {
             if (i > 0) sb += `, `;
             sb += `\`${colp[i]}\` = CASE idpk `;
@@ -170,7 +351,7 @@ export default class Base78<T extends BaseSchema> {
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
 
-        const query = `INSERT INTO ${this.tableConfig.tbname} (${colp.join(',')},id,upby,uptime,${this.tableConfig.uidcid}) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`;
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${colp.join(',')},id,upby,uptime,${this.tableConfig.uidcid}) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
 
         const result = await this.dbService.mAdd(query, values, this.up, this.dbname);
 
@@ -190,7 +371,7 @@ export default class Base78<T extends BaseSchema> {
         }
 
         const setClause = colp.map(col => `${col}=?`).join(',');
-        const query = `UPDATE ${this.tableConfig.tbname} SET ${setClause}, upby=?, uptime=? WHERE idpk=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE idpk=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
@@ -208,7 +389,7 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
         const setClause = colp.map(col => `${col}=?`).join(',');
-        const query = `UPDATE ${this.tableConfig.tbname} SET ${setClause}, upby=?, uptime=? WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
@@ -220,7 +401,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async midpk(colp?: string[]): Promise<string> {
-        const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE idpk=? AND ${this.tableConfig.uidcid}=?`;
+        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE idpk=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -233,7 +414,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async m(colp?: string[]): Promise<string> {
-        const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE id=? AND ${this.tableConfig.uidcid}=?`;
+        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -265,13 +446,13 @@ export default class Base78<T extends BaseSchema> {
             }
         }
 
-        const query = `SELECT *    FROM ${this.tableConfig.tbname} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getstart}, ${this.up.getnumber}`;
+        const query = `SELECT *    FROM ${this.getDynamicTableName()} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getstart}, ${this.up.getnumber}`; // 使用动态表名
 
         return this.dbService.get(query, queryParams, this.up, this.dbname);
     }
     @ApiMethod()
     async del(): Promise<string> {
-        const query = `DELETE FROM ${this.tableConfig.tbname} WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
         const result = await this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         return result === 0 ? "err:没有行被修改" : this.up.mid.toString();
@@ -295,7 +476,7 @@ export default class Base78<T extends BaseSchema> {
         const firstField = this.tableConfig.cols[0];
         const firstFieldValue = this.up.pars[0];
         //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
-        const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE ${firstField}=? AND ${this.tableConfig.uidcid}=?`;
+        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE ${firstField}=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
         const result = await this.dbService.get(query, [firstFieldValue, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
         //console.log(`mByFirstField33:` + query + " " + this.up[this.tableConfig.uidcid] + " " + firstFieldValue + " " + JSON.stringify(result))
         if (result.length === 1) {
