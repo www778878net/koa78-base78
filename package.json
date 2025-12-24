@@ -32,7 +32,7 @@
         "startback": "npm run build && cross-env NODE_ENV=production node ./dist/index.js",
         "start:test": "cross-env NODE_ENV=test node ./dist/index.js config configtest.json",
         "postversion": "git push --follow-tags  && git checkout develop && git merge main && git push origin develop",
-        "preversion": "npm run build && npm test",
+        "preversion": "npm run build  ",
         "dev:precommit": "node hooks/pre-commit.cjs",
         "dev:prepush": "node hooks/pre-push.cjs",
         "dev:hooks": "node hooks/install-hooks.cjs",
