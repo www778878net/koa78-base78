@@ -10,8 +10,6 @@ class Test78 extends Base78_1.CidBase78 {
         this.setShardingConfig({
             type: 'daily',
             retentionDays: 5,
-            createFutureDays: 5,
-            createPastDays: 2,
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                     id VARCHAR(36) NOT NULL DEFAULT '',
