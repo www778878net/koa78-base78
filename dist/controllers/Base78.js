@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UidBase78 = exports.CidBase78 = void 0;
 const tslib_1 = require("tslib");
-Base78.ts;
 require("reflect-metadata");
 const DatabaseService_1 = require("../services/DatabaseService");
 const CacheService_1 = require("../services/CacheService");
@@ -295,6 +294,7 @@ class Base78 {
     }
     mAdd(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield this.performShardingTableMaintenance();
             colp = colp || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
@@ -426,6 +426,7 @@ class Base78 {
         });
     }
 }
+//维护命令
 Base78.lastMaintenanceDate = '';
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
