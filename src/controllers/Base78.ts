@@ -1,4 +1,3 @@
-Base78.ts
 import 'reflect-metadata';
 import { DatabaseService } from '../services/DatabaseService';
 import { CacheService } from '../services/CacheService';
