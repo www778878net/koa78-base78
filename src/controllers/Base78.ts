@@ -21,8 +21,6 @@ interface ShardingConfig {
     type: 'daily' | 'monthly' | 'none';
     tableSQL?: string;
     retentionDays?: number; // 保留天数，默认为5
-    createFutureDays?: number; // 预创建未来天数，默认为5
-    createPastDays?: number; // 预创建过去天数，默认为4
 }
 
 export default class Base78<T extends BaseSchema> {
@@ -140,13 +138,12 @@ export default class Base78<T extends BaseSchema> {
 
             if (dropResult === 1) {
                 // 如果删除成功，只新建第retentionDays天的表
-                const createFutureDays = this.shardingConfig.createFutureDays || 5;
                 let futureDate;
 
                 if (this.shardingConfig.type === 'daily') {
-                    futureDate = dayjs().add(createFutureDays, 'day');
+                    futureDate = dayjs().add(retentionDays, 'day');
                 } else { // monthly
-                    futureDate = dayjs().add(createFutureDays, 'month');
+                    futureDate = dayjs().add(retentionDays, 'month');
                 }
 
                 const dateStr = this.shardingConfig.type === 'daily' ?
@@ -154,11 +151,11 @@ export default class Base78<T extends BaseSchema> {
                     futureDate.format('YYYYMM');
                 await this.createShardingTable(dateStr);
             } else {
-                // 如果删除失败，新建从后退pastDays天开始到未来futureDays天的表
-                const createPastDays = this.shardingConfig.createPastDays || 4;
-                const createFutureDays = this.shardingConfig.createFutureDays || 5;
+                // 如果删除失败，新建从后退(retentionDays-1)天开始到未来retentionDays天的表
+                const pastDays = retentionDays - 1;
+                const futureDays = retentionDays;
 
-                for (let i = -createPastDays; i <= createFutureDays; i++) {
+                for (let i = -pastDays; i <= futureDays; i++) {
                     let date;
                     if (this.shardingConfig.type === 'daily') {
                         date = dayjs().add(i, 'day');
@@ -294,8 +291,8 @@ export default class Base78<T extends BaseSchema> {
         const up = self.up;
 
         // 防注入: 校验cid和uname
-        if (up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy') && !up.uname?.indexOf("sys")) {
-            throw new Error(`err:只有管理员可以操作 ${up.uname} ${up.cid} ${this.config.get('cidmy')}`);
+        if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !up.uname?.indexOf("sys")) {
+            throw new Error("err:只有管理员可以操作");
         }
 
         let colp = colpin || this.up.cols || self.tableConfig.colsImp;  // 修改列
