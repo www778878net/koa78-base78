@@ -11,7 +11,7 @@ const decorators_1 = require("../interfaces/decorators");
 const ContainerManager_1 = require("../ContainerManager");
 const tslog78_1 = require("tslog78");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
-// 确保使用CommonJS模块导出方式
+const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
 class Base78 {
     constructor() {
         this.dbname = "default"; //mysql数据库名（非表名） 
@@ -21,6 +21,132 @@ class Base78 {
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
+    // 新增：设置分表配置的方法
+    setShardingConfig(config) {
+        this.shardingConfig = config;
+    }
+    // 新增：获取动态表名的方法
+    getDynamicTableName() {
+        if (!this.shardingConfig || this.shardingConfig.type === 'none') {
+            return this.tableConfig.tbname;
+        }
+        const currentDate = (0, dayjs_1.default)();
+        let dateSuffix;
+        switch (this.shardingConfig.type) {
+            case 'daily':
+                dateSuffix = currentDate.format('YYYYMMDD');
+                break;
+            case 'monthly':
+                dateSuffix = currentDate.format('YYYYMM');
+                break;
+            default:
+                return this.tableConfig.tbname;
+        }
+        return `${this.tableConfig.tbname}_${dateSuffix}`;
+    }
+    // 新增：创建分表的方法
+    createShardingTable(dateStr) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.shardingConfig || !this.shardingConfig.tableSQL) {
+                throw new Error('分表建表SQL未定义');
+            }
+            const tableName = `${this.tableConfig.tbname}_${dateStr}`;
+            // 替换SQL中的表名占位符（如果有的话）为实际的表名
+            const sqlWithTableName = this.shardingConfig.tableSQL.replace(/\{TABLE_NAME\}/g, tableName);
+            yield this.dbService.m(sqlWithTableName, [], this.up, this.dbname);
+        });
+    }
+    // 新增：删除指定日期之前的分表
+    dropOldShardingTable(daysAgo) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.shardingConfig) {
+                return 0; // 没有配置分表，直接返回
+            }
+            let targetDate;
+            if (this.shardingConfig.type === 'daily') {
+                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'day').format('YYYYMMDD');
+            }
+            else if (this.shardingConfig.type === 'monthly') {
+                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'month').format('YYYYMM');
+            }
+            else {
+                return 0; // 不是分表类型，返回
+            }
+            const tableName = `${this.tableConfig.tbname}_${targetDate}`;
+            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+            try {
+                // 先检查表是否存在
+                const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
+                const tableExists = yield this.dbService.get(checkTableSQL, [], this.up, this.dbname);
+                // 如果表不存在，直接返回0
+                if (tableExists.length === 0) {
+                    return 0;
+                }
+                yield this.dbService.m(dropTableSQL, [], this.up, this.dbname);
+                return 1; // 成功删除返回1
+            }
+            catch (error) {
+                this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+                return 0; // 删除失败返回0
+            }
+        });
+    }
+    // 新增：执行分表维护任务
+    performShardingTableMaintenance() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (!this.shardingConfig || this.shardingConfig.type === 'none') {
+                return; // 如果没有启用分表，则不执行维护任务
+            }
+            const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
+            const retentionDays = this.shardingConfig.retentionDays || 5;
+            // 如果今天已经执行过维护任务，则跳过
+            if (Base78.lastMaintenanceDate === today) {
+                return;
+            }
+            try {
+                // 正常情况下：删除retentionDays天前的分表
+                const dropResult = yield this.dropOldShardingTable(retentionDays);
+                if (dropResult === 1) {
+                    // 如果删除成功，只新建第retentionDays天的表
+                    const createFutureDays = this.shardingConfig.createFutureDays || 5;
+                    let futureDate;
+                    if (this.shardingConfig.type === 'daily') {
+                        futureDate = (0, dayjs_1.default)().add(createFutureDays, 'day');
+                    }
+                    else { // monthly
+                        futureDate = (0, dayjs_1.default)().add(createFutureDays, 'month');
+                    }
+                    const dateStr = this.shardingConfig.type === 'daily' ?
+                        futureDate.format('YYYYMMDD') :
+                        futureDate.format('YYYYMM');
+                    yield this.createShardingTable(dateStr);
+                }
+                else {
+                    // 如果删除失败，新建从后退pastDays天开始到未来futureDays天的表
+                    const createPastDays = this.shardingConfig.createPastDays || 4;
+                    const createFutureDays = this.shardingConfig.createFutureDays || 5;
+                    for (let i = -createPastDays; i <= createFutureDays; i++) {
+                        let date;
+                        if (this.shardingConfig.type === 'daily') {
+                            date = (0, dayjs_1.default)().add(i, 'day');
+                        }
+                        else { // monthly
+                            date = (0, dayjs_1.default)().add(i, 'month');
+                        }
+                        const dateStr = this.shardingConfig.type === 'daily' ?
+                            date.format('YYYYMMDD') :
+                            date.format('YYYYMM');
+                        yield this.createShardingTable(dateStr);
+                    }
+                }
+                // 更新最后维护日期
+                Base78.lastMaintenanceDate = today;
+            }
+            catch (error) {
+                this.logger.error(`执行分表维护任务失败: ${error}`);
+            }
+        });
+    }
     setup(upInfo) {
         this._up = upInfo;
     }
@@ -29,6 +155,33 @@ class Base78 {
             throw new Error('UpInfo not set. Call setup() before using up.');
         }
         return this._up;
+    }
+    /**
+  * 删除指定日期之前的日志表
+  * @param daysAgo 距离今天多少天前的表
+  * @returns Promise<number> 返回1表示删除成功，其他值表示删除失败
+  */
+    dropOldLogTable(daysAgo) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'day').format('YYYYMMDD');
+            const tableName = `sys_log_${targetDate}`;
+            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+            try {
+                // 先检查表是否存在
+                const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
+                const tableExists = yield this.dbService.get(checkTableSQL, [], this.up);
+                // 如果表不存在，直接返回0
+                if (tableExists.length === 0) {
+                    return 0;
+                }
+                yield this.dbService.m(dropTableSQL, [], this.up);
+                return 1; // 成功删除返回1
+            }
+            catch (error) {
+                this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+                return 0; // 删除失败返回0
+            }
+        });
     }
     mUpdateElkByid() {
         var _a;
@@ -113,7 +266,7 @@ class Base78 {
                 values.push(vals); // 存储更新值
             }
             // 构建 SQL 查询
-            let sb = `UPDATE ${self.tableConfig.tbname} SET `;
+            let sb = `UPDATE ${self.getDynamicTableName()} SET `;
             for (let i = 0; i < colp.length; i++) {
                 if (i > 0)
                     sb += `, `;
@@ -141,13 +294,14 @@ class Base78 {
     }
     mAdd(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield this.performShardingTableMaintenance();
             colp = colp || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const values = this.up.pars.slice(0, colp.length);
             values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
-            const query = `INSERT INTO ${this.tableConfig.tbname} (${colp.join(',')},id,upby,uptime,${this.tableConfig.uidcid}) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`;
+            const query = `INSERT INTO ${this.getDynamicTableName()} (${colp.join(',')},id,upby,uptime,${this.tableConfig.uidcid}) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
             const result = yield this.dbService.mAdd(query, values, this.up, this.dbname);
             // 如果mAdd返回值是0 且tbname=jhs_puton 记录query和values
             if (result === 0) {
@@ -163,7 +317,7 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const setClause = colp.map(col => `${col}=?`).join(',');
-            const query = `UPDATE ${this.tableConfig.tbname} SET ${setClause}, upby=?, uptime=? WHERE idpk=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE idpk=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
             const values = this.up.pars.slice(0, colp.length);
             values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
@@ -180,7 +334,7 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const setClause = colp.map(col => `${col}=?`).join(',');
-            const query = `UPDATE ${this.tableConfig.tbname} SET ${setClause}, upby=?, uptime=? WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
             const values = this.up.pars.slice(0, colp.length);
             values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
@@ -189,7 +343,7 @@ class Base78 {
     }
     midpk(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE idpk=? AND ${this.tableConfig.uidcid}=?`;
+            const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE idpk=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
                 this.up.midpk = result[0]["idpk"];
@@ -202,7 +356,7 @@ class Base78 {
     }
     m(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE id=? AND ${this.tableConfig.uidcid}=?`;
+            const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
                 this.up.midpk = result[0]["idpk"];
@@ -230,13 +384,13 @@ class Base78 {
                     queryParams.push(this.up.pars[i]);
                 }
             }
-            const query = `SELECT *    FROM ${this.tableConfig.tbname} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getstart}, ${this.up.getnumber}`;
+            const query = `SELECT *    FROM ${this.getDynamicTableName()} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getstart}, ${this.up.getnumber}`; // 使用动态表名
             return this.dbService.get(query, queryParams, this.up, this.dbname);
         });
     }
     del() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const query = `DELETE FROM ${this.tableConfig.tbname} WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`;
+            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
             const result = yield this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             return result === 0 ? "err:没有行被修改" : this.up.mid.toString();
         });
@@ -258,7 +412,7 @@ class Base78 {
             const firstField = this.tableConfig.cols[0];
             const firstFieldValue = this.up.pars[0];
             //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
-            const query = `SELECT id,idpk FROM ${this.tableConfig.tbname} WHERE ${firstField}=? AND ${this.tableConfig.uidcid}=?`;
+            const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE ${firstField}=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [firstFieldValue, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             //console.log(`mByFirstField33:` + query + " " + this.up[this.tableConfig.uidcid] + " " + firstFieldValue + " " + JSON.stringify(result))
             if (result.length === 1) {
@@ -272,6 +426,8 @@ class Base78 {
         });
     }
 }
+//维护命令
+Base78.lastMaintenanceDate = '';
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),

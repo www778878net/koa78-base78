@@ -117,7 +117,7 @@ describe("SQLite Database Tests", () => {
     });
 
     it('should query data from sys_sql table', async () => {
-        // 设置单个测试的超时时间
+        // 设置单个测试的超时时间 
         jest.setTimeout(15000);
 
         try {
