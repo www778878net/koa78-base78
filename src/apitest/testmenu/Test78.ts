@@ -59,8 +59,7 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
         return {
             shardingType: this.shardingConfig?.type,
             retentionDays: this.shardingConfig?.retentionDays,
-            createFutureDays: this.shardingConfig?.createFutureDays,
-            createPastDays: this.shardingConfig?.createPastDays,
+
             hasTableSQL: !!this.shardingConfig?.tableSQL
         };
     }
