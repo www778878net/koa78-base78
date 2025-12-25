@@ -304,7 +304,7 @@ class Base78 {
             const result = yield this.dbService.mAdd(query, values, this.up, this.dbname);
             // 如果mAdd返回值是0 且tbname=jhs_puton 记录query和values
             if (result === 0) {
-                this.logger.warn(`mAdd returned 0 for jhs_puton table. Query: ${query}, Values: ${JSON.stringify(values)}`);
+                this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
             }
             return result;
         });
@@ -425,7 +425,7 @@ class Base78 {
         });
     }
 }
-//维护命令
+//维护命令一天执行一次
 Base78.lastMaintenanceDate = '';
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),

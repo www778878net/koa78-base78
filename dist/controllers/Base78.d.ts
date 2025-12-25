@@ -19,7 +19,7 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string;
     protected tbname: string;
     tableConfig: TableSet;
-    protected static lastMaintenanceDate;
+    protected static lastMaintenanceDate: string;
     protected shardingConfig?: ShardingConfig;
     constructor();
     setShardingConfig(config: ShardingConfig): void;
@@ -68,4 +68,4 @@ export declare class CidBase78<T extends BaseSchema> extends Base78<T> {
 }
 export declare class UidBase78<T extends BaseSchema> extends Base78<T> {
 }
-export { };
+export {};
