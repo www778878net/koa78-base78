@@ -19,7 +19,7 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string;
     protected tbname: string;
     tableConfig: TableSet;
-    private static lastMaintenanceDate;
+    protected static lastMaintenanceDate: string;
     protected shardingConfig?: ShardingConfig;
     constructor();
     setShardingConfig(config: ShardingConfig): void;
