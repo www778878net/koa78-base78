@@ -315,7 +315,7 @@ export default class Base78<T extends BaseSchema> {
         let sb = `UPDATE ${self.getDynamicTableName()} SET `;
         for (let i = 0; i < colp.length; i++) {
             if (i > 0) sb += `, `;
-            sb += `\`${colp[i]}\` = CASE idpk `;
+            sb += `\`${colp[i]}\` = CASE \`idpk\` `;
             for (let j = 0; j < idlist.length; j++) {
                 sb += `WHEN ? THEN ? `;
                 pars.push(idlist[j], values[j][i]);  // 添加查询参数
@@ -324,10 +324,10 @@ export default class Base78<T extends BaseSchema> {
         }
 
         // 添加 upby 和 uptime 字段
-        sb += ", upby = ?, uptime = ? ";
+        sb += ", \`upby\` = ?, \`uptime\` = ? ";
 
         // 添加 where 子句
-        sb += `WHERE idpk IN (${idlist.map(() => '?').join(',')})`;
+        sb += `WHERE \`idpk\` IN (${idlist.map(() => '?').join(',')})`;
         pars.push(up.uname, up.utime, ...idlist);
 
         // 执行更新操作
@@ -350,7 +350,9 @@ export default class Base78<T extends BaseSchema> {
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
 
-        const query = `INSERT INTO ${this.getDynamicTableName()} (${colp.join(',')},id,upby,uptime,${this.tableConfig.uidcid}) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
+        // 为所有字段名添加反引号
+        const quotedColp = colp.map(col => `\`${col}\``);
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
 
         const result = await this.dbService.mAdd(query, values, this.up, this.dbname);
 
@@ -369,8 +371,8 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
 
-        const setClause = colp.map(col => `${col}=?`).join(',');
-        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE idpk=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
+        const setClause = colp.map(col => `\`${col}\`=?`).join(',');
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
@@ -387,8 +389,8 @@ export default class Base78<T extends BaseSchema> {
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
         }
-        const setClause = colp.map(col => `${col}=?`).join(',');
-        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, upby=?, uptime=? WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
+        const setClause = colp.map(col => `\`${col}\`=?`).join(',');
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
@@ -400,7 +402,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async midpk(colp?: string[]): Promise<string> {
-        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE idpk=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
+        const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -413,7 +415,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async m(colp?: string[]): Promise<string> {
-        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
+        const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -435,12 +437,12 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
 
-        let whereClause = `${this.tableConfig.uidcid}=?`;
+        let whereClause = `\`${this.tableConfig.uidcid}\`=?`;
         let queryParams = [this.up[this.tableConfig.uidcid]];
 
         if (colp && this.up.pars && colp.length > 0) {
             for (let i = 0; i < colp.length; i++) {
-                whereClause += ` AND ${colp[i]}=?`;
+                whereClause += ` AND \`${colp[i]}\`=?`;
                 queryParams.push(this.up.pars[i]);
             }
         }
@@ -451,7 +453,7 @@ export default class Base78<T extends BaseSchema> {
     }
     @ApiMethod()
     async del(): Promise<string> {
-        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE id=? AND ${this.tableConfig.uidcid}=? LIMIT 1`; // 使用动态表名
+        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
         const result = await this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         return result === 0 ? "err:没有行被修改" : this.up.mid.toString();
@@ -475,7 +477,7 @@ export default class Base78<T extends BaseSchema> {
         const firstField = this.tableConfig.cols[0];
         const firstFieldValue = this.up.pars[0];
         //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
-        const query = `SELECT id,idpk FROM ${this.getDynamicTableName()} WHERE ${firstField}=? AND ${this.tableConfig.uidcid}=?`; // 使用动态表名
+        const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`${firstField}\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [firstFieldValue, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
         //console.log(`mByFirstField33:` + query + " " + this.up[this.tableConfig.uidcid] + " " + firstFieldValue + " " + JSON.stringify(result))
         if (result.length === 1) {
