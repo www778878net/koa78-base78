@@ -29,8 +29,8 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string = "default";//mysql数据库名（非表名） 
     protected tbname: string;//表名
     public tableConfig: TableSet;
-    //维护命令
-    private static lastMaintenanceDate: string = '';
+    //维护命令一天执行一次
+    protected static lastMaintenanceDate: string = '';
     // 新增：分表配置对象
     protected shardingConfig?: ShardingConfig;
 
@@ -356,7 +356,7 @@ export default class Base78<T extends BaseSchema> {
 
         // 如果mAdd返回值是0 且tbname=jhs_puton 记录query和values
         if (result === 0) {
-            this.logger.warn(`mAdd returned 0 for jhs_puton table. Query: ${query}, Values: ${JSON.stringify(values)}`);
+            this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
         }
 
         return result;
