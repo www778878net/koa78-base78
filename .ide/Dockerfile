@@ -11,7 +11,7 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh \
 RUN apt-get update && apt-get install -y git wget unzip openssh-server build-essential
 
 # 安装 typescript 和 pnpm
-RUN npm install -g typescript pnpm
+RUN npm install -g typescript pnpm ts-node cross-env nodemon node-gyp  
 
 # 安装 MariaDB 客户端和服务端（替代MySQL）
 RUN apt-get update && apt-get install -y mariadb-client mariadb-server

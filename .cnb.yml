@@ -61,6 +61,10 @@ $:
         - name: install-deps
           script:    
             - pnpm install   
+            - cd /workspace/node_modules/.pnpm/@vscode+sqlite3@5.1.10-vscode/node_modules/@vscode/sqlite3
+            - mkdir -p build/Release
+            - node-gyp configure build
+            - ls -la build/Release/vscode-sqlite3.node
       endStages:
         - name: end stage 1
           script: echo "end stage 1"

@@ -211,18 +211,16 @@ export class UpInfoAgent extends Agent {
 
   static getGuest(): UpInfoAgent {
     const up2 = new UpInfoAgent(null);
-    Object.assign(up2, {
-      sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
-      cid: 'GUEST000-8888-8888-8888-GUEST00GUEST',
-      bcid: 'd4856531-e9d3-20f3-4c22-fe3c65fb009c',
-      mid: this.getNewid(),
-      uname: 'guest',
-      pars: [],
-      getstart: 0,
-      ip: "127.0.0.1"
-    });
+    up2.sid = 'GUEST888-8888-8888-8888-GUEST88GUEST';
+    up2.cid = 'GUEST000-8888-8888-8888-GUEST00GUEST';
+    up2.bcid = 'd4856531-e9d3-20f3-4c22-fe3c65fb009c';
+    up2.mid = this.getNewid();
+    up2.uname = 'guest';
+    up2.pars = [];
+    up2.getstart = 0;
+    up2.ip = "127.0.0.1";
     return up2;
-  };
+  }
 
   static getNewid(): string {
     const s4 = (): string => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -275,6 +273,9 @@ export class UpInfoAgent extends Agent {
     clonedUpInfo.sid = this.sid;
     clonedUpInfo.uname = this.uname;
     clonedUpInfo.bcid = this.bcid;
+    clonedUpInfo.ctx = this.ctx;
+    clonedUpInfo.method = this.method;
+    // 可以根据需要复制更多属性
     return clonedUpInfo;
   }
 }
