@@ -69,6 +69,7 @@
         "axios": "^1.13.2",
         "config": "^4.1.1",
         "cross-env": "^7.0.3",
+        "dayjs": "^1.11.19",
         "iconv-lite": "^0.7.1",
         "install": "^0.13.0",
         "inversify": "^7.10.6",

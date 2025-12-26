@@ -1,4 +1,6 @@
-import { CidBase78, ApiMethod, Elasticsearch78, QueryBuilder, TableSchemas } from 'koa78-base78';
+import { CidBase78, ApiMethod, QueryBuilder } from '../../controllers/Base78';
+import { TableSchemas } from '../../config/tableConfig';
+import Elasticsearch78 from '../../services/elasticsearch78';
 import dayjs from 'dayjs';
 
 export default class workflow_definition extends CidBase78<TableSchemas['workflow_definition']> {
