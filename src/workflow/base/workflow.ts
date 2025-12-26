@@ -18,7 +18,7 @@ export class Workflow extends WorkflowDB {
     public tasks: Task[] = [];  // 任务列表
     public current_task: Task | null = null;  // 当前执行的任务实例
     public task_results: Record<string, any> = {};  // 任务执行结果
-    public errors: string[] = [];  // 执行错误列表
+    public errors: string[] = [];  // 执行错误列表 
 
     constructor(workflowData?: Partial<Record<string, any>>) {
         super(workflowData);
