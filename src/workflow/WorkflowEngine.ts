@@ -1,6 +1,8 @@
 // WorkflowEngine.ts - 工作流引擎核心实现
 
-import { WorkflowDefinition, WorkflowInstance, WorkflowTask, WorkflowStep } from './models/WorkflowModels';
+import workflow_instance from '../apiwf/basic/workflow_instance';
+import workflow_task from '../apiwf/basic/workflow_task';
+import { WorkflowStep, WorkflowContext } from './models/WorkflowModels';
 import { HandlerRegistry } from './handlers/StepHandler';
 import globalHandlerRegistry from './handlers/HandlerRegistryImpl';
 
@@ -35,7 +37,7 @@ export class WorkflowEngine {
      * @param inputData 输入数据
      * @returns 工作流实例
      */
-    createWorkflowInstance(definition: WorkflowDefinition, inputData: any): WorkflowInstance {
+    createWorkflowInstance(definition: any, inputData: any): workflow_instance {
         const instance: WorkflowInstance = {
             id: this.generateId(),
             idpk: 0,
