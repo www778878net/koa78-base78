@@ -235,11 +235,6 @@ async function runUserQueryWorkflowDemo() {
     console.log('='.repeat(50));
 
     try {
-        const inputData = JSON.parse(workflow.inputdata);
-
-        // 将输入数据设置到第一个任务
-        workflow.tasks[0].setInput(inputData);
-
         const result = await workflow.execute();
 
         console.log('\n' + '='.repeat(50));

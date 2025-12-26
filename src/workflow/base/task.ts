@@ -196,14 +196,65 @@ export class Task extends TaskDB {
                 // 使用工作流数据作为上下文评估条件表达式
                 if (condition) {
                     if (workflowData) {
-                        // 在TypeScript中直接执行条件表达式有安全风险，这里简化处理
-                        // 实际应用中应该使用更安全的表达式求值库
+                        // 创建安全的求值环境
+                        const context = {
+                            ...workflowData,
+                            // 提供一些常用的工具函数
+                            get: (path: string, defaultValue?: any) => {
+                                // 支持点号分隔的路径访问，如 "user.profile.age"
+                                const keys = path.split('.');
+                                let value = workflowData;
+                                for (const key of keys) {
+                                    if (value && typeof value === 'object' && key in value) {
+                                        value = value[key];
+                                    } else {
+                                        return defaultValue;
+                                    }
+                                }
+                                return value;
+                            },
+                            // 常用的比较函数
+                            equals: (a: any, b: any) => a === b,
+                            notEquals: (a: any, b: any) => a !== b,
+                            greaterThan: (a: any, b: any) => a > b,
+                            lessThan: (a: any, b: any) => a < b,
+                            contains: (arr: any[], item: any) => arr?.includes?.(item),
+                            hasProperty: (obj: any, prop: string) => obj && typeof obj === 'object' && prop in obj
+                        };
+
+                        // 安全地求值条件表达式
+                        // 注意：在生产环境中应该使用专门的表达式求值库，如expr-eval
+                        const safeEval = (expr: string, ctx: Record<string, any>): boolean => {
+                            try {
+                                // 将上下文对象的属性转换为可以直接使用的变量
+                                // 这里使用Function构造函数创建一个函数，它接受上下文属性作为参数
+                                // 这比直接使用eval更安全，因为它不会在当前作用域中执行
+                                const vars = Object.keys(ctx);
+                                const values = Object.values(ctx);
+                                
+                                // 创建一个返回表达式结果的函数
+                                // eslint-disable-next-line no-new-func
+                                const func = new Function(...vars, `return (${expr});`);
+                                return Boolean(func(...values));
+                            } catch (e) {
+                                console.log(`条件表达式语法错误: ${expr}, 错误: ${e}`);
+                                return false; // 语法错误时默认不满足条件
+                            }
+                        };
+
                         console.log(`条件: ${condition}, 上下文: ${JSON.stringify(workflowData)}`);
-                        // 这里只是简单模拟，实际应该实现表达式求值
-                        result.push(nextTaskId);
+                        
+                        // 求值条件表达式
+                        const conditionResult = safeEval(condition, context);
+                        
+                        if (conditionResult) {
+                            result.push(nextTaskId);
+                        }
                     } else {
-                        // 如果没有工作流数据，默认不执行条件表达式
-                        result.push(nextTaskId);
+                        // 如果没有工作流数据，只有当条件为空时才执行
+                        // 有具体条件但无数据时，认为条件不满足
+                        console.log(`无法评估条件 ${condition}：缺少工作流数据`);
+                        continue;
                     }
                 } else {
                     // 条件为空，默认执行

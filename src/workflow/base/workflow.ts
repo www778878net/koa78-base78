@@ -111,6 +111,55 @@ export class Workflow extends WorkflowDB {
                 this.current_task = task;
 
                 // 执行任务
+                // 设置输入数据
+                let inputData: any = {};
+
+                if (Object.keys(this.task_results).length === 0) {
+                    // 第一个任务，使用工作流的输入数据
+                    try {
+                        inputData = this.inputdata ? JSON.parse(this.inputdata) : {};
+                        console.log(`   为第一个任务设置输入数据: ${JSON.stringify(inputData)}`);
+                    } catch (error) {
+                        console.error('解析工作流输入数据失败:', error);
+                        inputData = {};
+                    }
+                } else {
+                    // 不是第一个任务，将当前任务的直接前驱任务结果作为输入数据
+                    // 查找当前任务的直接前驱任务
+                    let prevTaskId: string | null = null;
+
+                    // 遍历所有已执行的任务，找到直接流转到当前任务的任务
+                    for (const t of this.tasks) {
+                        if (t.transitions && executed_tasks.has(t.id)) {
+                            for (const [nextTaskId, transition] of Object.entries(t.transitions)) {
+                                if (nextTaskId === task.id) {
+                                    prevTaskId = t.id;
+                                    break;
+                                }
+                            }
+                            if (prevTaskId) break;
+                        }
+                    }
+
+                    if (prevTaskId && this.task_results[prevTaskId]) {
+                        // 使用直接前驱任务的执行结果
+                        inputData = this.task_results[prevTaskId];
+                        console.log(`   为任务 ${task.id} 设置前驱任务 ${prevTaskId} 的结果作为输入: ${JSON.stringify(inputData)}`);
+                    } else {
+                        // 如果没有找到直接前驱任务，使用最后一个执行的任务结果
+                        const taskResultValues = Object.values(this.task_results);
+                        if (taskResultValues.length > 0) {
+                            const lastResult = taskResultValues[taskResultValues.length - 1];
+                            inputData = lastResult;
+                            console.log(`   为任务 ${task.id} 设置最后执行任务的结果作为输入: ${JSON.stringify(inputData)}`);
+                        } else {
+                            console.log(`   为任务 ${task.id} 设置空输入数据`);
+                        }
+                    }
+                }
+
+                task.setInput(inputData);
+
                 const result = await task.execute(agent);
 
                 // 保存任务结果
@@ -131,6 +180,43 @@ export class Workflow extends WorkflowDB {
                     // 更新状态到数据库
                     this.state = 'failed';
                     this.lasterrinfo = errorMsg;
+
+                    // 构建包含错误信息的上下文数据
+                    const errorContextData = {
+                        'task_result': { error: task.error, failed: true },
+                        'task_results': this.task_results,
+                        'workflow': this
+                    };
+
+                    // 尝试执行错误处理任务（如果有条件匹配）
+                    const next_task_ids = task.evaluateConditions(errorContextData);
+                    if (next_task_ids.length > 0) {
+                        // 只添加第一个错误处理任务
+                        const errorTaskId = next_task_ids[0];
+                        if (errorTaskId in task_map && !executed_tasks.has(errorTaskId)) {
+                            const errorTask = task_map[errorTaskId];
+                            console.log(`\n执行任务: ${errorTask.getName()} (ID: ${errorTaskId})`);
+
+                            // 设置错误任务的输入数据
+                            errorTask.setInput({ error: task.error, failedTask: task.getName() });
+
+                            // 执行错误处理任务
+                            const errorResult = await errorTask.execute(agent);
+
+                            // 保存错误处理任务结果
+                            if (errorTaskId) {
+                                this.task_results[errorTaskId] = errorResult;
+                            }
+
+                            // 标记错误处理任务为已执行
+                            if (errorTaskId) {
+                                executed_tasks.add(errorTaskId);
+                            }
+                        }
+                    }
+
+                    // 执行完错误处理任务后，清空任务队列并终止循环
+                    task_queue.length = 0;
                     break;
                 }
 
@@ -139,7 +225,21 @@ export class Workflow extends WorkflowDB {
                 const context_data = {
                     'task_result': result,
                     'task_results': this.task_results,
-                    'workflow': this
+                    // 只传递关键的workflow信息，而不是整个实例
+                    'workflow_context': {
+                        id: this.id,
+                        wfname: this.wfname,
+                        state: this.state,
+                        inputdata: this.inputdata,
+                        outputdata: this.outputdata,
+                        status: this.status,
+                        tasks: this.tasks.map(t => ({
+                            id: t.id,
+                            taskname: t.taskname,
+                            state: t.state,
+                            status: t.status
+                        }))
+                    }
                 };
                 const next_task_ids = task.evaluateConditions(context_data);
 
