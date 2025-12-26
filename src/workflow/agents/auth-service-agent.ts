@@ -1,6 +1,6 @@
 import UpInfo from 'koa78-upinfo';
 import { Agent } from '../base/agent';
-import { SqliteDatabaseAgent } from './sqlite-database-agent';
+import { MysqlDatabaseAgent } from './mysql-database-agent';
 import { CacheServiceAgent } from './cache-service-agent';
 import { z } from 'zod';
 import { Config } from '../../config/Config';
@@ -11,7 +11,7 @@ const log = TsLog78.Instance;
 export class AuthServiceAgent extends Agent {
     private static _CID_MY: string | null = null;
     public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
-    private sqliteAgent: SqliteDatabaseAgent | null = null;
+    private databaseAgent: MysqlDatabaseAgent | null = null;
     private cacheServiceAgent: CacheServiceAgent | null = null;
 
     constructor() {
@@ -19,8 +19,8 @@ export class AuthServiceAgent extends Agent {
     }
 
     // 初始化方法，用于设置依赖项
-    public init(sqliteAgent: SqliteDatabaseAgent, cacheServiceAgent: CacheServiceAgent): void {
-        this.sqliteAgent = sqliteAgent;
+    public init(databaseAgent: MysqlDatabaseAgent, cacheServiceAgent: CacheServiceAgent): void {
+        this.databaseAgent = databaseAgent;
         this.cacheServiceAgent = cacheServiceAgent;
     }
 
@@ -129,8 +129,8 @@ export class AuthServiceAgent extends Agent {
                     "  idcoDef,openweixin ,truename,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                     " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t2.cid=companys.id";
             const values = [up.sid, up.sid];
-            // 使用SqliteDatabaseAgent
-            const result = await this.sqliteAgent?.query(cmdtext, values, up, dbname) || [];
+            // 使用MysqlDatabaseAgent
+            const result = await this.databaseAgent?.query(cmdtext, values, up, dbname) || [];
             console.log("upcheck result:", result);
             if (result?.length === 0) tmp = "";
             else {
