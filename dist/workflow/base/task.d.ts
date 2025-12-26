@@ -1,4 +1,4 @@
-import { Agent } from './agentbase';
+import { Agent } from './agent';
 import { TaskDB } from './task_db';
 export declare class Task extends TaskDB {
     status: string;

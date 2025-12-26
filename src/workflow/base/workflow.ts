@@ -1,6 +1,6 @@
 // 工作流定义类，提供数据字典和基础功能
-import { Task } from './taskbase';
-import { Agent } from './agentbase';
+import { Task } from './task';
+import { Agent } from './agent';
 import { WorkflowDB } from './workflow_db';
 
 export class Workflow extends WorkflowDB {
@@ -97,7 +97,7 @@ export class Workflow extends WorkflowDB {
             // 执行任务直到队列为空
             while (task_queue.length > 0) {
                 // 获取当前任务
-                const task = task_queue.shift() as TaskBase;
+                const task = task_queue.shift() as Task;
                 const taskId = task.id;
 
                 // 如果任务已经执行过，跳过

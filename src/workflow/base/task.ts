@@ -1,5 +1,5 @@
 // 任务类，提供数据字典和基础功能
-import { Agent } from './agentbase';
+import { Agent } from './agent';
 import { TaskDB } from './task_db';
 
 export class Task extends TaskDB {
@@ -142,7 +142,9 @@ export class Task extends TaskDB {
             // 支持两种执行方式：通过Agent执行Handler或直接执行函数
             if (agent && this.handler) {
                 console.log(`通过Agent执行Handler ${this.handler}`);
-                this.result = await agent.executeHandler(this.handler as string, inputData);
+                // 解析handler字符串，格式为"type:capability"
+                const [type, capability] = this.handler.split(":");
+                this.result = await agent.executeHandler(type, capability, inputData);
             } else if (this.taskFunction) {
                 console.log(`直接执行任务函数`);
                 this.result = await this.taskFunction(inputData);

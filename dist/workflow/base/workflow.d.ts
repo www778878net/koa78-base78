@@ -1,5 +1,5 @@
-import { Task } from './taskbase';
-import { Agent } from './agentbase';
+import { Task } from './task';
+import { Agent } from './agent';
 import { WorkflowDB } from './workflow_db';
 export declare class Workflow extends WorkflowDB {
     static readonly STATE: {

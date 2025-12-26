@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Workflow = void 0;
 const tslib_1 = require("tslib");
 // 工作流定义类，提供数据字典和基础功能
-const taskbase_1 = require("./taskbase");
+const task_1 = require("./task");
 const workflow_db_1 = require("./workflow_db");
 class Workflow extends workflow_db_1.WorkflowDB {
     constructor(workflowData) {
@@ -190,7 +190,7 @@ class Workflow extends workflow_db_1.WorkflowDB {
                     'inputdata': JSON.stringify(task_data.input_data || {})
                 };
                 // 创建Task实例
-                const task = new taskbase_1.Task(task_params);
+                const task = new task_1.Task(task_params);
                 // 添加条件流转信息
                 if (task_data.next_tasks) {
                     task.nextTasks = task_data.next_tasks;

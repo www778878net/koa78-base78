@@ -109,7 +109,9 @@ class Task extends task_db_1.TaskDB {
                 // 支持两种执行方式：通过Agent执行Handler或直接执行函数
                 if (agent && this.handler) {
                     console.log(`通过Agent执行Handler ${this.handler}`);
-                    this.result = yield agent.executeHandler(this.handler, inputData);
+                    // 解析handler字符串，格式为"type:capability"
+                    const [type, capability] = this.handler.split(":");
+                    this.result = yield agent.executeHandler(type, capability, inputData);
                 }
                 else if (this.taskFunction) {
                     console.log(`直接执行任务函数`);
