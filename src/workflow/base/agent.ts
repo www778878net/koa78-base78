@@ -91,4 +91,5 @@ export class Agent extends AgentDB {
             this.currentcopy -= 1;
         }
     }
+
 }
