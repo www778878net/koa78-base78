@@ -20,7 +20,7 @@ class Workflow(WorkflowDB):
         :param workflow_id: 工作流定义ID
         :param instance_id: 工作流实例ID
         :param workflow_name: 工作流名称
-        :param input_data: 工作流输入数据
+         :param input_data: 工作流输入数据 
         :param flowschema: 工作流定义JSON（可选）
         :param kwargs: 其他WorkflowDB所需的参数
         """
@@ -130,7 +130,7 @@ class Workflow(WorkflowDB):
                 context_data = {
                     'task_result': result,
                     'task_results': self.task_results,
-                    'workflow': self
+                    # 'workflow': self
                 }
                 next_task_ids = task.evaluate_conditions(context_data)
                 

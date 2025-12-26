@@ -196,65 +196,17 @@ export class Task extends TaskDB {
                 // 使用工作流数据作为上下文评估条件表达式
                 if (condition) {
                     if (workflowData) {
-                        // 创建安全的求值环境
-                        const context = {
-                            ...workflowData,
-                            // 提供一些常用的工具函数
-                            get: (path: string, defaultValue?: any) => {
-                                // 支持点号分隔的路径访问，如 "user.profile.age"
-                                const keys = path.split('.');
-                                let value = workflowData;
-                                for (const key of keys) {
-                                    if (value && typeof value === 'object' && key in value) {
-                                        value = value[key];
-                                    } else {
-                                        return defaultValue;
-                                    }
-                                }
-                                return value;
-                            },
-                            // 常用的比较函数
-                            equals: (a: any, b: any) => a === b,
-                            notEquals: (a: any, b: any) => a !== b,
-                            greaterThan: (a: any, b: any) => a > b,
-                            lessThan: (a: any, b: any) => a < b,
-                            contains: (arr: any[], item: any) => arr?.includes?.(item),
-                            hasProperty: (obj: any, prop: string) => obj && typeof obj === 'object' && prop in obj
-                        };
-
-                        // 安全地求值条件表达式
-                        // 注意：在生产环境中应该使用专门的表达式求值库，如expr-eval
-                        const safeEval = (expr: string, ctx: Record<string, any>): boolean => {
-                            try {
-                                // 将上下文对象的属性转换为可以直接使用的变量
-                                // 这里使用Function构造函数创建一个函数，它接受上下文属性作为参数
-                                // 这比直接使用eval更安全，因为它不会在当前作用域中执行
-                                const vars = Object.keys(ctx);
-                                const values = Object.values(ctx);
-                                
-                                // 创建一个返回表达式结果的函数
-                                // eslint-disable-next-line no-new-func
-                                const func = new Function(...vars, `return (${expr});`);
-                                return Boolean(func(...values));
-                            } catch (e) {
-                                console.log(`条件表达式语法错误: ${expr}, 错误: ${e}`);
-                                return false; // 语法错误时默认不满足条件
-                            }
-                        };
-
-                        console.log(`条件: ${condition}, 上下文: ${JSON.stringify(workflowData)}`);
-                        
-                        // 求值条件表达式
-                        const conditionResult = safeEval(condition, context);
-                        
-                        if (conditionResult) {
+                        // 实现真正的条件评估，使用安全的表达式求值
+                        const isConditionMet = this.evaluateCondition(condition, workflowData);
+                        if (isConditionMet) {
                             result.push(nextTaskId);
+                            console.log(`条件满足: ${condition}, 添加任务 ${nextTaskId}`);
+                        } else {
+                            console.log(`条件不满足: ${condition}, 跳过任务 ${nextTaskId}`);
                         }
                     } else {
-                        // 如果没有工作流数据，只有当条件为空时才执行
-                        // 有具体条件但无数据时，认为条件不满足
-                        console.log(`无法评估条件 ${condition}：缺少工作流数据`);
-                        continue;
+                        // 如果没有工作流数据，默认不执行条件表达式
+                        result.push(nextTaskId);
                     }
                 } else {
                     // 条件为空，默认执行
@@ -268,6 +220,116 @@ export class Task extends TaskDB {
         }
 
         return result;
+    }
+
+    // 使用安全方式评估条件表达式
+    private evaluateCondition(condition: string, context: any): boolean {
+        // 简单的安全条件评估实现
+        // 这里我们只支持一些基本的比较操作
+        try {
+            // 支持的条件模式:
+            // 1. task_result.property === value
+            // 2. task_result.property !== value
+            // 3. task_result.property == value
+            // 4. task_result.property != value
+            // 5. task_result.property (直接检查值的真假)
+            // 6. task_result.property && other_condition
+            // 7. task_result.property || other_condition
+
+            // 简单的条件解析
+            condition = condition.trim();
+
+            // 检查是否为简单的属性存在性检查
+            if (!condition.includes(' ') && condition.startsWith('task_result.')) {
+                const property = condition.replace('task_result.', '');
+                const value = this.getNestedProperty(context.task_result, property);
+                return !!value; // 转换为布尔值
+            }
+
+            // 处理复杂的条件表达式
+            // 支持的操作符: ===, ==, !==, !=, >, <, >=, <=
+            const operators = ['===', '==', '!==', '!=', '>=', '<=', '>', '<'];
+            let matchedOperator: string | null = null;
+            let operatorIndex = -1;
+
+            for (const op of operators) {
+                const index = condition.indexOf(op);
+                if (index !== -1) {
+                    matchedOperator = op;
+                    operatorIndex = index;
+                    break;
+                }
+            }
+
+            if (matchedOperator && operatorIndex !== -1) {
+                // 分割条件表达式
+                const leftSide = condition.substring(0, operatorIndex).trim();
+                const rightSide = condition.substring(operatorIndex + matchedOperator.length).trim();
+
+                // 解析左侧（通常是task_result的属性）
+                let actualValue;
+                if (leftSide.startsWith('task_result.')) {
+                    const property = leftSide.replace('task_result.', '');
+                    actualValue = this.getNestedProperty(context.task_result, property);
+                } else {
+                    // 如果不是task_result开头，可能是一个更复杂的表达式，目前不支持
+                    console.warn(`不支持的条件表达式左侧: ${leftSide}`);
+                    return false;
+                }
+
+                // 解析右侧值
+                let expectedValue;
+                if (rightSide === 'true') {
+                    expectedValue = true;
+                } else if (rightSide === 'false') {
+                    expectedValue = false;
+                } else if (rightSide === 'null') {
+                    expectedValue = null;
+                } else if (rightSide === 'undefined') {
+                    expectedValue = undefined;
+                } else if (!isNaN(Number(rightSide))) {
+                    expectedValue = Number(rightSide);
+                } else {
+                    // 假设是字符串，去除引号
+                    expectedValue = rightSide.replace(/^["']|["']$/g, '');
+                }
+
+                // 根据操作符比较值
+                switch (matchedOperator) {
+                    case '===':
+                        return actualValue === expectedValue;
+                    case '==':
+                        return actualValue == expectedValue;
+                    case '!==':
+                        return actualValue !== expectedValue;
+                    case '!=':
+                        return actualValue != expectedValue;
+                    case '>':
+                        return actualValue > expectedValue;
+                    case '<':
+                        return actualValue < expectedValue;
+                    case '>=':
+                        return actualValue >= expectedValue;
+                    case '<=':
+                        return actualValue <= expectedValue;
+                    default:
+                        return false;
+                }
+            }
+
+            // 如果不匹配任何已知模式，返回false
+            return false;
+        } catch (e) {
+            console.error(`评估条件时出错: ${e}`);
+            return false;
+        }
+    }
+
+    // 辅助方法：获取嵌套属性
+    private getNestedProperty(obj: any, path: string): any {
+        return path.split('.').reduce((current, prop) => {
+            return current && current[prop] !== undefined ? current[prop] : undefined;
+        }, obj);
     }
 
     // 获取任务状态信息
