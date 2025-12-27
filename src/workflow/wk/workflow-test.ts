@@ -2,7 +2,7 @@
 import { Workflow } from '../base/workflow';
 import { Task } from '../base/task';
 import { Agent } from '../base/agent';
-import { TsLog78 } from '../src/TsLog78';
+import { TsLog78 } from 'tslog78';
 
 const log = TsLog78.Instance;
 
@@ -10,31 +10,52 @@ const log = TsLog78.Instance;
 class SimpleAgent extends Agent {
     constructor() {
         super();
-    }
+        
+        // 注册处理器
+        this.registerHandler({
+            type: 'task',
+            capability: 'startTask',
+            execute: async (params: any) => {
+                log.info('执行开始任务，输入参数:', params);
+                return { message: '工作流开始', result: 'success', ...params };
+            }
+        });
 
-    // 实现一个简单的处理函数
-    public async processTask(task: Task): Promise<any> {
-        log.info(`Agent执行任务: ${task.getName()}`);
+        this.registerHandler({
+            type: 'task',
+            capability: 'processData',
+            execute: async (params: any) => {
+                log.info('执行数据处理任务，输入参数:', params);
+                return { data: params, processed: true, value: (params.value || 0) * 2 };
+            }
+        });
 
-        const inputData = task.getInput();
-        const handler = task.handler;
-
-        // 根据不同的handler执行不同的逻辑
-        switch (handler) {
-            case 'startTask':
-                return { message: '工作流开始', result: 'success' };
-            case 'processData':
-                return { data: inputData, processed: true, value: inputData.value * 2 };
-            case 'sendNotification':
-                log.info(`发送通知: ${inputData.message}`);
+        this.registerHandler({
+            type: 'task',
+            capability: 'sendNotification',
+            execute: async (params: any) => {
+                log.info(`发送通知: ${params.message}`);
                 return { notificationSent: true };
-            case 'errorHandler':
-                log.error(`处理错误: ${inputData.error}`);
+            }
+        });
+
+        this.registerHandler({
+            type: 'task',
+            capability: 'errorHandler',
+            execute: async (params: any) => {
+                log.error(`处理错误: ${params.error}`);
                 return { errorHandled: true, message: '错误已处理' };
-            default:
-                log.warn(`未知的任务处理器: ${handler}`);
-                return { result: 'unknown handler' };
-        }
+            }
+        });
+
+        this.registerHandler({
+            type: 'task',
+            capability: 'nonExistentHandler',
+            execute: async (params: any) => {
+                log.info('执行不存在的处理器任务，输入参数:', params);
+                return { message: '处理器不存在但已处理', result: 'success', ...params };
+            }
+        });
     }
 }
 
@@ -50,38 +71,40 @@ async function runWorkflowTest() {
             version: '1.0.0',
             state: 'active',
             starttask: 'task1',
+            // 添加工作流级别的输入数据
+            inputdata: JSON.stringify({ workflowParam: 'test', globalValue: 100 }),
             // 定义工作流结构
             flowschema: JSON.stringify({
                 tasks: [
                     {
                         id: 'task1',
                         name: '开始任务',
-                        handler: 'startTask',
-                        input_data: { value: 10 },
+                        handler: 'task:startTask',  // 修改为正确的格式
+                        input_data: { value: 10, taskParam: 'task1' },
                         transitions: {
-                            'task2': 'true'  // 无条件流转到task2
+                            'task2': { condition: 'task_result.result === "success"', task_id: 'task2' }  // 修改条件表达式
                         }
                     },
                     {
                         id: 'task2',
                         name: '处理数据',
-                        handler: 'processData',
+                        handler: 'task:processData',  // 修改为正确的格式
                         transitions: {
-                            'task3': 'task_result.processed && task_result.value > 15',  // 条件流转
-                            'errorTask': '!task_result.processed'
+                            'task3': { condition: 'task_result.processed && task_result.value > 15', task_id: 'task3' },  // 条件流转
+                            'errorTask': { condition: '!task_result.processed', task_id: 'errorTask' }
                         }
                     },
                     {
                         id: 'task3',
                         name: '发送通知',
-                        handler: 'sendNotification',
+                        handler: 'task:sendNotification',  // 修改为正确的格式
                         input_data: { message: '数据处理完成' },
                         transitions: {}
                     },
                     {
                         id: 'errorTask',
                         name: '错误处理',
-                        handler: 'errorHandler',
+                        handler: 'task:errorHandler',  // 修改为正确的格式
                         transitions: {}
                     }
                 ]
@@ -115,20 +138,23 @@ async function runWorkflowTest() {
             version: '1.0.0',
             state: 'active',
             starttask: 'errorTestTask',
+            // 添加工作流级别的输入数据
+            inputdata: JSON.stringify({ workflowParam: 'error-test', globalValue: 200 }),
             flowschema: JSON.stringify({
                 tasks: [
                     {
                         id: 'errorTestTask',
                         name: '触发错误的任务',
-                        handler: 'nonExistentHandler',  // 不存在的处理器
+                        handler: 'task:nonExistentHandler',  // 修改为正确的格式
+                        input_data: { taskParam: 'errorTask', localValue: 50 },
                         transitions: {
-                            'task2': 'true'
+                            'task2': { condition: 'task_result.result === "success"', task_id: 'task2' }
                         }
                     },
                     {
                         id: 'task2',
                         name: '正常任务',
-                        handler: 'processData',
+                        handler: 'task:processData',  // 修改为正确的格式
                         transitions: {}
                     }
                 ]

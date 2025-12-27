@@ -115,12 +115,21 @@ export class Workflow extends WorkflowDB {
                 let inputData: any = {};
 
                 if (Object.keys(this.task_results).length === 0) {
-                    // 第一个任务，使用工作流的输入数据
+                    // 第一个任务，合并工作流输入数据和任务输入数据
                     try {
-                        inputData = this.inputdata ? JSON.parse(this.inputdata) : {};
-                        console.log(`   为第一个任务设置输入数据: ${JSON.stringify(inputData)}`);
+                        // 获取工作流输入数据
+                        const workflowInputData = this.inputdata ? JSON.parse(this.inputdata) : {};
+                        
+                        // 获取任务输入数据
+                        const taskInputData = task.getInput();
+                        
+                        // 合并两个输入数据，任务输入数据优先级更高
+                        inputData = { ...workflowInputData, ...taskInputData };
+                        
+                        console.log(`   为第一个任务设置合并的输入数据: ${JSON.stringify(inputData)}`);
                     } catch (error) {
-                        console.error('解析工作流输入数据失败:', error);
+                        console.error('解析任务或工作流输入数据失败:', error);
+                        // 出错时使用空对象
                         inputData = {};
                     }
                 } else {
@@ -322,7 +331,7 @@ export class Workflow extends WorkflowDB {
                 // 构建任务参数
                 const task_params: Partial<Record<string, any>> = {
                     'id': task_data.id,
-                    'name': task_data.name,
+                    'taskname': task_data.name,  // 修正：使用taskname而不是name
                     'handler': task_data.handler,
                     'inputdata': JSON.stringify(task_data.input_data || {})
                 };
