@@ -1,8 +1,8 @@
 // 简单工作流测试示例
-import { Workflow } from '../base/workflow';
-import { Task } from '../base/task';
-import { Agent } from '../base/agent';
-import { Handler } from '../base/handler';
+import { Workflow } from '../../workflow/base/workflow';
+import { Task } from '../../workflow/base/task';
+import { Agent } from '../../workflow/base/agent';
+import { Handler } from '../../workflow/base/handler';
 
 // 创建一个简单的工作流
 async function runSimpleWorkflow() {
@@ -69,13 +69,11 @@ async function runSimpleWorkflow() {
     workflow.add_task(task3);
 
     // 设置任务流转
-    task1.transitions = {
-        task2: { condition: null, task_id: 'task2' }
-    };
+    task1.nextTaskId = 'task2';
+    task1.nextTaskCondition = null;
 
-    task2.transitions = {
-        task3: { condition: null, task_id: 'task3' }
-    };
+    task2.nextTaskId = 'task3';
+    task2.nextTaskCondition = null;
 
     console.log(`\n工作流任务数量: ${workflow.tasks.length}`);
     console.log('任务列表:', workflow.tasks.map(t => t.taskname));

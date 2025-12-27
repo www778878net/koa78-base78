@@ -1,6 +1,6 @@
 // Agent和Handler使用示例
-import { Agent } from '../base/agent';
-import { Handler } from '../base/handler';
+import { Agent } from '../../workflow/base/agent';
+import { Handler } from '../../workflow/base/handler';
 
 // 创建Agent实例
 const agent = new Agent({
@@ -66,11 +66,11 @@ async function testExecuteHandler() {
     console.log('=== 测试参数验证器 ===');
     try {
         // 测试成功的情况
-        const validationResult = await agent.executeHandler('validator', 'validate', { sid: 'session-123' });
+        const validationResult = await agent.executeHandlerByCapability('validator', 'validate', { sid: 'session-123' });
         console.log('验证结果:', validationResult);
 
         // 测试失败的情况
-        const invalidResult = await agent.executeHandler('validator', 'validate', {});
+        const invalidResult = await agent.executeHandlerByCapability('validator', 'validate', {});
         console.log('无效参数结果:', invalidResult);
     } catch (error) {
         console.error('验证错误:', error);
@@ -78,7 +78,7 @@ async function testExecuteHandler() {
 
     console.log('\n=== 测试数据库查询 ===');
     try {
-        const queryResult = await agent.executeHandler('query', 'query', { sid: 'session-123' });
+        const queryResult = await agent.executeHandlerByCapability('query', 'query', { sid: 'session-123' });
         console.log('查询结果:', queryResult);
     } catch (error) {
         console.error('查询错误:', error);

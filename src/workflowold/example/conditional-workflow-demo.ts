@@ -1,6 +1,6 @@
 // 条件流转工作流演示 - 测试更复杂的条件评估
-import { Workflow } from '../base/workflow';
-import { Task } from '../base/task';
+import { Workflow } from '../../workflow/base/workflow';
+import { Task } from '../../workflow/base/task';
 
 async function runConditionalWorkflowDemo() {
     console.log('\n=== 条件流转工作流演示 ===\n');
@@ -25,18 +25,18 @@ async function runConditionalWorkflowDemo() {
     checkValueTask.taskFunction = async (input) => {
         const { value } = input;
         console.log(`\n🔍 检查数值: ${value}`);
-        
+
         if (value > 5) {
-            return { 
-                value, 
-                isGreater: true, 
-                category: 'large' 
+            return {
+                value,
+                isGreater: true,
+                category: 'large'
             };
         } else {
-            return { 
-                value, 
-                isGreater: false, 
-                category: 'small' 
+            return {
+                value,
+                isGreater: false,
+                category: 'small'
             };
         }
     };
@@ -77,9 +77,9 @@ async function runConditionalWorkflowDemo() {
 
     squareTask.taskFunction = async (input) => {
         console.log(`\n🔢 计算平方: ${input.value}² = ${input.value * input.value}`);
-        return { 
-            ...input, 
-            squared: input.value * input.value 
+        return {
+            ...input,
+            squared: input.value * input.value
         };
     };
 
@@ -110,36 +110,37 @@ async function runConditionalWorkflowDemo() {
     workflow.add_task(squareTask);
     workflow.add_task(formatResultTask);
 
-    // 设置条件流转关系
-    checkValueTask.transitions = {
-        'process-large': { 
-            condition: 'task_result.isGreater === true', 
-            task_id: 'process-large' 
-        },
-        'process-small': { 
-            condition: 'task_result.isGreater === false', 
-            task_id: 'process-small' 
-        }
-    };
+    // 设置条件流转关系 - 新API只支持一个下一个任务
+    // 重新设计逻辑：检查数值后直接处理，不再分支
+    checkValueTask.nextTaskId = 'calculate-square';
+    checkValueTask.nextTaskCondition = null;
 
-    largeValueTask.transitions = {
-        'calculate-square': { 
-            condition: 'task_result.processed === true', 
-            task_id: 'calculate-square' 
-        }
-    };
+    squareTask.nextTaskId = 'format-result';
+    squareTask.nextTaskCondition = 'task_result.squared';
 
-    smallValueTask.transitions = {
-        'calculate-square': { 
-            condition: 'task_result.processed === true', 
-            task_id: 'calculate-square' 
-        }
-    };
+    // 将处理逻辑合并到检查任务中
+    checkValueTask.taskFunction = async (input) => {
+        const { value } = input;
+        console.log(`\n🔍 检查数值: ${value}`);
 
-    squareTask.transitions = {
-        'format-result': { 
-            condition: 'task_result.squared', 
-            task_id: 'format-result' 
+        if (value > 5) {
+            console.log(`📈 处理大数值: ${value}`);
+            return {
+                value,
+                isGreater: true,
+                category: 'large',
+                processed: true,
+                handler: 'large'
+            };
+        } else {
+            console.log(`📉 处理小数值: ${value}`);
+            return {
+                value,
+                isGreater: false,
+                category: 'small',
+                processed: true,
+                handler: 'small'
+            };
         }
     };
 

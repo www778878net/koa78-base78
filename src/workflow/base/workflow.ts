@@ -119,13 +119,13 @@ export class Workflow extends WorkflowDB {
                     try {
                         // 获取工作流输入数据
                         const workflowInputData = this.inputdata ? JSON.parse(this.inputdata) : {};
-                        
+
                         // 获取任务输入数据
                         const taskInputData = task.getInput();
-                        
+
                         // 合并两个输入数据，任务输入数据优先级更高
                         inputData = { ...workflowInputData, ...taskInputData };
-                        
+
                         console.log(`   为第一个任务设置合并的输入数据: ${JSON.stringify(inputData)}`);
                     } catch (error) {
                         console.error('解析任务或工作流输入数据失败:', error);
@@ -139,14 +139,9 @@ export class Workflow extends WorkflowDB {
 
                     // 遍历所有已执行的任务，找到直接流转到当前任务的任务
                     for (const t of this.tasks) {
-                        if (t.transitions && executed_tasks.has(t.id)) {
-                            for (const [nextTaskId, transition] of Object.entries(t.transitions)) {
-                                if (nextTaskId === task.id) {
-                                    prevTaskId = t.id;
-                                    break;
-                                }
-                            }
-                            if (prevTaskId) break;
+                        if (executed_tasks.has(t.id) && t.nextTaskId === task.id) {
+                            prevTaskId = t.id;
+                            break;
                         }
                     }
 
@@ -182,9 +177,9 @@ export class Workflow extends WorkflowDB {
                 }
 
                 // 检查任务执行状态
-                if (task.status === "failed") {
+                if (task.state === Task.STATE.FAILED) {
                     this.status = "failed";
-                    const errorMsg = `任务 ${task.getName()} 执行失败: ${task.error}`;
+                    const errorMsg = `任务 ${task.getName()} 执行失败: ${task.lasterrinfo}`;
                     this.errors.push(errorMsg);
                     // 更新状态到数据库
                     this.state = 'failed';
@@ -192,36 +187,28 @@ export class Workflow extends WorkflowDB {
 
                     // 构建包含错误信息的上下文数据
                     const errorContextData = {
-                        'task_result': { error: task.error, failed: true },
+                        'task_result': { error: task.lasterrinfo, failed: true },
                         'task_results': this.task_results,
                         'workflow': this
                     };
 
                     // 尝试执行错误处理任务（如果有条件匹配）
-                    const next_task_ids = task.evaluateConditions(errorContextData);
-                    if (next_task_ids.length > 0) {
-                        // 只添加第一个错误处理任务
-                        const errorTaskId = next_task_ids[0];
-                        if (errorTaskId in task_map && !executed_tasks.has(errorTaskId)) {
-                            const errorTask = task_map[errorTaskId];
-                            console.log(`\n执行任务: ${errorTask.getName()} (ID: ${errorTaskId})`);
+                    const next_task_id = task.evaluateConditions(errorContextData);
+                    if (next_task_id && next_task_id in task_map && !executed_tasks.has(next_task_id)) {
+                        const errorTask = task_map[next_task_id];
+                        console.log(`\n执行任务: ${errorTask.getName()} (ID: ${next_task_id})`);
 
-                            // 设置错误任务的输入数据
-                            errorTask.setInput({ error: task.error, failedTask: task.getName() });
+                        // 设置错误任务的输入数据
+                        errorTask.setInput({ error: task.lasterrinfo, failedTask: task.getName() });
 
-                            // 执行错误处理任务
-                            const errorResult = await errorTask.execute(agent);
+                        // 执行错误处理任务
+                        const errorResult = await errorTask.execute(agent);
 
-                            // 保存错误处理任务结果
-                            if (errorTaskId) {
-                                this.task_results[errorTaskId] = errorResult;
-                            }
+                        // 保存错误处理任务结果
+                        this.task_results[next_task_id] = errorResult;
 
-                            // 标记错误处理任务为已执行
-                            if (errorTaskId) {
-                                executed_tasks.add(errorTaskId);
-                            }
-                        }
+                        // 标记错误处理任务为已执行
+                        executed_tasks.add(next_task_id);
                     }
 
                     // 执行完错误处理任务后，清空任务队列并终止循环
@@ -245,20 +232,17 @@ export class Workflow extends WorkflowDB {
                         tasks: this.tasks.map(t => ({
                             id: t.id,
                             taskname: t.taskname,
-                            state: t.state,
-                            status: t.status
+                            state: t.state
                         }))
                     }
                 };
-                const next_task_ids = task.evaluateConditions(context_data);
+                const next_task_id = task.evaluateConditions(context_data);
 
                 // 将符合条件的下一个任务添加到队列
-                for (const next_task_id of next_task_ids) {
-                    if (next_task_id in task_map && !executed_tasks.has(next_task_id)) {
-                        const next_task = task_map[next_task_id];
-                        task_queue.push(next_task);
-                        console.log(`任务 ${task.getName()} 完成，根据条件流转到任务 ${next_task.getName()}`);
-                    }
+                if (next_task_id && next_task_id in task_map && !executed_tasks.has(next_task_id)) {
+                    const next_task = task_map[next_task_id];
+                    task_queue.push(next_task);
+                    console.log(`任务 ${task.getName()} 完成，根据条件流转到任务 ${next_task.getName()}`);
                 }
             }
 
@@ -340,15 +324,17 @@ export class Workflow extends WorkflowDB {
                 const task = new Task(task_params);
 
                 // 添加条件流转信息
-                if (task_data.next_tasks) {
-                    task.nextTasks = task_data.next_tasks;
-                }
-                if (task_data.conditions) {
-                    task.conditions = task_data.conditions;
-                }
-                // 支持直接加载transitions配置
+                // 支持旧格式的transitions配置（向后兼容）
                 if (task_data.transitions) {
-                    task.transitions = task_data.transitions;
+                    const transitions = task_data.transitions;
+                    const firstTransition = Object.values(transitions)[0];
+                    if (firstTransition) {
+                        task.nextTaskId = firstTransition.task_id;
+                        task.nextTaskCondition = firstTransition.condition;
+                    }
+                } else if (task_data.next_tasks) {
+                    // 支持旧格式的next_tasks（向后兼容）
+                    task.nextTaskId = task_data.next_tasks[0] || null;
                 }
 
                 // 添加到工作流

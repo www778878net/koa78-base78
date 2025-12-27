@@ -1,8 +1,8 @@
 // 工作流演示示例 - 展示完整的工作流执行流程和条件流转
-import { Workflow } from '../base/workflow';
-import { Task } from '../base/task';
-import { Agent } from '../base/agent';
-import { Handler } from '../base/handler';
+import { Workflow } from '../../workflow/base/workflow';
+import { Task } from '../../workflow/base/task';
+import { Agent } from '../../workflow/base/agent';
+import { Handler } from '../../workflow/base/handler';
 
 // 模拟用户数据
 const mockUsers = [
@@ -204,26 +204,21 @@ async function runUserQueryWorkflowDemo() {
     workflow.add_task(errorHandlerTask);
 
     // 设置任务流转关系
-    // 验证成功 → 转换SID
-    validateSidTask.transitions = {
-        'convert-sid-to-user': { condition: 'task_result.valid === true', task_id: 'convert-sid-to-user' },
-        'error-handler': { condition: 'task_result.valid === false', task_id: 'error-handler' }
-    };
+    // 验证成功 → 转换SID (失败则终止)
+    validateSidTask.nextTaskId = 'convert-sid-to-user';
+    validateSidTask.nextTaskCondition = 'task_result.valid === true';
 
     // 转换成功 → 权限验证
-    convertSidTask.transitions = {
-        'validate-permission': { condition: 'task_result.userId', task_id: 'validate-permission' }
-    };
+    convertSidTask.nextTaskId = 'validate-permission';
+    convertSidTask.nextTaskCondition = 'task_result.userId';
 
     // 权限验证通过 → 数据库查询
-    validatePermissionTask.transitions = {
-        'query-user-info': { condition: 'task_result.authorized', task_id: 'query-user-info' }
-    };
+    validatePermissionTask.nextTaskId = 'query-user-info';
+    validatePermissionTask.nextTaskCondition = 'task_result.authorized';
 
     // 查询成功 → 结果格式化
-    dbQueryTask.transitions = {
-        'format-result': { condition: 'task_result.id', task_id: 'format-result' }
-    };
+    dbQueryTask.nextTaskId = 'format-result';
+    dbQueryTask.nextTaskCondition = 'task_result.id';
 
     console.log('\n📋 工作流任务列表');
     workflow.tasks.forEach((task, index) => {

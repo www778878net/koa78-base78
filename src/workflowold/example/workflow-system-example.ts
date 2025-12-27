@@ -1,8 +1,8 @@
 // 工作流系统完整示例
-import { Agent } from '../base/agent';
-import { Handler } from '../base/handler';
-import { Task } from '../base/task';
-import { Workflow } from '../base/workflow';
+import { Agent } from '../../workflow/base/agent';
+import { Handler } from '../../workflow/base/handler';
+import { Task } from '../../workflow/base/task';
+import { Workflow } from '../../workflow/base/workflow';
 
 // 1. 创建Agent实例
 const agent = new Agent();
