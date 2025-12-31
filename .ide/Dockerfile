@@ -3,14 +3,15 @@ FROM node:24
 
 RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension cnbcool.cnb-welcome \
-  && code-server --install-extension marscode.marscode-extension \
+  && code-server --install-extension Alibaba-Cloud.tongyi-lingma \  
+  && code-server --install-extension marscode.marscode-extension \  
   && echo done  
 
 # 安装 ssh 服务，用于支持 VSCode 等客户端通过 Remote-SSH 访问开发环境（也可按需安装其他软件）
 RUN apt-get update && apt-get install -y git wget unzip openssh-server build-essential
 
 # 安装 typescript 和 pnpm
-RUN npm install -g typescript pnpm
+RUN npm install -g typescript pnpm ts-node cross-env nodemon node-gyp  
 
 # 安装 MariaDB 客户端和服务端（替代MySQL）
 RUN apt-get update && apt-get install -y mariadb-client mariadb-server
