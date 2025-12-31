@@ -10,6 +10,7 @@ import { Context } from 'koa';
 import Base78 from '../controllers/Base78';
 import UpInfo from 'koa78-upinfo';
 import { ControllerLoader } from '../utils/ControllerLoader';
+import bodyParser from 'koa-bodyparser';
 
 // 扩展Koa的Request接口以支持body和fields属性
 declare module 'koa' {
@@ -116,61 +117,7 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
     app.use(errorHandler);           // 错误处理应在最外层
     app.use(statsMiddleware);        // 统计信息收集
     app.use(loggerMiddleware);       // 日志记录
-
-    // 自定义中间件：解析 JSON 和 urlencoded 请求体
-    app.use(async (ctx, next) => {
-        // 兼容已有设置
-        if (ctx.request.body !== undefined) return await next();
-
-        const contentType = ctx.get('Content-Type') || '';
-        let body;
-
-        try {
-            if (contentType.includes('application/json')) {
-                const rawBody = await readBody(ctx.req);
-                body = rawBody.trim().length ? JSON.parse(rawBody) : {};
-            } else if (contentType.includes('application/x-www-form-urlencoded')) {
-                const rawBody = await readBody(ctx.req);
-                body = parseUrlEncoded(rawBody);
-            } else if (contentType.includes('text/') || contentType === '') {
-                // 处理文本内容或无Content-Type的情况
-                body = await readBody(ctx.req);
-            } else {
-                // 其他类型的Content-Type也读取body内容为字符串
-                body = await readBody(ctx.req);
-            }
-        } catch (e) {
-            ctx.throw(422, `Body parse error: ${e.message}`);
-        }
-
-        ctx.request.body = body || {};
-        log.detail("Request body:", body);
-        await next();
-    });
-
-    // 辅助函数：读取流中的请求体
-    async function readBody(readable: any): Promise<string> {
-        // 如果不是流对象，直接返回空字符串
-        if (!readable || typeof readable.on !== 'function') {
-            return '';
-        }
-
-        const chunks: any[] = [];
-        for await (const chunk of readable) {
-            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-        }
-        return Buffer.concat(chunks).toString('utf8');
-    }
-
-    // 简易 application/x-www-form-urlencoded 解析器
-    function parseUrlEncoded(body: string): Record<string, any> {
-        if (!body) return {};
-        return body.split('&').reduce((acc, pair) => {
-            const [key, value] = pair.split('=').map(decodeURIComponent);
-            acc[key] = value;
-            return acc;
-        }, {} as Record<string, any>);
-    }
+    app.use(bodyParser());           // 使用koa-bodyparser解析请求体
     log.info("正在设置路由...");
     await setupRoutes(app);
     log.info("路由设置成功");
