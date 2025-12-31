@@ -4,22 +4,29 @@ exports.Task = void 0;
 const tslib_1 = require("tslib");
 const task_db_1 = require("./task_db");
 class Task extends task_db_1.TaskDB {
-    // 获取状态转换映射
-    get transitions() {
-        return this._transitions;
+    // 获取下一个任务ID
+    get nextTaskId() {
+        return this._nextTaskId;
     }
-    // 设置状态转换映射
-    set transitions(value) {
-        this._transitions = value || {};
+    // 设置下一个任务ID
+    set nextTaskId(value) {
+        this._nextTaskId = value;
     }
-    constructor(taskData) {
-        super(taskData);
+    // 获取下一个任务的条件
+    get nextTaskCondition() {
+        return this._nextTaskCondition;
+    }
+    // 设置下一个任务的条件
+    set nextTaskCondition(value) {
+        this._nextTaskCondition = value;
+    }
+    constructor(json_data) {
+        super(json_data);
         // 运行时状态（非数据库字段）
-        this.status = "created"; // created, running, completed, failed
         this.result = null;
-        this.error = null;
-        // 支持条件流转的属性
-        this._transitions = {};
+        // 支持条件流转的属性 - 只支持一个下级任务
+        this._nextTaskId = null;
+        this._nextTaskCondition = null;
     }
     // 检查任务是否处于活动状态（pending, running, paused）
     isActive() {
@@ -46,59 +53,10 @@ class Task extends task_db_1.TaskDB {
     setOutput(output) {
         this.outputdata = typeof output === 'string' ? output : JSON.stringify(output);
     }
-    // 获取下一个可能执行的任务ID列表（向后兼容）
-    get nextTasks() {
-        return Object.values(this._transitions).map(transition => transition.task_id);
-    }
-    // 设置下一个可能执行的任务ID列表，并更新状态转换映射（向后兼容）
-    set nextTasks(value) {
-        const existingConditions = {};
-        // 保存现有条件
-        for (const transition of Object.values(this._transitions)) {
-            if (transition.condition) {
-                existingConditions[transition.task_id] = transition.condition;
-            }
-        }
-        // 重建transitions
-        const newTransitions = {};
-        for (const taskId of value) {
-            newTransitions[taskId] = {
-                condition: existingConditions[taskId] || null,
-                task_id: taskId
-            };
-        }
-        this._transitions = newTransitions;
-    }
-    // 获取条件表达式字典（向后兼容）
-    get conditions() {
-        const conditions = {};
-        for (const [key, transition] of Object.entries(this._transitions)) {
-            if (transition.condition) {
-                conditions[key] = transition.condition;
-            }
-        }
-        return conditions;
-    }
-    // 设置条件表达式字典，并更新状态转换映射（向后兼容）
-    set conditions(value) {
-        for (const [taskId, condition] of Object.entries(value)) {
-            if (taskId in this._transitions) {
-                this._transitions[taskId].condition = condition;
-            }
-            else {
-                // 如果任务ID不在transitions中，添加它
-                this._transitions[taskId] = {
-                    condition,
-                    task_id: taskId
-                };
-            }
-        }
-    }
     // 执行任务
     execute(agent) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             console.log(`执行任务: ${this.getName()} (ID: ${this.id})`);
-            this.status = "running";
             this.state = Task.STATE.RUNNING;
             this.runningstatus = 'running';
             this.starttime = new Date().toISOString();
@@ -109,9 +67,8 @@ class Task extends task_db_1.TaskDB {
                 // 支持两种执行方式：通过Agent执行Handler或直接执行函数
                 if (agent && this.handler) {
                     console.log(`通过Agent执行Handler ${this.handler}`);
-                    // 解析handler字符串，格式为"type:capability"
-                    const [type, capability] = this.handler.split(":");
-                    this.result = yield agent.executeHandler(type, capability, inputData);
+                    // 直接使用handler名称调用
+                    this.result = yield agent.executeHandler(this.handler, inputData);
                 }
                 else if (this.taskFunction) {
                     console.log(`直接执行任务函数`);
@@ -121,7 +78,6 @@ class Task extends task_db_1.TaskDB {
                     console.log(`任务 ${this.getName()} 没有执行逻辑，标记为完成`);
                     this.result = null;
                 }
-                this.status = "completed";
                 this.state = Task.STATE.COMPLETED;
                 this.runningstatus = 'completed';
                 this.endtime = new Date().toISOString();
@@ -132,68 +88,171 @@ class Task extends task_db_1.TaskDB {
                 console.log(`任务 ${this.getName()} 执行完成`);
             }
             catch (e) {
-                this.status = "failed";
-                this.error = e instanceof Error ? e.message : String(e);
                 this.state = Task.STATE.FAILED;
                 this.runningstatus = 'failed';
                 this.endtime = new Date().toISOString();
                 this.lasterrortime = new Date().toISOString();
-                this.lasterrinfo = this.error;
+                this.lasterrinfo = e instanceof Error ? e.message : String(e);
                 this.update_statistics(false);
-                console.log(`任务 ${this.getName()} 执行失败: ${this.error}`);
+                console.log(`任务 ${this.getName()} 执行失败: ${this.lasterrinfo}`);
                 this.result = null;
             }
             return this.result;
         });
     }
-    // 评估条件，确定下一个要执行的任务ID列表
+    // 评估条件，确定下一个要执行的任务ID
     evaluateConditions(workflowData) {
-        if (Object.keys(this._transitions).length === 0) {
-            return []; // 没有下一个任务
+        if (!this._nextTaskId) {
+            return null; // 没有下一个任务
         }
         // 评估条件表达式
-        const result = [];
-        for (const transitionInfo of Object.values(this._transitions)) {
-            const nextTaskId = transitionInfo.task_id;
-            const condition = transitionInfo.condition;
-            try {
-                // 使用工作流数据作为上下文评估条件表达式
-                if (condition) {
-                    if (workflowData) {
-                        // 在TypeScript中直接执行条件表达式有安全风险，这里简化处理
-                        // 实际应用中应该使用更安全的表达式求值库
-                        console.log(`条件: ${condition}, 上下文: ${JSON.stringify(workflowData)}`);
-                        // 这里只是简单模拟，实际应该实现表达式求值
-                        result.push(nextTaskId);
+        const condition = this._nextTaskCondition;
+        try {
+            // 使用工作流数据作为上下文评估条件表达式
+            if (condition) {
+                if (workflowData) {
+                    // 实现真正的条件评估，使用安全的表达式求值
+                    const isConditionMet = this.evaluateCondition(condition, workflowData);
+                    if (isConditionMet) {
+                        console.log(`条件满足: ${condition}, 执行任务 ${this._nextTaskId}`);
+                        return this._nextTaskId;
                     }
                     else {
-                        // 如果没有工作流数据，默认不执行条件表达式
-                        result.push(nextTaskId);
+                        console.log(`条件不满足: ${condition}, 跳过任务 ${this._nextTaskId}`);
+                        return null;
                     }
                 }
                 else {
-                    // 条件为空，默认执行
-                    result.push(nextTaskId);
+                    // 如果没有工作流数据，默认执行
+                    return this._nextTaskId;
                 }
             }
-            catch (e) {
-                // 条件表达式评估失败，默认不执行该任务
-                console.log(`条件表达式评估失败: ${condition}, 错误: ${e}`);
-                continue;
+            else {
+                // 条件为空，默认执行
+                return this._nextTaskId;
             }
         }
-        return result;
+        catch (e) {
+            // 条件表达式评估失败，默认不执行该任务
+            console.log(`条件表达式评估失败: ${condition}, 错误: ${e}`);
+            return null;
+        }
+    }
+    // 使用安全方式评估条件表达式
+    evaluateCondition(condition, context) {
+        // 简单的安全条件评估实现
+        // 这里我们只支持一些基本的比较操作
+        try {
+            // 支持的条件模式:
+            // 1. task_result.property === value
+            // 2. task_result.property !== value
+            // 3. task_result.property == value
+            // 4. task_result.property != value
+            // 5. task_result.property (直接检查值的真假)
+            // 6. task_result.property && other_condition
+            // 7. task_result.property || other_condition
+            // 简单的条件解析
+            condition = condition.trim();
+            // 检查是否为简单的属性存在性检查
+            if (!condition.includes(' ') && condition.startsWith('task_result.')) {
+                const property = condition.replace('task_result.', '');
+                const value = this.getNestedProperty(context.task_result, property);
+                return !!value; // 转换为布尔值
+            }
+            // 处理复杂的条件表达式
+            // 支持的操作符: ===, ==, !==, !=, >, <, >=, <=
+            const operators = ['===', '==', '!==', '!=', '>=', '<=', '>', '<'];
+            let matchedOperator = null;
+            let operatorIndex = -1;
+            for (const op of operators) {
+                const index = condition.indexOf(op);
+                if (index !== -1) {
+                    matchedOperator = op;
+                    operatorIndex = index;
+                    break;
+                }
+            }
+            if (matchedOperator && operatorIndex !== -1) {
+                // 分割条件表达式
+                const leftSide = condition.substring(0, operatorIndex).trim();
+                const rightSide = condition.substring(operatorIndex + matchedOperator.length).trim();
+                // 解析左侧（通常是task_result的属性）
+                let actualValue;
+                if (leftSide.startsWith('task_result.')) {
+                    const property = leftSide.replace('task_result.', '');
+                    actualValue = this.getNestedProperty(context.task_result, property);
+                }
+                else {
+                    // 如果不是task_result开头，可能是一个更复杂的表达式，目前不支持
+                    console.warn(`不支持的条件表达式左侧: ${leftSide}`);
+                    return false;
+                }
+                // 解析右侧值
+                let expectedValue;
+                if (rightSide === 'true') {
+                    expectedValue = true;
+                }
+                else if (rightSide === 'false') {
+                    expectedValue = false;
+                }
+                else if (rightSide === 'null') {
+                    expectedValue = null;
+                }
+                else if (rightSide === 'undefined') {
+                    expectedValue = undefined;
+                }
+                else if (!isNaN(Number(rightSide))) {
+                    expectedValue = Number(rightSide);
+                }
+                else {
+                    // 假设是字符串，去除引号
+                    expectedValue = rightSide.replace(/^["']|["']$/g, '');
+                }
+                // 根据操作符比较值
+                switch (matchedOperator) {
+                    case '===':
+                        return actualValue === expectedValue;
+                    case '==':
+                        return actualValue == expectedValue;
+                    case '!==':
+                        return actualValue !== expectedValue;
+                    case '!=':
+                        return actualValue != expectedValue;
+                    case '>':
+                        return actualValue > expectedValue;
+                    case '<':
+                        return actualValue < expectedValue;
+                    case '>=':
+                        return actualValue >= expectedValue;
+                    case '<=':
+                        return actualValue <= expectedValue;
+                    default:
+                        return false;
+                }
+            }
+            // 如果不匹配任何已知模式，返回false
+            return false;
+        }
+        catch (e) {
+            console.error(`评估条件时出错: ${e}`);
+            return false;
+        }
+    }
+    // 辅助方法：获取嵌套属性
+    getNestedProperty(obj, path) {
+        return path.split('.').reduce((current, prop) => {
+            return current && current[prop] !== undefined ? current[prop] : undefined;
+        }, obj);
     }
     // 获取任务状态信息
     getStatus() {
         return {
             "task_id": this.id,
             "task_name": this.getName(),
-            "status": this.status,
-            "db_state": this.state,
+            "status": this.state,
             "progress": this.progress,
             "result": this.result,
-            "error": this.error
+            "error": this.lasterrinfo
         };
     }
 }

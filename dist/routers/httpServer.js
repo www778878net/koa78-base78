@@ -9,6 +9,7 @@ const tslog78_1 = require("tslog78");
 const router_1 = tslib_1.__importDefault(require("@koa/router"));
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const ControllerLoader_1 = require("../utils/ControllerLoader");
+const koa_bodyparser_1 = tslib_1.__importDefault(require("koa-bodyparser"));
 // const esClient = Elasticsearch78.getInstance();
 const log = tslog78_1.TsLog78.Instance;
 const router = new router_1.default();
@@ -91,81 +92,7 @@ function startServer(port) {
         app.use(errorHandler); // 错误处理应在最外层
         app.use(statsMiddleware); // 统计信息收集
         app.use(loggerMiddleware); // 日志记录
-        // 自定义中间件：解析 JSON 和 urlencoded 请求体
-        app.use((ctx, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // 兼容已有设置
-            if (ctx.request.body !== undefined)
-                return yield next();
-            const contentType = ctx.get('Content-Type') || '';
-            let body;
-            try {
-                if (contentType.includes('application/json')) {
-                    const rawBody = yield readBody(ctx.req);
-                    body = rawBody.trim().length ? JSON.parse(rawBody) : {};
-                }
-                else if (contentType.includes('application/x-www-form-urlencoded')) {
-                    const rawBody = yield readBody(ctx.req);
-                    body = parseUrlEncoded(rawBody);
-                }
-                else if (contentType.includes('text/') || contentType === '') {
-                    // 处理文本内容或无Content-Type的情况
-                    body = yield readBody(ctx.req);
-                }
-                else {
-                    // 其他类型的Content-Type也读取body内容为字符串
-                    body = yield readBody(ctx.req);
-                }
-            }
-            catch (e) {
-                ctx.throw(422, `Body parse error: ${e.message}`);
-            }
-            ctx.request.body = body || {};
-            log.detail("Request body:", body);
-            yield next();
-        }));
-        // 辅助函数：读取流中的请求体
-        function readBody(readable) {
-            var _a, readable_1, readable_1_1;
-            var _b, e_1, _c, _d;
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                // 如果不是流对象，直接返回空字符串
-                if (!readable || typeof readable.on !== 'function') {
-                    return '';
-                }
-                const chunks = [];
-                try {
-                    for (_a = true, readable_1 = tslib_1.__asyncValues(readable); readable_1_1 = yield readable_1.next(), _b = readable_1_1.done, !_b;) {
-                        _d = readable_1_1.value;
-                        _a = false;
-                        try {
-                            const chunk = _d;
-                            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-                        }
-                        finally {
-                            _a = true;
-                        }
-                    }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (!_a && !_b && (_c = readable_1.return)) yield _c.call(readable_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                }
-                return Buffer.concat(chunks).toString('utf8');
-            });
-        }
-        // 简易 application/x-www-form-urlencoded 解析器
-        function parseUrlEncoded(body) {
-            if (!body)
-                return {};
-            return body.split('&').reduce((acc, pair) => {
-                const [key, value] = pair.split('=').map(decodeURIComponent);
-                acc[key] = value;
-                return acc;
-            }, {});
-        }
+        app.use((0, koa_bodyparser_1.default)()); // 使用koa-bodyparser解析请求体
         log.info("正在设置路由...");
         yield setupRoutes(app);
         log.info("路由设置成功");

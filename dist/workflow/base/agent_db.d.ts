@@ -43,7 +43,19 @@ export declare class AgentDB {
     jsobj: Record<string, any>;
     inputdata: Record<string, any>;
     outputdata: Record<string, any>;
+    private handlersByType;
+    private handlersByName;
     constructor(json_data?: Record<string, any>);
-    set_from_json(json_data: Record<string, any>): this;
-    get_from_json(): Record<string, any>;
+    setFromJson(json_data: Record<string, any>): this;
+    toJson(): Record<string, any>;
+    private loadHandlersFromJsonData;
+    private convertHandlersToJsonArray;
+    isActive(): boolean;
+    addHandler(handler: any): void;
+    getHandlerByCapability(type: string, capability: string): any | null;
+    getHandlerByName(handlerName: string): any | null;
+    getAllHandlersByType(): Map<string, Map<string, any>>;
+    getAllHandlersByName(): Map<string, any>;
+    getHandlersByType(type: string): Map<string, any> | null;
+    executeHandler(handlerName: string, params: Record<string, any>): Promise<Record<string, any>>;
 }
