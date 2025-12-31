@@ -1,44 +1,57 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "lib": [ "ES2015", "DOM" ],
-    "module": "commonjs",
-    "rootDir": "src",
-    "outDir": "dist",
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noImplicitAny": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "forceConsistentCasingInFileNames": true,
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "types": ["node", "jest"],
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "useDefineForClassFields": false,
-    "paths": {
-      "*": ["node_modules/*"],
-      "scripts/*": ["scripts/*"]
+    "compilerOptions": {
+        "target": "es6",
+        "lib": [
+            "ES2015",
+            "DOM"
+        ],
+        "module": "commonjs",
+        "rootDir": "src",
+        "outDir": "dist",
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noImplicitAny": false,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "declaration": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "forceConsistentCasingInFileNames": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ],
+        "types": [
+            "node",
+            "jest"
+        ],
+        "moduleResolution": "node",
+        "importHelpers": true,
+        "useDefineForClassFields": false,
+        "paths": {
+            "*": [
+                "node_modules/*"
+            ],
+            "scripts/*": [
+                "scripts/*"
+            ]
+        },
+        "baseUrl": "."
     },
-    "baseUrl": "."
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "__tests__",
-    "scripts"
-  ]
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+        "__tests__",
+        "scripts"
+    ]
 }

@@ -1,19 +1,47 @@
 {
-    "location": "ali",
-    "port": 888,
-    "isdebug": true,
-    "host": "oa.778878.net",
-    "tableconfigfile": "./src/config/tabledef.ts",
-    "iplog": true,
+    "location": "development-local",
+    "port": 88,
+    "isdebug": false,
+    "host": "localhost",
+    "tableconfigfile": "./src/config/tableConfig.ts",
     "nodejslog": {
         "issave": true,
         "redis": true
     },
-    "sqlites": {
+    "iplog": true,
+    "mysqls": {
         "default": {
-            "filename": "./data/default.db",
+            "host": "localhost",
+            "port": "3306",
+            "password": "rootpassword",
+            "database": "testdb",
+            "user": "root",
             "isLog": true,
-            "isCount": true
+            "isCount": true,
+            "max": 10
+        },
+        "7788": {
+            "host": "localhost",
+            "port": "3306",
+            "password": "rootpassword",
+            "database": "testdb",
+            "user": "root",
+            "isLog": true,
+            "isCount": true,
+            "max": 10
         }
+    },
+    "memcached": {
+        "host": "localhost",
+        "port": 11211,
+        "max": 100,
+        "local": "dev"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "pwd": "",
+        "max": 100,
+        "local": "dev"
     }
 }
