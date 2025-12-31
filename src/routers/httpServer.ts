@@ -12,13 +12,7 @@ import UpInfo from 'koa78-upinfo';
 import { ControllerLoader } from '../utils/ControllerLoader';
 import bodyParser from 'koa-bodyparser';
 
-// 扩展Koa的Request接口以支持body和fields属性
-declare module 'koa' {
-    interface Request {
-        body?: any;
-        fields?: any;
-    }
-}
+
 
 // const esClient = Elasticsearch78.getInstance();
 const log = TsLog78.Instance;
