@@ -304,9 +304,13 @@ class Base78 {
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
             const result = yield this.dbService.mAdd(query, values, this.up, this.dbname);
-            // 如果mAdd返回值是0 且tbname=jhs_puton 记录query和values
+            // 如果mAdd返回值是0 且tbname以workflow_开头，返回包含SQL和值的对象
             if (result === 0) {
                 this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
+                // 检查tbname是否以workflow_开头
+                if (this.tbname.startsWith('workflow_')) {
+                    return { sql: query, values: values };
+                }
             }
             return result;
         });
