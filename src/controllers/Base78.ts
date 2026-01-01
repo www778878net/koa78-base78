@@ -340,7 +340,7 @@ export default class Base78<T extends BaseSchema> {
     }
 
     @ApiMethod()
-    async mAdd(colp?: string[]): Promise<number> {
+    async mAdd(colp?: string[]): Promise<number | { sql: string, values: any[] }> {
         await this.performShardingTableMaintenance();
 
         colp = colp || this.tableConfig.colsImp;
@@ -356,9 +356,14 @@ export default class Base78<T extends BaseSchema> {
 
         const result = await this.dbService.mAdd(query, values, this.up, this.dbname);
 
-        // 如果mAdd返回值是0 且tbname=jhs_puton 记录query和values
+        // 如果mAdd返回值是0 且tbname以workflow_开头，返回包含SQL和值的对象
         if (result === 0) {
             this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
+
+            // 检查tbname是否以workflow_开头
+            if (this.tbname.startsWith('workflow_')) {
+                return { sql: query, values: values };
+            }
         }
 
         return result;
