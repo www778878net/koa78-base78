@@ -45,7 +45,10 @@ export default class Base78<T extends BaseSchema> {
     private _loadConfig;
     protected _setBack(res: number, errmsg: string, kind?: string): void;
     mUpdateMany(colpin?: string[]): Promise<any>;
-    mAdd(colp?: string[]): Promise<number>;
+    mAdd(colp?: string[]): Promise<number | {
+        sql: string;
+        values: any[];
+    }>;
     mUpdateIdpk(colp?: string[]): Promise<string>;
     mUpdate(colp?: string[]): Promise<string>;
     midpk(colp?: string[]): Promise<string>;
