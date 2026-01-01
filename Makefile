@@ -1,4 +1,6 @@
 # 变量定义
+SHELL := powershell.exe
+.SHELLFLAGS := -NoProfile -Command
 NODE := node
 NPX := npx
 PNPM := pnpm
@@ -17,6 +19,23 @@ help:
 	@echo "  make test               - 运行测试"
 	@echo "  make clean              - 清理构建文件"
 	@echo "  make gen                - 生成Schemas数据结构"
+	@echo "  make diskspace          - 查看磁盘空间使用情况"
+logsvc:
+	ssh root@47.110.76.160
+logsvc3:
+	& '.\ssh.ps1'
+logsvc4:
+	bash ./ssh.sh
 
+# 查看磁盘空间使用情况
+diskspace:
+	df -h
+	du -h --max-depth=1 /
+	du -h --max-depth=1 /7788
+	du -h --max-depth=1 /var/lib/docker
+
+
+debug-shell:
+	@echo Using shell: $(SHELL)
 tset1:
 	npm run test:dev -- --test/apiwf/basic/demoinit.test.ts
