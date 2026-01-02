@@ -176,15 +176,12 @@ function setupRoutes(app) {
                 }
                 log.debug(`Setting response type to JSON ${result}`);
                 ctx.set('Content-Type', 'application/json');
-                if (controller.up.backtype === "json" && typeof result !== 'string') {
-                    result = JSON.stringify(result);
-                }
-                ctx.body = JSON.stringify({
+                ctx.body = {
                     res: controller.up.res,
                     errmsg: controller.up.errmsg,
                     kind: controller.up.backtype,
                     back: result
-                });
+                };
             }
             catch (e) {
                 log.error("Route error:", e);
