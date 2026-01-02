@@ -355,7 +355,7 @@ class Base78 {
                 return this.mUpdateIdpk(colp);
             }
             else {
-                return (yield this.mAdd(colp)).toString();
+                return yield this.mAdd(colp);
             }
         });
     }
@@ -368,7 +368,7 @@ class Base78 {
                 return this.mUpdateIdpk(colp);
             }
             else {
-                return (yield this.mAdd(colp)).toString();
+                return yield this.mAdd(colp);
             }
         });
     }
@@ -426,7 +426,7 @@ class Base78 {
                 return this.mUpdateIdpk();
             }
             else {
-                return (yield this.mAdd()).toString();
+                return yield this.mAdd(colp);
             }
         });
     }
