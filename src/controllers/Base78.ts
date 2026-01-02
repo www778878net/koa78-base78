@@ -406,7 +406,7 @@ export default class Base78<T extends BaseSchema> {
     }
 
     @ApiMethod()
-    async midpk(colp?: string[]): Promise<string> {
+    async midpk(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
         const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
@@ -414,12 +414,12 @@ export default class Base78<T extends BaseSchema> {
             this.up.midpk = result[0]["idpk"]
             return this.mUpdateIdpk(colp);
         } else {
-            return (await this.mAdd(colp)).toString();
+            return await this.mAdd(colp);
         }
     }
 
     @ApiMethod()
-    async m(colp?: string[]): Promise<string> {
+    async m(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
         const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
@@ -427,7 +427,7 @@ export default class Base78<T extends BaseSchema> {
             this.up.midpk = result[0]["idpk"]
             return this.mUpdateIdpk(colp);
         } else {
-            return (await this.mAdd(colp)).toString();
+            return await this.mAdd(colp);
         }
     }
 
@@ -478,7 +478,7 @@ export default class Base78<T extends BaseSchema> {
      * @returns 
      */
     @ApiMethod()
-    async mByFirstField(colp?: string[]): Promise<string> {
+    async mByFirstField(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
         const firstField = this.tableConfig.cols[0];
         const firstFieldValue = this.up.pars[0];
         //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
@@ -490,7 +490,7 @@ export default class Base78<T extends BaseSchema> {
             this.up.midpk = result[0]["idpk"];
             return this.mUpdateIdpk();
         } else {
-            return (await this.mAdd()).toString();
+            return await this.mAdd(colp);
         }
     }
 }

@@ -51,8 +51,14 @@ export default class Base78<T extends BaseSchema> {
     }>;
     mUpdateIdpk(colp?: string[]): Promise<string>;
     mUpdate(colp?: string[]): Promise<string>;
-    midpk(colp?: string[]): Promise<string>;
-    m(colp?: string[]): Promise<string>;
+    midpk(colp?: string[]): Promise<number | string | {
+        sql: string;
+        values: any[];
+    }>;
+    m(colp?: string[]): Promise<number | string | {
+        sql: string;
+        values: any[];
+    }>;
     get(colp?: string[]): Promise<object>;
     del(): Promise<string>;
     protected createQueryBuilder(): QueryBuilder<T>;
@@ -65,7 +71,10 @@ export default class Base78<T extends BaseSchema> {
         tmp=await up.send_back("apistock/stock/stock_mine/mByFirstField", up)
      * @returns
      */
-    mByFirstField(colp?: string[]): Promise<string>;
+    mByFirstField(colp?: string[]): Promise<number | string | {
+        sql: string;
+        values: any[];
+    }>;
 }
 export declare class CidBase78<T extends BaseSchema> extends Base78<T> {
 }
