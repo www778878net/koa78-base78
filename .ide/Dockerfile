@@ -48,7 +48,7 @@ ENV CLAUDE_HOME="/workspace/.claude" \
 # API Key通过云环境启动时注入（避免硬编码泄露），这里仅配置端点和模型
 ENV ANTHROPIC_BASE_URL="https://api.xiaomimimo.com/anthropic" \
     ANTHROPIC_MODEL="mimo-v2-flash" \
-    ANTHROPIC_AUTH_TOKEN="sk-ct5t43z5xhow436jchpwco402m7xffb5d1jis5r00zgs10g8"
+    ANTHROPIC_AUTH_TOKEN=""
 
 # ==============================================
 # 7. 初始化Claude Code配置（避免首次启动弹窗）
