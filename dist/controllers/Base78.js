@@ -14,7 +14,7 @@ const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticse
 const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
 class Base78 {
     constructor() {
-        this.dbname = "default"; //mysql数据库名（非表名） 
+        this.dbname = "default"; //mysql数据库名（非表名）
         // 使用新的日志服务方式，与DatabaseService中完全一致
         this.logger = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
         this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
@@ -303,15 +303,53 @@ class Base78 {
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
+            // 执行插入操作
             const result = yield this.dbService.mAdd(query, values, this.up, this.dbname);
-            // 如果mAdd返回值是0 且tbname以workflow_开头，返回包含SQL和值的对象
-            if (result === 0) {
-                this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
-                // 检查tbname是否以workflow_开头
-                if (this.tbname.startsWith('workflow_') || this.tbname.startsWith('steam_')) {
-                    return { sql: query, values: values };
-                }
+            // 返回可直接在SQL客户端执行的完整SQL（带参数值）
+            let sql = query;
+            for (let i = 0; i < values.length; i++) {
+                const val = values[i];
+                const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                sql = sql.replace('?', replacement);
             }
+            return sql;
+        });
+    }
+    mAddMany(colp) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield this.performShardingTableMaintenance();
+            colp = colp || this.tableConfig.colsImp;
+            // 检查是否有足够的数据
+            if (this.up.pars.length < colp.length) {
+                throw new Error('insufficient parameters for mAddMany');
+            }
+            // 计算行数：前端只传业务字段，每行 colp.length 个字段
+            const totalPars = this.up.pars.length;
+            const rowCount = Math.floor(totalPars / colp.length);
+            if (rowCount === 0) {
+                throw new Error('no data to insert');
+            }
+            // 检查是否有余数（参数数量必须是 colp.length 的整数倍）
+            if (totalPars % colp.length !== 0) {
+                throw new Error('parameters count must be multiple of column count');
+            }
+            // 为所有字段名添加反引号
+            const quotedColp = colp.map(col => `\`${col}\``);
+            // 每行实际需要的参数数：业务字段 + 4个系统字段
+            const fieldsPerRow = colp.length + 4;
+            // 构建批量插入的SQL
+            const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+            // 构建参数数组
+            const values = [];
+            for (let i = 0; i < rowCount; i++) {
+                const startIndex = i * colp.length;
+                const rowValues = this.up.pars.slice(startIndex, startIndex + colp.length);
+                // 添加业务字段值
+                values.push(...rowValues);
+                // 添加系统字段值（每行都相同）
+                values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            }
+            const result = yield this.dbService.m(query, values, this.up, this.dbname);
             return result;
         });
     }
@@ -451,6 +489,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mAdd", null);
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Array]),
+    tslib_1.__metadata("design:returntype", Promise)
+], Base78.prototype, "mAddMany", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
