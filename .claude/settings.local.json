@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc --noEmit src/controllers/Base78.ts)",
       "Bash(findstr /C:\"395\" /C:\"398\" /C:\"error TS\")",
-      "Bash(powershell -Command \"\\(Get-Content Base78.ts -Raw\\) -replace [regex]::Escape\\(''    @ApiMethod\\(\\)''\\), ''@@@TEMP_START@@@'' | Set-Content Base78.ts\")"
+      "Bash(powershell -Command \"\\(Get-Content Base78.ts -Raw\\) -replace [regex]::Escape\\(''    @ApiMethod\\(\\)''\\), ''@@@TEMP_START@@@'' | Set-Content Base78.ts\")",
+      "Bash(git commit -m \"Merge branch ''main'' into develop\")",
+      "Bash(cat package.json)"
     ]
   }
 }
