@@ -9,7 +9,17 @@
       "Bash(npx tsc --noEmit)",
       "Bash(Get-Content \"D:\\\\50.code\\\\30.git78\\\\50.koa78\\\\koa78-base78\\\\src\\\\dll78\\\\Mysql78.ts\")",
       "Bash(Select-Object -First 5)",
-      "Bash(cat node_modules/mysql78/package.json)"
+      "Bash(cat node_modules/mysql78/package.json)",
+      "Bash(npm install mysql2)",
+      "Bash(npm install mysql2 --save)",
+      "Bash(npm install --legacy-peer-deps mysql2)",
+      "Bash(dir node_modulesmysql78node_modules)",
+      "Bash(npm cache clean --force)",
+      "Bash(npm install --save-dev mysql2@3.11.5)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm install)",
+      "Bash(pnpm run build)",
+      "Bash(dir node_modules)"
     ]
   }
 }

@@ -183,8 +183,8 @@ class Base78 {
         });
     }
     mUpdateElkByid() {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             const up = this.up;
             if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
                 throw new Error("err:只有管理员可以操作");
@@ -242,8 +242,8 @@ class Base78 {
         this.up.errmsg = errmsg || "";
     }
     mUpdateMany(colpin) {
-        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const self = this;
             const up = self.up;
             // 防注入: 校验cid和uname
@@ -497,6 +497,7 @@ class Base78 {
 }
 //维护命令一天执行一次
 Base78.lastMaintenanceDate = '';
+exports.default = Base78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -563,7 +564,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mByFirstField", null);
-exports.default = Base78;
 class CidBase78 extends Base78 {
 }
 exports.CidBase78 = CidBase78;
