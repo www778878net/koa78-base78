@@ -361,7 +361,7 @@ export default class Base78<T extends BaseSchema> {
             this.logger.warn(`mAdd returned 0 for ${this.getDynamicTableName()} table. Query: ${query}, Values: ${JSON.stringify(values)}`);
 
             // 检查tbname是否以workflow_开头
-            if (this.tbname.startsWith('workflow_')) {
+            if (this.tbname.startsWith('workflow_') || this.tbname.startsWith('steam_')) {
                 return { sql: query, values: values };
             }
         }
