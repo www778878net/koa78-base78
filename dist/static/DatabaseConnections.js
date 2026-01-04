@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseConnections = void 0;
 const tslib_1 = require("tslib");
-const mysql78_1 = tslib_1.__importDefault(require("mysql78"));
+const Mysql78_1 = tslib_1.__importDefault(require("../dll78/Mysql78"));
 const memcache78_1 = tslib_1.__importDefault(require("memcache78"));
 const redis78_1 = tslib_1.__importDefault(require("redis78"));
 const Sqlite78_1 = tslib_1.__importDefault(require("../dll78/Sqlite78"));
@@ -16,7 +16,7 @@ class DatabaseConnections {
         const mysqlEntries = mysqls ? Object.entries(mysqls) : [];
         for (const [name, mysqlConfig] of mysqlEntries) {
             console.warn(`Creating MySQL connection [${name}] with host:${mysqlConfig.host} db:${mysqlConfig.database} user:${mysqlConfig.user} password:${mysqlConfig.password}`);
-            this.mysqlConnections.set(name, new mysql78_1.default(mysqlConfig));
+            this.mysqlConnections.set(name, new Mysql78_1.default(mysqlConfig));
         }
         // 初始化SQLite连接 - 注释掉这部分代码
         if (sqlites) {
