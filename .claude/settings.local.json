@@ -5,7 +5,11 @@
       "Bash(findstr /C:\"395\" /C:\"398\" /C:\"error TS\")",
       "Bash(powershell -Command \"\\(Get-Content Base78.ts -Raw\\) -replace [regex]::Escape\\(''    @ApiMethod\\(\\)''\\), ''@@@TEMP_START@@@'' | Set-Content Base78.ts\")",
       "Bash(git commit -m \"Merge branch ''main'' into develop\")",
-      "Bash(cat package.json)"
+      "Bash(cat package.json)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(Get-Content \"D:\\\\50.code\\\\30.git78\\\\50.koa78\\\\koa78-base78\\\\src\\\\dll78\\\\Mysql78.ts\")",
+      "Bash(Select-Object -First 5)",
+      "Bash(cat node_modules/mysql78/package.json)"
     ]
   }
 }
