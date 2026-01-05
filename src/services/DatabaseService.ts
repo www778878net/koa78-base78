@@ -37,7 +37,7 @@ export class DatabaseService {
         }
     }
 
-    async m(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<any> {
+    async m(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<{ affectedRows: number; error?: string }> {
         if (!this.dbConnections) {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
@@ -73,7 +73,7 @@ export class DatabaseService {
         }
     }
 
-    async mAdd(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<number> {
+    async mAdd(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<{ insertId: number; error?: string }> {
         if (!this.dbConnections) {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
@@ -110,7 +110,7 @@ export class DatabaseService {
         }
     }
 
-    async sqliteM(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<any> {
+    async sqliteM(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<{ affectedRows: number; error?: string }> {
         if (!this.dbConnections) {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
@@ -146,7 +146,7 @@ export class DatabaseService {
         }
     }
 
-    async sqliteMAdd(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<number> {
+    async sqliteMAdd(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<{ insertId: number; error?: string }> {
         if (!this.dbConnections) {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');

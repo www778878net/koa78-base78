@@ -49,14 +49,20 @@ export default class Sqlite78 {
      * @param values 参数值
      * @param up 用户信息
      */
-    doM(cmdtext: string, values: any[], up: UpInfo): Promise<number>;
+    doM(cmdtext: string, values: any[], up: UpInfo): Promise<{
+        affectedRows: number;
+        error?: string;
+    }>;
     /**
      * 插入数据，返回插入的行ID
      * @param cmdtext SQL语句
      * @param values 参数值
      * @param up 用户信息
      */
-    doMAdd(cmdtext: string, values: any[], up: UpInfo): Promise<number>;
+    doMAdd(cmdtext: string, values: any[], up: UpInfo): Promise<{
+        insertId: number;
+        error?: string;
+    }>;
     /**
      * 设置警告处理器
      * @param handler 处理警告的函数

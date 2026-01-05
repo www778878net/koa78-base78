@@ -217,7 +217,7 @@ class Sqlite78 {
         var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this._db) {
-                return 0;
+                return { affectedRows: 0, error: 'database not initialized' };
             }
             const debug = (_a = up.debug) !== null && _a !== void 0 ? _a : false;
             const dstart = new Date();
@@ -228,12 +228,17 @@ class Sqlite78 {
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
-                return result.changes;
+                // 如果受影响行数为0，返回明确的错误信息
+                if (result.changes === 0) {
+                    return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})` };
+                }
+                return { affectedRows: result.changes };
             }
             catch (err) {
-                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+                const errorMsg = JSON.stringify(err);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
                 this.log.error(err, 'sqlite_doM');
-                return -1;
+                return { affectedRows: 0, error: errorMsg };
             }
         });
     }
@@ -247,7 +252,7 @@ class Sqlite78 {
         var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this._db) {
-                return 0;
+                return { insertId: 0, error: 'database not initialized' };
             }
             const debug = (_a = up.debug) !== null && _a !== void 0 ? _a : false;
             const dstart = new Date();
@@ -258,12 +263,17 @@ class Sqlite78 {
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
-                return result.lastID;
+                // 如果受影响行数为0，返回明确的错误信息
+                if (result.changes === 0) {
+                    return { insertId: 0, error: `插入失败，数据未被添加 (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})` };
+                }
+                return { insertId: result.lastID };
             }
             catch (err) {
-                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+                const errorMsg = JSON.stringify(err);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
                 this.log.error(err, 'sqlite_doMAdd');
-                return 0;
+                return { insertId: 0, error: errorMsg };
             }
         });
     }

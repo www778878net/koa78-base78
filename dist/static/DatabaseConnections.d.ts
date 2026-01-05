@@ -1,4 +1,4 @@
-import Mysql78 from 'mysql78';
+import Mysql78 from '../dll78/Mysql78';
 import MemCache78 from 'memcache78';
 import Redis78 from 'redis78';
 import Sqlite78 from '../dll78/Sqlite78';

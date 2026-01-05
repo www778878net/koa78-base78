@@ -16,14 +16,14 @@ console.log('TypeScript compilation succeeded.');
 const gitStatus = shell.exec('git status --porcelain', { silent: true });
 if (gitStatus.stdout.trim() !== '') {
   console.log('There are uncommitted changes after running npx tsc. Committing them now.');
-  
+
   // Add all changes
   shell.exec('git add .');
-  
+
   // Get the last commit message from develop branch
   const lastCommitMsg = shell.exec('git log -1 --pretty=%B', { silent: true }).stdout.trim();
   console.log(`Committing with message: ${lastCommitMsg}`);
-  
+
   // Commit the changes
   shell.exec(`git commit -m "${lastCommitMsg}"`);
 } else {

@@ -3,7 +3,30 @@
     "allow": [
       "Bash(npx tsc --noEmit src/controllers/Base78.ts)",
       "Bash(findstr /C:\"395\" /C:\"398\" /C:\"error TS\")",
-      "Bash(powershell -Command \"\\(Get-Content Base78.ts -Raw\\) -replace [regex]::Escape\\(''    @ApiMethod\\(\\)''\\), ''@@@TEMP_START@@@'' | Set-Content Base78.ts\")"
+      "Bash(powershell -Command \"\\(Get-Content Base78.ts -Raw\\) -replace [regex]::Escape\\(''    @ApiMethod\\(\\)''\\), ''@@@TEMP_START@@@'' | Set-Content Base78.ts\")",
+      "Bash(git commit -m \"Merge branch ''main'' into develop\")",
+      "Bash(cat package.json)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(Get-Content \"D:\\\\50.code\\\\30.git78\\\\50.koa78\\\\koa78-base78\\\\src\\\\dll78\\\\Mysql78.ts\")",
+      "Bash(Select-Object -First 5)",
+      "Bash(cat node_modules/mysql78/package.json)",
+      "Bash(npm install mysql2)",
+      "Bash(npm install mysql2 --save)",
+      "Bash(npm install --legacy-peer-deps mysql2)",
+      "Bash(dir node_modulesmysql78node_modules)",
+      "Bash(npm cache clean --force)",
+      "Bash(npm install --save-dev mysql2@3.11.5)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm install)",
+      "Bash(pnpm run build)",
+      "Bash(dir node_modules)",
+      "Bash(dir build)",
+      "Bash(dir buildRelease)",
+      "Bash(node-gyp configure build)",
+      "Bash(npx node-gyp configure build)",
+      "Bash(set VCTOOLSINSTALLDIR=C:Program FilesMicrosoft Visual Studio2022CommunityVCToolsMSVC14.38.33130 )",
+      "Bash(npx node-gyp rebuild --msvs_version=2022)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" depsaction_before_build.vcxproj /p:SpectreMitigation=None /p:PlatformToolset=v143)"
     ]
   }
 }

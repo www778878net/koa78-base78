@@ -333,7 +333,11 @@ export default class Base78<T extends BaseSchema> {
         // 执行更新操作
         try {
             const result = await this.dbService.m(sb, pars, up, this.dbname);
-            return result.toString();
+            if (result.error) {
+                this._setBack(-1, result.error);
+                return result.error;
+            }
+            return result.affectedRows.toString();
         } catch (error) {
             throw new Error(`数据库操作失败: ${error.message}`);
         }
@@ -356,6 +360,12 @@ export default class Base78<T extends BaseSchema> {
 
         // 执行插入操作
         const result = await this.dbService.mAdd(query, values, this.up, this.dbname);
+
+        // 如果返回结果包含错误信息，设置 res 为负值并返回错误信息
+        if (result.error) {
+            this._setBack(-1, result.error);
+            return result.error;
+        }
 
         // 返回可直接在SQL客户端执行的完整SQL（带参数值）
         let sql = query;
@@ -416,7 +426,14 @@ export default class Base78<T extends BaseSchema> {
         }
 
         const result = await this.dbService.m(query, values, this.up, this.dbname);
-        return result;
+
+        // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
+        if (result.error) {
+            this._setBack(-1, result.error);
+            return 0;
+        }
+
+        return result.affectedRows;
     }
 
     @ApiMethod()
@@ -433,9 +450,13 @@ export default class Base78<T extends BaseSchema> {
         values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
 
         const result = await this.dbService.m(query, values, this.up, this.dbname);
-        if (result == 0) return this.up.midpk.toString() + " " + this.tableConfig.uidcid + " "
+        if (result.error) {
+            this._setBack(-1, result.error);
+            return result.error;
+        }
+        if (result.affectedRows == 0) return this.up.midpk.toString() + " " + this.tableConfig.uidcid + " "
             + this.up[this.tableConfig.uidcid] + " " + JSON.stringify(this.up)
-        return result === 1 ? this.up.mid.toString() : result;
+        return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
     }
 
     @ApiMethod()
@@ -452,7 +473,12 @@ export default class Base78<T extends BaseSchema> {
 
         const result = await this.dbService.m(query, values, this.up, this.dbname);
 
-        return result === 1 ? this.up.mid.toString() : result;
+        if (result.error) {
+            this._setBack(-1, result.error);
+            return result.error;
+        }
+
+        return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
     }
 
     @ApiMethod()
@@ -511,7 +537,12 @@ export default class Base78<T extends BaseSchema> {
         const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
         const result = await this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
-        return result === 0 ? "err:没有行被修改" : this.up.mid.toString();
+        if (result.error) {
+            this._setBack(-1, result.error);
+            return result.error;
+        }
+
+        return result.affectedRows === 0 ? "err:没有行被修改" : this.up.mid.toString();
     }
 
     protected createQueryBuilder(): QueryBuilder<T> {
