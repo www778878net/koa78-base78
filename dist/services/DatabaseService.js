@@ -15,8 +15,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
     setDatabaseConnections(dbConnections) {
         this.dbConnections = dbConnections;
     }
-    get(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    get(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -35,8 +35,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    m(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    m(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -55,8 +55,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    doT(cmds_1, values_1, errtexts_1, logtext_1, logvalue_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (cmds, values, errtexts, logtext, logvalue, up, dbName = "default") {
+    doT(cmds, values, errtexts, logtext, logvalue, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -75,8 +75,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    mAdd(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    mAdd(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -96,8 +96,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
         });
     }
     // SQLite相关方法
-    sqliteGet(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    sqliteGet(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -116,8 +116,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    sqliteM(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    sqliteM(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -136,8 +136,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    sqliteDoT(cmds_1, values_1, errtexts_1, logtext_1, logvalue_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (cmds, values, errtexts, logtext, logvalue, up, dbName = "default") {
+    sqliteDoT(cmds, values, errtexts, logtext, logvalue, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -156,8 +156,8 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
             }
         });
     }
-    sqliteMAdd(sql_1, values_1, up_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (sql, values, up, dbName = "default") {
+    sqliteMAdd(sql, values, up, dbName = "default") {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.dbConnections) {
                 this.log.error('DatabaseConnections not initialized');
                 throw new Error('DatabaseConnections not initialized');
@@ -177,9 +177,9 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
         });
     }
 };
-exports.DatabaseService = DatabaseService;
-exports.DatabaseService = DatabaseService = DatabaseService_1 = tslib_1.__decorate([
+DatabaseService = DatabaseService_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
     tslib_1.__metadata("design:paramtypes", [])
 ], DatabaseService);
+exports.DatabaseService = DatabaseService;
 //# sourceMappingURL=DatabaseService.js.map

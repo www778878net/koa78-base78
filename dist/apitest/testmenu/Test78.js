@@ -9,7 +9,7 @@ class Test78 extends Base78_1.CidBase78 {
         // 设置分表配置示例 - 按天分表
         this.setShardingConfig({
             type: 'daily',
-            retentionDays: 5, // 保留5天的表   
+            retentionDays: 5,
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                     id VARCHAR(36) NOT NULL DEFAULT '',
@@ -50,8 +50,8 @@ class Test78 extends Base78_1.CidBase78 {
         });
     }
     testShardingConfig() {
+        var _a, _b, _c;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
             // 测试分表配置是否正确设置
             return {
                 shardingType: (_a = this.shardingConfig) === null || _a === void 0 ? void 0 : _a.type,
@@ -107,7 +107,6 @@ class Test78 extends Base78_1.CidBase78 {
         }));
     }
 }
-exports.default = Test78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -150,4 +149,5 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", []),
     tslib_1.__metadata("design:returntype", Promise)
 ], Test78.prototype, "test2", null);
+exports.default = Test78;
 //# sourceMappingURL=Test78.js.map
