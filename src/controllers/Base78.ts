@@ -315,7 +315,7 @@ export default class Base78<T extends BaseSchema> {
         let sb = `UPDATE ${self.getDynamicTableName()} SET `;
         for (let i = 0; i < colp.length; i++) {
             if (i > 0) sb += `, `;
-            sb += `\`${colp[i]}\` = CASE \`idpk\` `;
+            sb += `\`${colp[i]}\` = CASE \`id\` `;
             for (let j = 0; j < idlist.length; j++) {
                 sb += `WHEN ? THEN ? `;
                 pars.push(idlist[j], values[j][i]);  // 添加查询参数
@@ -327,7 +327,7 @@ export default class Base78<T extends BaseSchema> {
         sb += ", \`upby\` = ?, \`uptime\` = ? ";
 
         // 添加 where 子句
-        sb += `WHERE \`idpk\` IN (${idlist.map(() => '?').join(',')})`;
+        sb += `WHERE \`id\` IN (${idlist.map(() => '?').join(',')})`;
         pars.push(up.uname, up.utime, ...idlist);
 
         // 执行更新操作
