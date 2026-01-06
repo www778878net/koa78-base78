@@ -12,7 +12,10 @@ agent_path: .iflow/agents/release
 ## 步骤1: Git 提交
 1. 检查当前分支是否为 develop
 2. 查看是否有未提交的更改
-3. 如果有更改，添加所有文件并提交（提交信息从用户输入获取，会自动添加 "ai" 前缀）
+3. 如果有更改，添加所有文件并提交：
+   - AI 自动分析修改的文件内容
+   - AI 自动生成提交信息，描述修改的内容
+   - 在生成的提交信息前添加 "ai" 前缀
 
 ## 步骤2: 合并到 main 分支
 1. 执行 `npm run dev:main` 合并 develop 到 main
@@ -27,7 +30,7 @@ agent_path: .iflow/agents/release
 ## 注意事项
 - 确保在 develop 分支上执行
 - TypeScript 编译必须通过
-- 提交信息会自动添加 "ai" 前缀，要清晰描述更改内容
+- AI 会自动分析修改的文件并生成提交信息，格式为 `ai: 描述`
 
 用户的具体需求：
 {{user_input}}
