@@ -24,8 +24,8 @@ class sqlitetest extends Base78_1.CidBase78 {
      * 创建系统表（包括sys_log表）
      */
     createTables() {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             try {
                 // 先确保连接正常
                 yield this.dbService.sqliteGet("SELECT 1", [], this.up);

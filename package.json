@@ -1,6 +1,6 @@
 {
     "name": "koa78-base78",
-    "version": "3.0.51",
+    "version": "3.0.52",
     "description": "nodejs koa78框架 基类",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -57,6 +57,7 @@
         "@types/koa__router": "^12.0.5",
         "@types/node": "^25.0.2",
         "jest": "^29.7.0",
+        "node-gyp": "9.4.1",
         "reflect-metadata": "^0.2.2",
         "restler": "^3.4.0",
         "shelljs": "^0.8.5",
@@ -85,6 +86,7 @@
         "koa78-upinfo": "^4.1.1",
         "md5": "^2.3.0",
         "memcache78": "^2.1.6",
+        "mysql2": "^3.16.0",
         "mysql78": "^2.5.3",
         "protobufjs": "^7.5.4",
         "raw-body": "^3.0.2",

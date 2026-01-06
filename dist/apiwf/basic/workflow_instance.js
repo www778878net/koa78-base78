@@ -7,7 +7,7 @@ class workflow_instance extends Base78_1.CidBase78 {
         // 设置分表配置 - 按天分表
         this.setShardingConfig({
             type: 'daily',
-            retentionDays: 5, // 保留5天的表  
+            retentionDays: 5,
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                     idpk INT AUTO_INCREMENT PRIMARY KEY,

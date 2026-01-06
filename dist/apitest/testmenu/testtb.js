@@ -108,7 +108,6 @@ class testtb extends Base78_1.CidBase78 {
         });
     }
 }
-exports.default = testtb;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -133,4 +132,5 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", []),
     tslib_1.__metadata("design:returntype", Promise)
 ], testtb.prototype, "m", null);
+exports.default = testtb;
 //# sourceMappingURL=testtb.js.map

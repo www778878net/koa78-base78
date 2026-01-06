@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.startServer = startServer;
-exports.stopServer = stopServer;
+exports.stopServer = exports.startServer = void 0;
 const tslib_1 = require("tslib");
 const koa_1 = tslib_1.__importDefault(require("koa"));
 const Config_1 = require("../config/Config");
@@ -115,6 +114,7 @@ function startServer(port) {
         });
     });
 }
+exports.startServer = startServer;
 // 设置路由函数
 function setupRoutes(app) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -252,4 +252,5 @@ function stopServer(server) {
         });
     });
 }
+exports.stopServer = stopServer;
 //# sourceMappingURL=httpServer.js.map
