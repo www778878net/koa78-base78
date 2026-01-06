@@ -1,12 +1,9 @@
 {
     "name": "koa78-base78",
-    "version": "3.0.52",
+    "version": "3.0.53",
     "description": "nodejs koa78框架 基类",
     "main": "dist/index.js",
     "types": "src/index.ts",
-    "bin": {
-        "iflow": "./.iflow/cli.js"
-    },
     "author": {
         "name": "Frieda.Hu<657225485@qq.com>"
     },
@@ -43,7 +40,6 @@
         "dev:dev3": "git checkout develop && git merge main --no-edit",
         "dev:main": "node hooks/mergeBranches.cjs",
         "dev:main3": "node hooks/mergeBranches.cjs",
-        "iflow:release": "iflow release",
         "test": "cross-env NODE_ENV=test jest ",
         "testtsc": "npx tsc --noEmit"
     },
