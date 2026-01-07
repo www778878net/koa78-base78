@@ -12,6 +12,15 @@ const ContainerManager_1 = require("../ContainerManager");
 const tslog78_1 = require("tslog78");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
 const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
+/**
+ * Base78 基础控制器类
+ *
+ * 重要说明：
+ * 1. 所有修改类方法（增删改）必须以 'm' 开头（如 mAdd、mUpdate、mDel）
+ * 2. 原因：某些浏览器会跟踪调度，可能重复发送请求，'m' 前缀用于防重机制
+ * 3. 查询方法（get）根据业务需求决定是否需要防重
+ * 4. 删除操作属于修改操作，必须使用 mDel 和 mDelMany
+ */
 class Base78 {
     constructor() {
         this.dbname = "default"; //mysql数据库名（非表名）
@@ -183,8 +192,8 @@ class Base78 {
         });
     }
     mUpdateElkByid() {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             const up = this.up;
             if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
                 throw new Error("err:只有管理员可以操作");
@@ -242,8 +251,8 @@ class Base78 {
         this.up.errmsg = errmsg || "";
     }
     mUpdateMany(colpin) {
-        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             const self = this;
             const up = self.up;
             // 防注入: 校验cid和uname
@@ -251,18 +260,21 @@ class Base78 {
                 throw new Error("err:只有管理员可以操作");
             }
             let colp = colpin || this.up.cols || self.tableConfig.colsImp; // 修改列
-            let order = up.order; // 主键，暂时只支持一个
-            let num = colp.length + 1; // 添加额外的字段来更新
-            let idlist = []; // 用于存储ID
+            let num = colp.length + 1; // 每组参数包含：业务字段 + idpk
+            // 检查参数数量是否正确
+            if (up.pars.length % num !== 0) {
+                throw new Error('参数数量不正确，必须为(业务字段数 + 1)的整数倍');
+            }
+            const rowCount = up.pars.length / num;
+            let idpkList = []; // 用于存储idpk列表
             let values = []; // 用于存储更新值
             let pars = []; // 最终的查询参数
             // 处理每一组参数并构建更新列表
-            while (up.pars.length > 0) {
-                let vals = up.pars.splice(0, num);
-                idlist.push(vals[num - 1]); // 获取ID列表
-                vals[num - 1] = (_b = up.uname) !== null && _b !== void 0 ? _b : ""; // 设置更新者
-                vals.push(up.utime); // 添加更新时间
-                values.push(vals); // 存储更新值
+            for (let i = 0; i < rowCount; i++) {
+                const startIndex = i * num;
+                const rowVals = up.pars.slice(startIndex, startIndex + num);
+                idpkList.push(rowVals[num - 1]); // 获取idpk列表
+                values.push(rowVals.slice(0, num - 1)); // 存储业务字段值
             }
             // 构建 SQL 查询
             let sb = `UPDATE ${self.getDynamicTableName()} SET `;
@@ -270,17 +282,17 @@ class Base78 {
                 if (i > 0)
                     sb += `, `;
                 sb += `\`${colp[i]}\` = CASE \`idpk\` `;
-                for (let j = 0; j < idlist.length; j++) {
+                for (let j = 0; j < idpkList.length; j++) {
                     sb += `WHEN ? THEN ? `;
-                    pars.push(idlist[j], values[j][i]); // 添加查询参数
+                    pars.push(idpkList[j], values[j][i]); // 添加查询参数
                 }
                 sb += `END`;
             }
             // 添加 upby 和 uptime 字段
             sb += ", \`upby\` = ?, \`uptime\` = ? ";
             // 添加 where 子句
-            sb += `WHERE \`idpk\` IN (${idlist.map(() => '?').join(',')})`;
-            pars.push(up.uname, up.utime, ...idlist);
+            sb += `WHERE \`idpk\` IN (${idpkList.map(() => '?').join(',')})`;
+            pars.push(up.uname, up.utime, ...idpkList);
             // 执行更新操作
             try {
                 const result = yield this.dbService.m(sb, pars, up, this.dbname);
@@ -394,10 +406,17 @@ class Base78 {
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
+            // 先查询 idpk，避免死锁
+            const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
+            const idpkResult = yield this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
+            if (idpkResult.length === 0) {
+                return "err:记录不存在";
+            }
+            const idpk = idpkResult[0]["idpk"];
             const setClause = colp.map(col => `\`${col}\`=?`).join(',');
-            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
+            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行更新
             const values = this.up.pars.slice(0, colp.length);
-            values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
+            values.push(this.up.uname || '', this.up.utime, idpk);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
                 this._setBack(-1, result.error);
@@ -453,15 +472,51 @@ class Base78 {
             return this.dbService.get(query, queryParams, this.up, this.dbname);
         });
     }
-    del() {
+    mdel() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
-            const result = yield this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
+            // 先查询 idpk（使用 FOR UPDATE 加锁，避免死锁）
+            const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
+            const idpkResult = yield this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
+            if (idpkResult.length === 0) {
+                return "err:记录不存在";
+            }
+            const idpk = idpkResult[0]["idpk"];
+            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行删除
+            const result = yield this.dbService.m(query, [idpk], this.up, this.dbname);
             if (result.error) {
                 this._setBack(-1, result.error);
                 return result.error;
             }
             return result.affectedRows === 0 ? "err:没有行被修改" : this.up.mid.toString();
+        });
+    }
+    mdelmany() {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
+            // 防注入: 校验cid和uname
+            if ((this.up.cid !== this.config.get('cidvps') && this.up.cid !== this.config.get('cidmy')) && !((_a = this.up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
+                throw new Error("err:只有管理员可以操作");
+            }
+            // 检查参数
+            if (this.up.pars.length === 0) {
+                throw new Error('参数不能为空');
+            }
+            // up.pars 包含 idpk 数组
+            const idpkList = this.up.pars;
+            // 构建 SQL 查询
+            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\` IN (${idpkList.map(() => '?').join(',')})`;
+            // 执行删除操作
+            try {
+                const result = yield this.dbService.m(query, idpkList, this.up, this.dbname);
+                if (result.error) {
+                    this._setBack(-1, result.error);
+                    return result.error;
+                }
+                return result.affectedRows.toString();
+            }
+            catch (error) {
+                throw new Error(`数据库操作失败: ${error.message}`);
+            }
         });
     }
     createQueryBuilder() {
@@ -497,6 +552,7 @@ class Base78 {
 }
 //维护命令一天执行一次
 Base78.lastMaintenanceDate = '';
+exports.default = Base78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -556,14 +612,19 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", []),
     tslib_1.__metadata("design:returntype", Promise)
-], Base78.prototype, "del", null);
+], Base78.prototype, "mdel", null);
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", Promise)
+], Base78.prototype, "mdelmany", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mByFirstField", null);
-exports.default = Base78;
 class CidBase78 extends Base78 {
 }
 exports.CidBase78 = CidBase78;

@@ -36,15 +36,15 @@ let CacheService = CacheService_1 = class CacheService {
             return yield this.memcache.del(key);
         });
     }
-    set(key, value, expiration = 86400) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    set(key_1, value_1) {
+        return tslib_1.__awaiter(this, arguments, void 0, function* (key, value, expiration = 86400) {
             if (!this.memcache)
                 return false;
             return yield this.memcache.set(key, String(value), expiration);
         });
     }
-    add(key, value, expiration = 86400) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    add(key_1, value_1) {
+        return tslib_1.__awaiter(this, arguments, void 0, function* (key, value, expiration = 86400) {
             if (!this.memcache)
                 return false;
             return this.memcache.add(key, String(value), expiration);
@@ -113,9 +113,9 @@ let CacheService = CacheService_1 = class CacheService {
         });
     }
 };
-CacheService = CacheService_1 = tslib_1.__decorate([
+exports.CacheService = CacheService;
+exports.CacheService = CacheService = CacheService_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
     tslib_1.__metadata("design:paramtypes", [])
 ], CacheService);
-exports.CacheService = CacheService;
 //# sourceMappingURL=CacheService.js.map

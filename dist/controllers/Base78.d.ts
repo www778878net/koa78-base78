@@ -8,11 +8,33 @@ import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { TsLog78 } from 'tslog78';
 import Elasticsearch78 from '../services/elasticsearch78';
+/**
+ * Base78 - 基础控制器类
+ *
+ * 重要约定：
+ * - 所有修改操作的方法（新增、更新、删除）必须以 'm' 开头
+ * - 原因：防止浏览器注入跟踪重复提交，需要防重机制
+ * - 查询方法（get）可以不以 m 开头，但至少不能重复修改
+ *
+ * 修改操作包括：
+ * - 新增：mAdd, mAddMany
+ * - 更新：mUpdate, mUpdateIdpk, mUpdateMany
+ * - 删除：mDel, mDelMany
+ */
 interface ShardingConfig {
     type: 'daily' | 'monthly' | 'none';
     tableSQL?: string;
     retentionDays?: number;
 }
+/**
+ * Base78 基础控制器类
+ *
+ * 重要说明：
+ * 1. 所有修改类方法（增删改）必须以 'm' 开头（如 mAdd、mUpdate、mDel）
+ * 2. 原因：某些浏览器会跟踪调度，可能重复发送请求，'m' 前缀用于防重机制
+ * 3. 查询方法（get）根据业务需求决定是否需要防重
+ * 4. 删除操作属于修改操作，必须使用 mDel 和 mDelMany
+ */
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
     protected logger: TsLog78;
@@ -58,7 +80,8 @@ export default class Base78<T extends BaseSchema> {
         values: any[];
     }>;
     get(colp?: string[]): Promise<object>;
-    del(): Promise<string>;
+    mdel(): Promise<string>;
+    mdelmany(): Promise<string>;
     protected createQueryBuilder(): QueryBuilder<T>;
     /**
      * 没有办法获取ID的情况下 但第一个字段唯一

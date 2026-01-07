@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApiMethod = void 0;
+exports.ApiMethod = ApiMethod;
 const tslib_1 = require("tslib");
 const AuthService_1 = require("../services/AuthService");
 function ApiMethod() {
@@ -34,5 +34,4 @@ function ApiMethod() {
         return descriptor;
     };
 }
-exports.ApiMethod = ApiMethod;
 //# sourceMappingURL=decorators.js.map

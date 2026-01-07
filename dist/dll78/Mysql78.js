@@ -49,8 +49,8 @@ class Mysql78 {
     }
     // 获取连接，并在发生错误时重试
     getConnectionWithRetry() {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             let attempts = 0;
             while (attempts < this.maxRetryAttempts) {
                 try {
@@ -133,8 +133,8 @@ class Mysql78 {
      * @param up user upload
      */
     doGet(cmdtext, values, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!this._pool) {
                 return [];
             }
@@ -173,8 +173,8 @@ class Mysql78 {
         });
     }
     doT(cmds, values, errtexts, logtext, logvalue, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!this._pool) {
                 return 'pool null';
             }
@@ -228,8 +228,8 @@ class Mysql78 {
     * @param up user upload
     */
     doMBack(cmdtext, values, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!this._pool) {
                 return { result: {}, error: 'pool null' };
             }
@@ -274,8 +274,8 @@ class Mysql78 {
      * @param up user upload
      */
     doM(cmdtext, values, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!this._pool) {
                 return { affectedRows: 0, error: 'pool null' };
             }
@@ -325,8 +325,8 @@ class Mysql78 {
      * @param up
      */
     doMAdd(cmdtext, values, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!this._pool) {
                 return { insertId: 0, error: 'pool null' };
             }
@@ -365,8 +365,8 @@ class Mysql78 {
      * @param up
      */
     doTran(cmdtext, values, con, up) {
-        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            var _a;
             const debug = (_a = up.debug) !== null && _a !== void 0 ? _a : false;
             try {
                 const [result] = yield con.execute(cmdtext, values);

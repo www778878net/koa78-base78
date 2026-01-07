@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Koa from 'koa';
 import http from 'http';
 export declare function startServer(port?: number): Promise<{
