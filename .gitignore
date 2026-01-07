@@ -5,8 +5,8 @@
 /.vs
 /node_modules
 /yarn-error.log
-dist
-dist/**/*.map
+#dist
+#dist/**/*.map
 *.map
 logs/
 testlogs/
