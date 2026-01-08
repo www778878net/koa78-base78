@@ -5,8 +5,8 @@
 /.vs
 /node_modules
 /yarn-error.log
-#dist
-#dist/**/*.map
+#dist 禁止排除这个 - 类库必须要 dist 文件，否则其他软件无法使用
+dist/**/*.map
 *.map
 logs/
 testlogs/
