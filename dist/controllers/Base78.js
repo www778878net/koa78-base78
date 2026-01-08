@@ -6,6 +6,7 @@ require("reflect-metadata");
 const DatabaseService_1 = require("../services/DatabaseService");
 const CacheService_1 = require("../services/CacheService");
 const Config_1 = require("../config/Config");
+const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const QueryBuilder_1 = require("../utils/QueryBuilder");
 const decorators_1 = require("../interfaces/decorators");
 const ContainerManager_1 = require("../ContainerManager");
@@ -344,7 +345,7 @@ class Base78 {
             if (this.up.pars.length < colp.length) {
                 throw new Error('insufficient parameters for mAddMany');
             }
-            // 计算行数：前端只传业务字段，每行 colp.length 个字段
+            // 计算行数：前端必须包含 id 字段作为业务字段的一部分
             const totalPars = this.up.pars.length;
             const rowCount = Math.floor(totalPars / colp.length);
             if (rowCount === 0) {
@@ -356,9 +357,9 @@ class Base78 {
             }
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
-            // 每行实际需要的参数数：业务字段 + 4个系统字段
+            // 每行实际需要的参数数：业务字段 + id + 3个系统字段（upby, uptime, uidcid）
             const fieldsPerRow = colp.length + 4;
-            // 构建批量插入的SQL
+            // 构建 SQL：自动添加 id 字段
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
             // 构建参数数组
             const values = [];
@@ -367,8 +368,10 @@ class Base78 {
                 const rowValues = this.up.pars.slice(startIndex, startIndex + colp.length);
                 // 添加业务字段值
                 values.push(...rowValues);
+                // 为每条记录自动生成 UUID id
+                values.push(koa78_upinfo_1.default.getNewid());
                 // 添加系统字段值（每行都相同）
-                values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+                values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             }
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
