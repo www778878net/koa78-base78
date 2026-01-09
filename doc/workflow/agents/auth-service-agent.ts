@@ -63,7 +63,7 @@ export class AuthServiceAgent extends Agent {
         const bcidSchema = z.string().length(36).refine(val => val.indexOf("-") === 8 && val.indexOf("-", 19) === 23);
         const midSchema = z.string().length(36);
         const numericSchema = z.string().regex(/^\d+$/);
-        console.log(`upcheck sid: ${JSON.stringify(up)}`);
+        //console.log(`upcheck sid: ${JSON.stringify(up)}`);
 
         try {
             sidSchema.parse(up.sid);
