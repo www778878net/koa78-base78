@@ -326,7 +326,7 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const values = this.up.pars.slice(0, colp.length);
-            values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            values.push(koa78_upinfo_1.default.getNewid(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
