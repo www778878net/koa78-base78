@@ -43,6 +43,7 @@ export default class Base78<T extends BaseSchema> {
     tableConfig: TableSet;
     protected static lastMaintenanceDate: string;
     protected shardingConfig?: ShardingConfig;
+    protected isadmin: boolean;
     constructor();
     setShardingConfig(config: ShardingConfig): void;
     protected getDynamicTableName(): string;
@@ -63,6 +64,12 @@ export default class Base78<T extends BaseSchema> {
     protected get dbService(): DatabaseService;
     protected get cacheService(): CacheService;
     protected get config(): Config;
+    /**
+     * 检查管理员权限
+     * 如果 isadmin 为 true，则检查用户是否为管理员
+     * @throws Error 如果不是管理员则抛出错误
+     */
+    protected checkAdminPermission(): void;
     protected _handleError(e: any): void;
     private _loadConfig;
     protected _setBack(res: number, errmsg: string, kind?: string): void;
