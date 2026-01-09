@@ -176,9 +176,9 @@ async function setupRoutes(app: Koa) {
             log.detail(`Controller instance created: ${controller.constructor.name}`);
 
             const upInfo = new UpInfo(ctx);
-            log.detail(`UpInfo created: ${JSON.stringify(upInfo)}`);
+
             controller.setup(upInfo);
-            log.detail('Controller setup completed');
+
 
             if (typeof controller[apifun] !== 'function' || apifun.startsWith('_')) {
                 log.debug(`API function not found or not accessible: ${apifun}`);
