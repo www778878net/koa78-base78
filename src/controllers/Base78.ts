@@ -56,6 +56,8 @@ export default class Base78<T extends BaseSchema> {
     protected static lastMaintenanceDate: string = '';
     // 新增：分表配置对象
     protected shardingConfig?: ShardingConfig;
+    // 新增：标识该表是否为管理员控制的全局表
+    protected isadmin: boolean = false;
 
     constructor() {
         // 使用新的日志服务方式，与DatabaseService中完全一致
@@ -243,10 +245,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mUpdateElkByid(): Promise<any> {
-        const up = this.up;
-        if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !up.uname?.indexOf("sys")) {
-            throw new Error("err:只有管理员可以操作");
-        }
+        this.checkAdminPermission();
         if (this.esService === null) return null;
         const index = this.tbname; // 替换为你的索引名称
         const id = this.up.pars[0]; // 替换为你的文档 ID
@@ -275,6 +274,20 @@ export default class Base78<T extends BaseSchema> {
 
     protected get config(): Config {
         return Config.getInstance();
+    }
+
+    /**
+     * 检查管理员权限
+     * 如果 isadmin 为 true，则检查用户是否为管理员
+     * @throws Error 如果不是管理员则抛出错误
+     */
+    protected checkAdminPermission(): void {
+        if (this.isadmin) {
+            const up = this.up;
+            if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !up.uname?.indexOf("sys")) {
+                throw new Error("err:只有管理员可以操作");
+            }
+        }
     }
 
     protected _handleError(e: any): void {
@@ -314,9 +327,7 @@ export default class Base78<T extends BaseSchema> {
         const up = self.up;
 
         // 防注入: 校验cid和uname
-        if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !up.uname?.indexOf("sys")) {
-            throw new Error("err:只有管理员可以操作");
-        }
+        this.checkAdminPermission();
 
         let colp = colpin || this.up.cols || self.tableConfig.colsImp;  // 修改列
         let num = colp.length + 1;  // 每组参数包含：业务字段 + idpk
@@ -373,6 +384,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mAdd(colp?: string[]): Promise<string> {
+        this.checkAdminPermission();
         await this.performShardingTableMaintenance();
 
         colp = colp || this.tableConfig.colsImp;
@@ -408,6 +420,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mAddMany(colp?: string[]): Promise<number> {
+        this.checkAdminPermission();
         await this.performShardingTableMaintenance();
 
         colp = colp || this.tableConfig.colsImp;
@@ -469,6 +482,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mUpdateIdpk(colp?: string[]): Promise<string> {
+        this.checkAdminPermission();
         colp = colp || this.up.cols || this.tableConfig.colsImp;
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
@@ -492,6 +506,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async mUpdate(colp?: string[]): Promise<string> {
+        this.checkAdminPermission();
         colp = colp || this.up.cols || this.tableConfig.cols;
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
@@ -524,6 +539,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async midpk(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
+        this.checkAdminPermission();
         const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
@@ -537,6 +553,7 @@ export default class Base78<T extends BaseSchema> {
 
     @ApiMethod()
     async m(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
+        this.checkAdminPermission();
         const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
@@ -575,6 +592,7 @@ export default class Base78<T extends BaseSchema> {
     }
     @ApiMethod()
     async mdel(): Promise<string> {
+        this.checkAdminPermission();
         // 先查询 idpk（使用 FOR UPDATE 加锁，避免死锁）
         const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
         const idpkResult = await this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
@@ -598,9 +616,7 @@ export default class Base78<T extends BaseSchema> {
     @ApiMethod()
     async mdelmany(): Promise<string> {
         // 防注入: 校验cid和uname
-        if ((this.up.cid !== this.config.get('cidvps') && this.up.cid !== this.config.get('cidmy')) && !this.up.uname?.indexOf("sys")) {
-            throw new Error("err:只有管理员可以操作");
-        }
+        this.checkAdminPermission();
 
         // 检查参数
         if (this.up.pars.length === 0) {
@@ -641,6 +657,7 @@ export default class Base78<T extends BaseSchema> {
      */
     @ApiMethod()
     async mByFirstField(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
+        this.checkAdminPermission();
         const firstField = this.tableConfig.cols[0];
         const firstFieldValue = this.up.pars[0];
         //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)

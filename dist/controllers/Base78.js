@@ -25,6 +25,8 @@ const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
 class Base78 {
     constructor() {
         this.dbname = "default"; //mysql数据库名（非表名）
+        // 新增：标识该表是否为管理员控制的全局表
+        this.isadmin = false;
         // 使用新的日志服务方式，与DatabaseService中完全一致
         this.logger = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
         this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
@@ -194,11 +196,7 @@ class Base78 {
     }
     mUpdateElkByid() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
-            const up = this.up;
-            if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
-                throw new Error("err:只有管理员可以操作");
-            }
+            this.checkAdminPermission();
             if (this.esService === null)
                 return null;
             const index = this.tbname; // 替换为你的索引名称
@@ -222,6 +220,20 @@ class Base78 {
     }
     get config() {
         return Config_1.Config.getInstance();
+    }
+    /**
+     * 检查管理员权限
+     * 如果 isadmin 为 true，则检查用户是否为管理员
+     * @throws Error 如果不是管理员则抛出错误
+     */
+    checkAdminPermission() {
+        var _a;
+        if (this.isadmin) {
+            const up = this.up;
+            if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
+                throw new Error("err:只有管理员可以操作");
+            }
+        }
     }
     _handleError(e) {
         this.up.errmsg = e.message;
@@ -253,13 +265,10 @@ class Base78 {
     }
     mUpdateMany(colpin) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             const self = this;
             const up = self.up;
             // 防注入: 校验cid和uname
-            if ((up.cid !== this.config.get('cidvps') && up.cid !== this.config.get('cidmy')) && !((_a = up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
-                throw new Error("err:只有管理员可以操作");
-            }
+            this.checkAdminPermission();
             let colp = colpin || this.up.cols || self.tableConfig.colsImp; // 修改列
             let num = colp.length + 1; // 每组参数包含：业务字段 + idpk
             // 检查参数数量是否正确
@@ -310,6 +319,7 @@ class Base78 {
     }
     mAdd(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
             colp = colp || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
@@ -339,6 +349,7 @@ class Base78 {
     }
     mAddMany(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
             colp = colp || this.tableConfig.colsImp;
             // 检查是否有足够的数据
@@ -384,6 +395,7 @@ class Base78 {
     }
     mUpdateIdpk(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             colp = colp || this.up.cols || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
@@ -405,6 +417,7 @@ class Base78 {
     }
     mUpdate(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             colp = colp || this.up.cols || this.tableConfig.cols;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
@@ -430,6 +443,7 @@ class Base78 {
     }
     midpk(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
@@ -443,6 +457,7 @@ class Base78 {
     }
     m(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
@@ -477,6 +492,7 @@ class Base78 {
     }
     mdel() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             // 先查询 idpk（使用 FOR UPDATE 加锁，避免死锁）
             const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
             const idpkResult = yield this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
@@ -495,11 +511,8 @@ class Base78 {
     }
     mdelmany() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             // 防注入: 校验cid和uname
-            if ((this.up.cid !== this.config.get('cidvps') && this.up.cid !== this.config.get('cidmy')) && !((_a = this.up.uname) === null || _a === void 0 ? void 0 : _a.indexOf("sys"))) {
-                throw new Error("err:只有管理员可以操作");
-            }
+            this.checkAdminPermission();
             // 检查参数
             if (this.up.pars.length === 0) {
                 throw new Error('参数不能为空');
@@ -536,6 +549,7 @@ class Base78 {
      */
     mByFirstField(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
             const firstField = this.tableConfig.cols[0];
             const firstFieldValue = this.up.pars[0];
             //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
