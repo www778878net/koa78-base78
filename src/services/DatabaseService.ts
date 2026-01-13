@@ -48,9 +48,20 @@ export class DatabaseService {
             throw new Error('Default MySQL connection not found');
         }
         try {
-            return await mysql.doM(sql, values, up);
+            const result = await mysql.doM(sql, values, up);
+
+            // 如果受影响行数为0，使用up对象记录错误
+            if (result.affectedRows === 0) {
+                up.res = -2;  // 使用不同的负值
+                up.errmsg = '没有记录被更新';
+            }
+
+            return result;
         } catch (error) {
             this.log.error(dbName + 'Error in DatabaseService.m:', error);
+            // 在up对象中设置错误信息
+            up.res = -3;  // 使用不同的负值表示异常
+            up.errmsg = String(error);
             throw error;
         }
     }
