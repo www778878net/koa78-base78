@@ -95,7 +95,12 @@ const loggerMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     const start = Date.now();
     await next();
     const ms = Date.now() - start;
-    log.info(`${ctx.method} ${ctx.url} - ${ms}ms`);
+
+    // 检查是否是心跳API，如果是则不输出日志
+    const isHeartbeatApi = (ctx as any).isHeartbeatApi;
+    if (!isHeartbeatApi) {
+        log.info(`${ctx.method} ${ctx.url} - ${ms}ms`);
+    }
 };
 
 export async function startServer(port?: number): Promise<{ app: Koa, httpServer: http.Server }> {
@@ -153,7 +158,19 @@ async function setupRoutes(app: Koa) {
     router.all('/:apiver/:apisys/:apiobj/:apifun', async (ctx: Context) => {
         try {
             const { apiver, apisys, apiobj, apifun } = ctx.params;
-            log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+
+            // 判断是否是心跳API，如果是则不输出详细日志
+            const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
+                                   apisys.toLowerCase() === 'testmenu' &&
+                                   apiobj.toLowerCase() === 'test78' &&
+                                   apifun.toLowerCase() === 'test';
+
+            // 设置标志供日志中间件使用
+            (ctx as any).isHeartbeatApi = isHeartbeatApi;
+
+            if (!isHeartbeatApi) {
+                log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+            }
 
             if (apifun.startsWith('_') || !apiver.toLowerCase().startsWith('api') || apisys.toLowerCase().startsWith('dll')) {
                 log.debug(`Access denied for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
@@ -171,9 +188,13 @@ async function setupRoutes(app: Koa) {
                 return;
             }
 
-            log.detail(`Controller class found: ${ControllerClass.name}`);
+            if (!isHeartbeatApi) {
+                log.detail(`Controller class found: ${ControllerClass.name}`);
+            }
             const controller = new ControllerClass() as Base78<any>;
-            log.detail(`Controller instance created: ${controller.constructor.name}`);
+            if (!isHeartbeatApi) {
+                log.detail(`Controller instance created: ${controller.constructor.name}`);
+            }
 
             const upInfo = new UpInfo(ctx);
 
@@ -187,9 +208,13 @@ async function setupRoutes(app: Koa) {
                 return;
             }
 
-            log.debug(`Executing controller method: ${apifun}`);
+            if (!isHeartbeatApi) {
+                log.debug(`Executing controller method: ${apifun}`);
+            }
             let result = await controller[apifun]();
-            log.detail(`Controller method ${apifun} executed, result: ${JSON.stringify(result)}`);
+            if (!isHeartbeatApi) {
+                log.detail(`Controller method ${apifun} executed, result: ${JSON.stringify(result)}`);
+            }
 
             if (controller.up.backtype === "protobuf") {
                 log.debug("Setting response type to protobuf");
@@ -208,7 +233,9 @@ async function setupRoutes(app: Koa) {
                 return;
             }
 
-            log.debug(`Setting response type to JSON ${result}`);
+            if (!isHeartbeatApi) {
+                log.debug(`Setting response type to JSON ${result}`);
+            }
             ctx.set('Content-Type', 'application/json');
             ctx.body = {
                 res: controller.up.res,
