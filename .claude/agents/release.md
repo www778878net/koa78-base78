@@ -87,6 +87,39 @@ proactive: false
 
 ## 配置说明
 
+### Git SSH 配置
+本项目使用 SSH 方式连接到 GitHub，配置信息如下：
+
+**SSH 配置文件位置：** `~/.ssh/config`
+
+**当前配置：**
+```ssh
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile C:\Users\Administrator\.ssh\202410
+    IdentitiesOnly yes
+```
+
+**Git Remote 配置：**
+```bash
+origin  git@github.com:www778878net/koa78-base78.git (fetch)
+origin  git@github.com:www778878net/koa78-base78.git (push)
+```
+
+**SSH Key：**
+- 私钥：`~/.ssh/202410`
+- 公钥：`~/.ssh/202410.pub`
+
+**如果需要切换到 SSH：**
+```bash
+# 从 HTTPS 切换到 SSH
+git remote set-url origin git@github.com:www778878net/koa78-base78.git
+
+# 验证配置
+git remote -v
+```
+
 ### 允许使用的工具
 - `run_shell_command` - 执行 shell 命令（git, npm）
 - `read_file` - 读取配置文件
