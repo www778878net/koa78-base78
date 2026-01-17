@@ -80,7 +80,11 @@ const loggerMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0
     const start = Date.now();
     yield next();
     const ms = Date.now() - start;
-    log.info(`${ctx.method} ${ctx.url} - ${ms}ms`);
+    // 检查是否是心跳API，如果是则不输出日志
+    const isHeartbeatApi = ctx.isHeartbeatApi;
+    if (!isHeartbeatApi) {
+        log.info(`${ctx.method} ${ctx.url} - ${ms}ms`);
+    }
 });
 function startServer(port) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -126,7 +130,16 @@ function setupRoutes(app) {
         router.all('/:apiver/:apisys/:apiobj/:apifun', (ctx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { apiver, apisys, apiobj, apifun } = ctx.params;
-                log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                // 判断是否是心跳API，如果是则不输出详细日志
+                const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
+                    apisys.toLowerCase() === 'testmenu' &&
+                    apiobj.toLowerCase() === 'test78' &&
+                    apifun.toLowerCase() === 'test';
+                // 设置标志供日志中间件使用
+                ctx.isHeartbeatApi = isHeartbeatApi;
+                if (!isHeartbeatApi) {
+                    log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                }
                 if (apifun.startsWith('_') || !apiver.toLowerCase().startsWith('api') || apisys.toLowerCase().startsWith('dll')) {
                     log.debug(`Access denied for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
                     ctx.status = 403;
@@ -140,9 +153,13 @@ function setupRoutes(app) {
                     ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apiver}/${apisys}/${apiobj}` };
                     return;
                 }
-                log.detail(`Controller class found: ${ControllerClass.name}`);
+                if (!isHeartbeatApi) {
+                    log.detail(`Controller class found: ${ControllerClass.name}`);
+                }
                 const controller = new ControllerClass();
-                log.detail(`Controller instance created: ${controller.constructor.name}`);
+                if (!isHeartbeatApi) {
+                    log.detail(`Controller instance created: ${controller.constructor.name}`);
+                }
                 const upInfo = new koa78_upinfo_1.default(ctx);
                 controller.setup(upInfo);
                 if (typeof controller[apifun] !== 'function' || apifun.startsWith('_')) {
@@ -151,9 +168,13 @@ function setupRoutes(app) {
                     ctx.body = { error: 'API function not found', details: apifun };
                     return;
                 }
-                log.debug(`Executing controller method: ${apifun}`);
+                if (!isHeartbeatApi) {
+                    log.debug(`Executing controller method: ${apifun}`);
+                }
                 let result = yield controller[apifun]();
-                log.detail(`Controller method ${apifun} executed, result: ${JSON.stringify(result)}`);
+                if (!isHeartbeatApi) {
+                    log.detail(`Controller method ${apifun} executed, result: ${JSON.stringify(result)}`);
+                }
                 if (controller.up.backtype === "protobuf") {
                     log.debug("Setting response type to protobuf");
                     ctx.set('Content-Type', 'application/x-protobuf');
@@ -172,7 +193,9 @@ function setupRoutes(app) {
                     }
                     return;
                 }
-                log.debug(`Setting response type to JSON ${result}`);
+                if (!isHeartbeatApi) {
+                    log.debug(`Setting response type to JSON ${result}`);
+                }
                 ctx.set('Content-Type', 'application/json');
                 ctx.body = {
                     res: controller.up.res,
