@@ -31,7 +31,7 @@ let Config = Config_1 = class Config {
             else {
                 // 否则使用 config 包按环境加载配置
                 this.configObject = config_1.default;
-                console.log(`加载环境配置: ${config_1.default.util.getEnv('NODE_ENV')}`);
+                console.log(`加载环境配置: ${env}`);
             }
             // 添加调试日志，输出配置内容
             console.log('Loaded config object:', JSON.stringify(this.configObject, null, 2));

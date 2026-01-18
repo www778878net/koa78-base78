@@ -34,7 +34,7 @@ export class Config {
             } else {
                 // 否则使用 config 包按环境加载配置
                 this.configObject = config;
-                console.log(`加载环境配置: ${config.util.getEnv('NODE_ENV')}`);
+                console.log(`加载环境配置: ${env}`);
             }
 
             // 添加调试日志，输出配置内容
