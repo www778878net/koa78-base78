@@ -32,7 +32,10 @@
       "Skill(glm-plan-usage:usage-query-skill:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm run dev:main:*)"
+      "Bash(npm run dev:main:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(npm version:*)"
     ]
   }
 }
