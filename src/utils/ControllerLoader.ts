@@ -114,7 +114,7 @@ export class ControllerLoader {
         }
     }
 
-    getController(path: string): any {
+    getController(path: string, retryCount: number = 0): any {
         // 获取日志实例
         const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
 
@@ -135,7 +135,26 @@ export class ControllerLoader {
             log.detail(`Attempting to get controller with key: ${controllerKey}`);
         }
 
-        const controller = this.controllers.get(controllerKey);
+        let controller = this.controllers.get(controllerKey);
+
+        // 如果找不到控制器且是第一次尝试，清除缓存重试一次（热更新场景）
+        if (!controller && retryCount === 0) {
+            log.warn(`Controller not found for key: ${controllerKey}, clearing cache and retrying...`);
+            this.loaded = false;
+            this.controllers.clear();
+
+            // 清除 Node.js 模块缓存
+            const userProjectDir = this.getUserProjectDir();
+            const cacheKeys = Object.keys(require.cache);
+            cacheKeys.forEach(key => {
+                if (key.startsWith(userProjectDir) && (key.endsWith('.ts') || key.endsWith('.js'))) {
+                    delete require.cache[key];
+                }
+            });
+
+            return this.getController(path, retryCount + 1);
+        }
+
         if (!controller) {
             log.warn(`Controller not found for key: ${controllerKey}. Available controllers: ${Array.from(this.controllers.keys()).join(', ')}`);
         }

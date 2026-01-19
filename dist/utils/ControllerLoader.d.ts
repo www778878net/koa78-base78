@@ -9,7 +9,7 @@ export declare class ControllerLoader {
      */
     private getUserProjectDir;
     private loadControllersFromDirectory;
-    getController(path: string): any;
+    getController(path: string, retryCount?: number): any;
     /**
      * 获取已加载的控制器数量，用于调试和测试
      */
