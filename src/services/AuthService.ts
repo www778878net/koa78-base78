@@ -139,8 +139,12 @@ export class AuthService {
             const values = [up.sid, up.sid];
             const result = await this.dbService?.get(cmdtext, values, up, dbname);
             this.log?.debug("upcheck result:", result);
-            if (result?.length === 0) tmp = "";
+            if (result?.length === 0) {
+                this.log?.warn(`upcheck数据库未找到匹配记录: SID=${up.sid}, DBNAME=${dbname}, QUERY_SID=${values[0]}, QUERY_SID_WEB=${values[1]}`);
+                tmp = "";
+            }
             else {
+
                 tmp = result[0];
                 await this.cacheService?.tbset(mem_sid + dbname + up.sid, tmp);
             }
@@ -168,6 +172,7 @@ export class AuthService {
 
             return "ok";
         } else {
+            this.log?.error(`认证失败: 无法获取用户信息, DBNAME=${dbname}, SID=${up.sid}, UID=${up.uid || 'N/A'}, UNAME=${up.uname || 'N/A'}`);
             throw new Error("err:get u info err3" + dbname + " " + up.sid);
         }
     }

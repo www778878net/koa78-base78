@@ -250,25 +250,30 @@ async function setupRoutes(app: Koa) {
 
             if (e instanceof Error) {
                 if (e.message.startsWith('err:get u info err3')) {
+                    log.error('Authentication Error:', e.message);
                     ctx.status = 401;
                     ctx.body = { error: 'Unauthorized', details: e.message };
                 } else {
                     switch (e.message) {
                         case 'err:get u info err3':
+                            log.error('Authentication Error:', e.message);
                             ctx.status = 401;
                             ctx.body = { error: 'Unauthorized', details: e.message };
                             break;
                         case (e.message.startsWith('防止重放攻击') ? e.message : ''):
+                            log.error('Replay Attack Prevention Error:', e.message);
                             ctx.status = 429;
                             ctx.body = { error: 'Too Many Requests', details: 'Possible replay attack detected' };
                             break;
                         case (e.message.startsWith('参数验证失败') ? e.message : ''):
                         case (e.message.startsWith('up order err:') ? e.message : ''):
                         case (e.message.startsWith('checkCols err:') ? e.message : ''):
+                            log.error('Bad Request Error:', e.message);
                             ctx.status = 400;
                             ctx.body = { error: 'Bad Request', details: e.message };
                             break;
                         default:
+                            log.error('Unexpected Server Error:', e.message, e.stack);
                             ctx.status = 500;
                             ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                     }
