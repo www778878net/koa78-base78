@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import sqlite3 from '@vscode/sqlite3';
 import { promisify } from 'util';
 import UpInfo from 'koa78-upinfo';
-import TsLog78 from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 // @ts-ignore
 import md5 from 'md5';
 
@@ -18,7 +18,7 @@ export default class Sqlite78 {
     private _filename: string = '';
     public isLog: boolean = false;
     public isCount: boolean = false;
-    private log: TsLog78 = TsLog78.Instance;
+    private log: MyLogger = MyLogger.getInstance("base78", 3, "koa78");
     private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
 
     // 设置重试次数和重试延迟

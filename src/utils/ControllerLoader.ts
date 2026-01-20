@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import Base78 from '../controllers/Base78';
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 
 
 
@@ -18,7 +18,7 @@ export class ControllerLoader {
 
     public loadControllers() {
         // 获取日志实例（此时容器应该已经初始化完成）
-        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
+        const log = MyLogger.getInstance("base78", 3, "koa78");
         log.detail('ControllerLoader loadControllers');
         // 确保只加载一次
         if (this.loaded) {
@@ -68,7 +68,7 @@ export class ControllerLoader {
 
     private async loadControllersFromDirectory(dir: string) {
         // 获取日志实例
-        const log: TsLog78 = ContainerManager.getLogger() || new TsLog78();
+        const log = MyLogger.getInstance("base78", 3, "koa78");
 
         for (const item of fs.readdirSync(dir)) {
             const fullPath = path.join(dir, item);
@@ -116,7 +116,7 @@ export class ControllerLoader {
 
     getController(path: string, retryCount: number = 0): any {
         // 获取日志实例
-        const log: TsLog78 = ContainerManager.getLogger() || TsLog78.Instance;
+        const log = MyLogger.getInstance("base78", 3, "koa78");
 
         // 确保控制器已加载
         if (!this.loaded) {

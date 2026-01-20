@@ -10,7 +10,7 @@ import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { ApiMethod } from '../interfaces/decorators';
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 import Elasticsearch78 from '../services/elasticsearch78';
 import dayjs from 'dayjs'; // 导入dayjs
 
@@ -48,7 +48,7 @@ interface ShardingConfig {
  */
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
-    protected logger: TsLog78;
+    protected logger: MyLogger;
     protected dbname: string = "default";//mysql数据库名（非表名）
     protected tbname: string;//表名
     public tableConfig: TableSet;
@@ -60,8 +60,10 @@ export default class Base78<T extends BaseSchema> {
     protected isadmin: boolean = false;
 
     constructor() {
-        // 使用新的日志服务方式，与DatabaseService中完全一致
-        this.logger = ContainerManager.getLogger() || TsLog78.Instance;
+        // 使用 MyLogger，整库所有日志统一在 logs/koa78/base78_日期.log
+        // myname: "base78" 固定，所有模块共用同一个文件
+        // wfname: "koa78"，统一目录名
+        this.logger = MyLogger.getInstance("base78", 3, "koa78");
         this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;

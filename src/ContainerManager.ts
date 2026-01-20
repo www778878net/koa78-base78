@@ -25,7 +25,7 @@ import { DatabaseConnections } from './static/DatabaseConnections';
 import { DatabaseService } from './services/DatabaseService';
 import { CacheService } from './services/CacheService';
 import { AuthService } from './services/AuthService';
-import { TsLog78, LogstashServerLog78, FileLog78, ConsoleLog78 } from "tslog78";
+import { MyLogger } from './utils/mylogger';
 import { ControllerLoader } from './utils/ControllerLoader';
 
 
@@ -34,7 +34,7 @@ import { ControllerLoader } from './utils/ControllerLoader';
 // 1. 日志服务需要在容器初始化早期就能使用，用于记录初始化过程中的信息
 // 2. 日志服务本身不依赖其他服务，可以在容器初始化之前独立初始化
 // 3. 提供静态方法访问，简化使用方式
-let loggerInstance: TsLog78 | null = null;
+let loggerInstance: MyLogger | null = null;
 
 export class ContainerManager {
     // 注意：这个字段目前未被使用，因为配置文件路径现在通过环境变量CONFIG_FILE传递
@@ -91,22 +91,14 @@ export class ContainerManager {
         try {
             const config = this.container!.get(Config);
             // 使用 Config 类已有的 get 方法获取日志配置
-            const logstashConfig = config.get('logstash');
             const isDebug = config.get('isdebug');
 
-            let serverLogger: LogstashServerLog78 | undefined;
-            if (logstashConfig && logstashConfig.host && logstashConfig.port) {
-                const serverUrl = `http://${logstashConfig.host}:${logstashConfig.port}`;
-                serverLogger = new LogstashServerLog78(serverUrl);
-            }
-
-            loggerInstance = TsLog78.Instance;
-            loggerInstance.setup(serverLogger, new FileLog78(), new ConsoleLog78());
+            // 使用 MyLogger，所有日志统一在 logs/koa78/base78_日期.log
+            loggerInstance = MyLogger.getInstance("base78", 3, "koa78");
 
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(20, 0, 50);
-                loggerInstance.setupDetailFile("detail.log");
+                // 开发环境自动启用 detail 日志
                 loggerInstance.clearDetailLog();
             }
 
@@ -118,13 +110,13 @@ export class ContainerManager {
 
     /**
      * 获取日志实例
-     * 
+     *
      * 使用静态方法而非依赖注入的原因：
      * 1. 日志服务需要在容器初始化早期就能使用
      * 2. 简化日志服务的获取方式
      * 3. 避免在容器尚未初始化完成时无法获取日志服务
      */
-    public static getLogger(): TsLog78 | null {
+    public static getLogger(): MyLogger | null {
         return loggerInstance;
     }
 

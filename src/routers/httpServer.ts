@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import { Config } from '../config/Config';
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 
 import http from 'http';
 import { Elasticsearch78 } from '../services/elasticsearch78';
@@ -15,7 +15,7 @@ import bodyParser from 'koa-bodyparser';
 
 
 // const esClient = Elasticsearch78.getInstance();
-const log = TsLog78.Instance;
+const log = MyLogger.getInstance("base78", 3, "koa78");
 const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
