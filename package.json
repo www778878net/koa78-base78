@@ -1,6 +1,6 @@
 {
     "name": "koa78-base78",
-    "version": "3.0.65",
+    "version": "3.0.64",
     "description": "nodejs koa78框架 基类",
     "main": "dist/index.js",
     "types": "src/index.ts",
