@@ -64,7 +64,7 @@ export default class Base78<T extends BaseSchema> {
         // myname: "base78" 固定，所有模块共用同一个文件
         // wfname: "koa78"，统一目录名
         this.logger = MyLogger.getInstance("base78", 3, "koa78");
-        this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
+        // this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
@@ -302,7 +302,7 @@ export default class Base78<T extends BaseSchema> {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config.getInstance();
-        this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
+        // this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
         if (!config) {
             this.logger.error('Config is not initialized');
             throw new Error('Config is not initialized');
