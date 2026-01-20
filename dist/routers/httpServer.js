@@ -6,13 +6,13 @@ const tslib_1 = require("tslib");
 const koa_1 = tslib_1.__importDefault(require("koa"));
 const Config_1 = require("../config/Config");
 const ContainerManager_1 = require("../ContainerManager");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("../utils/mylogger");
 const router_1 = tslib_1.__importDefault(require("@koa/router"));
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const ControllerLoader_1 = require("../utils/ControllerLoader");
 const koa_bodyparser_1 = tslib_1.__importDefault(require("koa-bodyparser"));
 // const esClient = Elasticsearch78.getInstance();
-const log = tslog78_1.TsLog78.Instance;
+const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
 const router = new router_1.default();
 // 统计中间件
 const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
@@ -107,12 +107,12 @@ function startServer(port) {
                 resolve({ app, httpServer });
             });
             httpServer.on('error', (error) => {
-                log.error(`服务器错误: ${error.message}`);
+                log.error('服务器错误:', error);
                 if (error.code === 'EADDRINUSE') {
                     log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
                 }
                 else {
-                    log.error(`启动 HTTP 服务器失败: ${error.message}`);
+                    log.error('启动 HTTP 服务器失败:', error);
                 }
                 reject(error);
             });
@@ -205,35 +205,35 @@ function setupRoutes(app) {
                 };
             }
             catch (e) {
-                // 使用 TsLog78 的正确 API: error(errorOrSummary: Error | string, messageOrLevelOrObject?: any)
-                if (e instanceof Error) {
-                    log.error(e, "Route error");
-                }
-                else {
-                    log.error("Route error:", e);
-                }
+                log.error("Route error:", e);
+                log.error("Stack trace:", e.stack);
                 if (e instanceof Error) {
                     if (e.message.startsWith('err:get u info err3')) {
+                        log.error('Authentication Error:', e.message);
                         ctx.status = 401;
                         ctx.body = { error: 'Unauthorized', details: e.message };
                     }
                     else {
                         switch (e.message) {
                             case 'err:get u info err3':
+                                log.error('Authentication Error:', e.message);
                                 ctx.status = 401;
                                 ctx.body = { error: 'Unauthorized', details: e.message };
                                 break;
                             case (e.message.startsWith('防止重放攻击') ? e.message : ''):
+                                log.error('Replay Attack Prevention Error:', e.message);
                                 ctx.status = 429;
                                 ctx.body = { error: 'Too Many Requests', details: 'Possible replay attack detected' };
                                 break;
                             case (e.message.startsWith('参数验证失败') ? e.message : ''):
                             case (e.message.startsWith('up order err:') ? e.message : ''):
                             case (e.message.startsWith('checkCols err:') ? e.message : ''):
+                                log.error('Bad Request Error:', e.message);
                                 ctx.status = 400;
                                 ctx.body = { error: 'Bad Request', details: e.message };
                                 break;
                             default:
+                                log.error(`Unexpected Server Error: ${e.message}`, e);
                                 ctx.status = 500;
                                 ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                         }
@@ -263,7 +263,7 @@ function stopServer(server) {
             if (server && server.close) {
                 server.close((err) => {
                     if (err) {
-                        log.error(`关闭服务器时出错: ${err.message}`);
+                        log.error('关闭服务器时出错:', err);
                         reject(err);
                     }
                     else {

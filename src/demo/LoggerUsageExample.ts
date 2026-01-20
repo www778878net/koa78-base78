@@ -5,18 +5,18 @@
  */
 
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 
 async function main() {
     try {
         // 创建容器管理器实例
         const containerManager = new ContainerManager('./configtest.json');
-        
+
         // 初始化所有服务，包括日志服务
         const container = await containerManager.initialize();
-        
+
         // 获取日志实例
-        const logger: TsLog78 | null = ContainerManager.getLogger();
+        const logger: MyLogger | null = ContainerManager.getLogger();
         
         if (logger) {
             logger.info('应用启动成功');

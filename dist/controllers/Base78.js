@@ -9,8 +9,7 @@ const Config_1 = require("../config/Config");
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const QueryBuilder_1 = require("../utils/QueryBuilder");
 const decorators_1 = require("../interfaces/decorators");
-const ContainerManager_1 = require("../ContainerManager");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("../utils/mylogger");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
 const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
 /**
@@ -27,9 +26,11 @@ class Base78 {
         this.dbname = "default"; //mysql数据库名（非表名）
         // 新增：标识该表是否为管理员控制的全局表
         this.isadmin = false;
-        // 使用新的日志服务方式，与DatabaseService中完全一致
-        this.logger = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
-        // this.logger.debug(`Base78 constructor called for ${this.constructor.name}`); // 注释掉重复日志
+        // 使用 MyLogger，整库所有日志统一在 logs/koa78/base78_日期.log
+        // myname: "base78" 固定，所有模块共用同一个文件
+        // wfname: "koa78"，统一目录名
+        this.logger = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
+        this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
@@ -244,7 +245,7 @@ class Base78 {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config_1.Config.getInstance();
-        // this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`); // 注释掉重复日志
+        this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
         if (!config) {
             this.logger.error('Config is not initialized');
             throw new Error('Config is not initialized');

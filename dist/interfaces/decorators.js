@@ -8,6 +8,7 @@ function ApiMethod() {
         const originalMethod = descriptor.value;
         descriptor.value = function (...args) {
             return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                var _a, _b, _c, _d, _e;
                 try {
                     // 从容器中获取AuthService实例
                     const container = global.appContainer;
@@ -23,6 +24,18 @@ function ApiMethod() {
                 catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
                     this._setBack(-8888, errorMessage);
+                    // 记录错误日志：包含表名、方法名和错误信息
+                    const errorInfo = {
+                        tbname: ((_a = this.tableConfig) === null || _a === void 0 ? void 0 : _a.tbname) || 'unknown',
+                        dbname: this.dbname || 'default',
+                        method: propertyKey,
+                        apisys: (_b = this.up) === null || _b === void 0 ? void 0 : _b.apisys,
+                        apiobj: (_c = this.up) === null || _c === void 0 ? void 0 : _c.apiobj,
+                        apifun: (_d = this.up) === null || _d === void 0 ? void 0 : _d.apifun,
+                        error: errorMessage,
+                        sid: (_e = this.up) === null || _e === void 0 ? void 0 : _e.sid
+                    };
+                    console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
                     // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
                     // 错误消息会被 httpServer.ts 中的错误处理器捕获
                     throw new Error(`参数验证失败: ${errorMessage}`);
