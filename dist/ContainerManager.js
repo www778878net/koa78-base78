@@ -28,7 +28,7 @@ const DatabaseConnections_1 = require("./static/DatabaseConnections");
 const DatabaseService_1 = require("./services/DatabaseService");
 const CacheService_1 = require("./services/CacheService");
 const AuthService_1 = require("./services/AuthService");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("./utils/mylogger");
 const ControllerLoader_1 = require("./utils/ControllerLoader");
 // 日志实例
 // 采用全局变量而非依赖注入的方式，原因如下：
@@ -82,19 +82,12 @@ class ContainerManager {
         try {
             const config = this.container.get(Config_1.Config);
             // 使用 Config 类已有的 get 方法获取日志配置
-            const logstashConfig = config.get('logstash');
             const isDebug = config.get('isdebug');
-            let serverLogger;
-            if (logstashConfig && logstashConfig.host && logstashConfig.port) {
-                const serverUrl = `http://${logstashConfig.host}:${logstashConfig.port}`;
-                serverLogger = new tslog78_1.LogstashServerLog78(serverUrl);
-            }
-            loggerInstance = tslog78_1.TsLog78.Instance;
-            loggerInstance.setup(serverLogger, new tslog78_1.FileLog78(), new tslog78_1.ConsoleLog78());
+            // 使用 MyLogger，所有日志统一在 logs/koa78/base78_日期.log
+            loggerInstance = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
             if (isDebug) {
                 console.log('调试模式已启用');
-                loggerInstance.setupLevel(20, 0, 50);
-                loggerInstance.setupDetailFile("detail.log");
+                // 开发环境自动启用 detail 日志
                 loggerInstance.clearDetailLog();
             }
             console.log('日志服务初始化完成');

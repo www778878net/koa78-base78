@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const sqlite3_1 = tslib_1.__importDefault(require("@vscode/sqlite3"));
 const util_1 = require("util");
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
-const tslog78_1 = tslib_1.__importDefault(require("tslog78"));
+const mylogger_1 = require("../utils/mylogger");
 // @ts-ignore
 const md5_1 = tslib_1.__importDefault(require("md5"));
 /**
@@ -19,7 +19,7 @@ class Sqlite78 {
         this._filename = '';
         this.isLog = false;
         this.isCount = false;
-        this.log = tslog78_1.default.Instance;
+        this.log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
         this.warnHandler = null;
         // 设置重试次数和重试延迟
         this.maxRetryAttempts = 3;
@@ -57,7 +57,7 @@ class Sqlite78 {
                 this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
             }
             catch (err) {
-                this.log.error(err, `SQLite数据库连接初始化失败: ${this._filename}`);
+                this.log.error(`SQLite数据库连接初始化失败: ${this._filename}`, err);
                 throw err;
             }
         });
@@ -118,7 +118,7 @@ class Sqlite78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error('creatTb error', err);
                 return 'error';
             }
         });
@@ -148,7 +148,7 @@ class Sqlite78 {
             }
             catch (err) {
                 this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-                this.log.error(err, 'sqlite_doGet');
+                this.log.error('sqlite_doGet error', err);
                 throw err;
             }
         });
@@ -200,9 +200,9 @@ class Sqlite78 {
                     yield this._run('ROLLBACK');
                 }
                 catch (rollbackErr) {
-                    this.log.error(rollbackErr, 'sqlite_doT_rollback');
+                    this.log.error('sqlite_doT_rollback error', rollbackErr);
                 }
-                this.log.error(err, 'sqlite_doT');
+                this.log.error('sqlite_doT error', err);
                 return 'error';
             }
         });
@@ -237,7 +237,7 @@ class Sqlite78 {
             catch (err) {
                 const errorMsg = JSON.stringify(err);
                 this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-                this.log.error(err, 'sqlite_doM');
+                this.log.error('sqlite_doM error', err);
                 return { affectedRows: 0, error: errorMsg };
             }
         });
@@ -272,7 +272,7 @@ class Sqlite78 {
             catch (err) {
                 const errorMsg = JSON.stringify(err);
                 this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-                this.log.error(err, 'sqlite_doMAdd');
+                this.log.error('sqlite_doMAdd error', err);
                 return { insertId: 0, error: errorMsg };
             }
         });
@@ -301,7 +301,7 @@ class Sqlite78 {
                     return yield this.warnHandler(info, kind, up);
                 }
                 catch (err) {
-                    this.log.error(err, 'sqlite__addWarn_handler');
+                    this.log.error('sqlite__addWarn_handler error', err);
                 }
             }
             if (!this._db || !this.isLog) {
@@ -314,7 +314,7 @@ class Sqlite78 {
                 return result.changes;
             }
             catch (err) {
-                this.log.error(err, 'sqlite__addWarn');
+                this.log.error('sqlite__addWarn error', err);
                 return 0;
             }
         });
@@ -343,7 +343,7 @@ class Sqlite78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error('_saveLog error', err);
                 return 'error';
             }
         });

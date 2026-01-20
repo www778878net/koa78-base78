@@ -6,7 +6,7 @@ import { TableSet } from '../config/tableConfig';
 import UpInfo from 'koa78-upinfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 import Elasticsearch78 from '../services/elasticsearch78';
 /**
  * Base78 - 基础控制器类
@@ -37,7 +37,7 @@ interface ShardingConfig {
  */
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
-    protected logger: TsLog78;
+    protected logger: MyLogger;
     protected dbname: string;
     protected tbname: string;
     tableConfig: TableSet;

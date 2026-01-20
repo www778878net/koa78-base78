@@ -53,7 +53,7 @@ class AuthService {
     }
     upcheck(up, cols, dbname) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e, _f;
             if (up.errmsg === "ok") {
                 return "ok";
             }
@@ -123,11 +123,13 @@ class AuthService {
                 const values = [up.sid, up.sid];
                 const result = yield ((_b = this.dbService) === null || _b === void 0 ? void 0 : _b.get(cmdtext, values, up, dbname));
                 (_c = this.log) === null || _c === void 0 ? void 0 : _c.debug("upcheck result:", result);
-                if ((result === null || result === void 0 ? void 0 : result.length) === 0)
+                if ((result === null || result === void 0 ? void 0 : result.length) === 0) {
+                    (_d = this.log) === null || _d === void 0 ? void 0 : _d.warn(`upcheck数据库未找到匹配记录: SID=${up.sid}, DBNAME=${dbname}, QUERY_SID=${values[0]}, QUERY_SID_WEB=${values[1]}`);
                     tmp = "";
+                }
                 else {
                     tmp = result[0];
-                    yield ((_d = this.cacheService) === null || _d === void 0 ? void 0 : _d.tbset(mem_sid + dbname + up.sid, tmp));
+                    yield ((_e = this.cacheService) === null || _e === void 0 ? void 0 : _e.tbset(mem_sid + dbname + up.sid, tmp));
                 }
             }
             if (tmp) {
@@ -148,6 +150,7 @@ class AuthService {
                 return "ok";
             }
             else {
+                (_f = this.log) === null || _f === void 0 ? void 0 : _f.error(`认证失败: 无法获取用户信息, DBNAME=${dbname}, SID=${up.sid}, UID=${up.uid || 'N/A'}, UNAME=${up.uname || 'N/A'}`);
                 throw new Error("err:get u info err3" + dbname + " " + up.sid);
             }
         });

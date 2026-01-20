@@ -66,7 +66,7 @@ export default class Sqlite78 {
 
             this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
         } catch (err) {
-            this.log.error(err as Error, `SQLite数据库连接初始化失败: ${this._filename}`);
+            this.log.error(`SQLite数据库连接初始化失败: ${this._filename}`, err as Error);
             throw err;
         }
     }
@@ -128,7 +128,7 @@ export default class Sqlite78 {
             await this._run(cmdtext2);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('creatTb error', err as Error);
             return 'error';
         }
     }
@@ -160,7 +160,7 @@ export default class Sqlite78 {
             return rows;
         } catch (err) {
             this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doGet');
+            this.log.error('sqlite_doGet error', err as Error);
             throw err;
         }
     }
@@ -215,9 +215,9 @@ export default class Sqlite78 {
             try {
                 await this._run('ROLLBACK');
             } catch (rollbackErr) {
-                this.log.error(rollbackErr as Error, 'sqlite_doT_rollback');
+                this.log.error('sqlite_doT_rollback error', rollbackErr as Error);
             }
-            this.log.error(err as Error, 'sqlite_doT');
+            this.log.error('sqlite_doT error', err as Error);
             return 'error';
         }
     }
@@ -255,7 +255,7 @@ export default class Sqlite78 {
         } catch (err) {
             const errorMsg = JSON.stringify(err);
             this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doM');
+            this.log.error('sqlite_doM error', err as Error);
             return { affectedRows: 0, error: errorMsg };
         }
     }
@@ -293,7 +293,7 @@ export default class Sqlite78 {
         } catch (err) {
             const errorMsg = JSON.stringify(err);
             this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doMAdd');
+            this.log.error('sqlite_doMAdd error', err as Error);
             return { insertId: 0, error: errorMsg };
         }
     }
@@ -321,7 +321,7 @@ export default class Sqlite78 {
             try {
                 return await this.warnHandler(info, kind, up);
             } catch (err) {
-                this.log.error(err as Error, 'sqlite__addWarn_handler');
+                this.log.error('sqlite__addWarn_handler error', err as Error);
             }
         }
 
@@ -336,7 +336,7 @@ export default class Sqlite78 {
             const result = await this._run(cmdtext, values);
             return result.changes;
         } catch (err) {
-            this.log.error(err as Error, 'sqlite__addWarn');
+            this.log.error('sqlite__addWarn error', err as Error);
             return 0;
         }
     }
@@ -370,7 +370,7 @@ export default class Sqlite78 {
 
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('_saveLog error', err as Error);
             return 'error';
         }
     }

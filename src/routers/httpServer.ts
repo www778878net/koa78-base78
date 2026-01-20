@@ -134,11 +134,11 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         });
 
         httpServer.on('error', (error: NodeJS.ErrnoException) => {
-            log.error(error, '服务器错误:');
+            log.error('服务器错误:', error);
             if (error.code === 'EADDRINUSE') {
                 log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
             } else {
-                log.error(error, '启动 HTTP 服务器失败:');
+                log.error('启动 HTTP 服务器失败:', error);
             }
             reject(error);
         });
@@ -161,9 +161,9 @@ async function setupRoutes(app: Koa) {
 
             // 判断是否是心跳API，如果是则不输出详细日志
             const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                                   apisys.toLowerCase() === 'testmenu' &&
-                                   apiobj.toLowerCase() === 'test78' &&
-                                   apifun.toLowerCase() === 'test';
+                apisys.toLowerCase() === 'testmenu' &&
+                apiobj.toLowerCase() === 'test78' &&
+                apifun.toLowerCase() === 'test';
 
             // 设置标志供日志中间件使用
             (ctx as any).isHeartbeatApi = isHeartbeatApi;
@@ -273,7 +273,7 @@ async function setupRoutes(app: Koa) {
                             ctx.body = { error: 'Bad Request', details: e.message };
                             break;
                         default:
-                            log.error('Unexpected Server Error:', e.message, e.stack);
+                            log.error(`Unexpected Server Error: ${e.message}`, e);
                             ctx.status = 500;
                             ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                     }
@@ -304,7 +304,7 @@ export async function stopServer(server: http.Server) {
         if (server && server.close) {
             server.close((err: Error | undefined) => {
                 if (err) {
-                    log.error(err, '关闭服务器时出错:');
+                    log.error('关闭服务器时出错:', err);
                     reject(err);
                 } else {
                     log.info('服务器成功关闭');
