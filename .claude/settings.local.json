@@ -35,7 +35,9 @@
       "Bash(npm run dev:main:*)",
       "Bash(git checkout:*)",
       "Bash(git push:*)",
-      "Bash(npm version:*)"
+      "Bash(npm version:*)",
+      "Bash(git tag:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
