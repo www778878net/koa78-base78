@@ -134,11 +134,11 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         });
 
         httpServer.on('error', (error: NodeJS.ErrnoException) => {
-            log.error(error, '服务器错误:');
+            log.error(`服务器错误: ${(error as Error).message}`);
             if (error.code === 'EADDRINUSE') {
                 log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
             } else {
-                log.error(error, '启动 HTTP 服务器失败:');
+                log.error(`启动 HTTP 服务器失败: ${(error as Error).message}`);
             }
             reject(error);
         });
@@ -245,8 +245,12 @@ async function setupRoutes(app: Koa) {
             };
 
         } catch (e) {
-            log.error("Route error:", e);
-            log.error("Stack trace:", e.stack);
+            // 使用 TsLog78 的正确 API: error(errorOrSummary: Error | string, messageOrLevelOrObject?: any)
+            if (e instanceof Error) {
+                log.error(e, "Route error");
+            } else {
+                log.error("Route error:", e);
+            }
 
             if (e instanceof Error) {
                 if (e.message.startsWith('err:get u info err3')) {
@@ -299,7 +303,7 @@ export async function stopServer(server: http.Server) {
         if (server && server.close) {
             server.close((err: Error | undefined) => {
                 if (err) {
-                    log.error(err, '关闭服务器时出错:');
+                    log.error(`关闭服务器时出错: ${(err as Error).message}`);
                     reject(err);
                 } else {
                     log.info('服务器成功关闭');

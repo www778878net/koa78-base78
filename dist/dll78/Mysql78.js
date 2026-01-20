@@ -110,7 +110,7 @@ class Mysql78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error(`Error: ${err.message}`);
                 return 'error';
             }
         });
@@ -476,7 +476,7 @@ class Mysql78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error(`Error: ${err.message}`);
                 return 'error';
             }
         });

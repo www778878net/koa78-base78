@@ -62,7 +62,7 @@ export default class Base78<T extends BaseSchema> {
     constructor() {
         // 使用新的日志服务方式，与DatabaseService中完全一致
         this.logger = ContainerManager.getLogger() || TsLog78.Instance;
-        this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
+        // this.logger.debug(`Base78 constructor called for ${this.constructor.name}`); // 注释掉重复日志
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
@@ -300,7 +300,7 @@ export default class Base78<T extends BaseSchema> {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config.getInstance();
-        this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
+        // this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`); // 注释掉重复日志
         if (!config) {
             this.logger.error('Config is not initialized');
             throw new Error('Config is not initialized');

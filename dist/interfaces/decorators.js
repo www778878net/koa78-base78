@@ -21,13 +21,11 @@ function ApiMethod() {
                     return yield originalMethod.apply(this, args);
                 }
                 catch (error) {
-                    if (error instanceof Error) {
-                        this._setBack(-8888, error.message);
-                    }
-                    else {
-                        this._setBack(-8888, 'An unknown error occurred');
-                    }
-                    throw error;
+                    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+                    this._setBack(-8888, errorMessage);
+                    // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
+                    // 错误消息会被 httpServer.ts 中的错误处理器捕获
+                    throw new Error(`参数验证失败: ${errorMessage}`);
                 }
             });
         };

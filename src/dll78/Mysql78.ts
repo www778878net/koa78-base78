@@ -119,7 +119,7 @@ export default class Mysql78 {
             await this._pool.execute(cmdtext2);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error(`Error: ${(err as Error).message}`);
             return 'error';
         }
     }
@@ -499,7 +499,7 @@ export default class Mysql78 {
             ]);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error(`Error: ${(err as Error).message}`);
             return 'error';
         }
     }

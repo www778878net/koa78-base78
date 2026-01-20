@@ -107,12 +107,12 @@ function startServer(port) {
                 resolve({ app, httpServer });
             });
             httpServer.on('error', (error) => {
-                log.error(error, '服务器错误:');
+                log.error(`服务器错误: ${error.message}`);
                 if (error.code === 'EADDRINUSE') {
                     log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
                 }
                 else {
-                    log.error(error, '启动 HTTP 服务器失败:');
+                    log.error(`启动 HTTP 服务器失败: ${error.message}`);
                 }
                 reject(error);
             });
@@ -205,8 +205,13 @@ function setupRoutes(app) {
                 };
             }
             catch (e) {
-                log.error("Route error:", e);
-                log.error("Stack trace:", e.stack);
+                // 使用 TsLog78 的正确 API: error(errorOrSummary: Error | string, messageOrLevelOrObject?: any)
+                if (e instanceof Error) {
+                    log.error(e, "Route error");
+                }
+                else {
+                    log.error("Route error:", e);
+                }
                 if (e instanceof Error) {
                     if (e.message.startsWith('err:get u info err3')) {
                         ctx.status = 401;
@@ -258,7 +263,7 @@ function stopServer(server) {
             if (server && server.close) {
                 server.close((err) => {
                     if (err) {
-                        log.error(err, '关闭服务器时出错:');
+                        log.error(`关闭服务器时出错: ${err.message}`);
                         reject(err);
                     }
                     else {

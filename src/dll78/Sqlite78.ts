@@ -128,7 +128,7 @@ export default class Sqlite78 {
             await this._run(cmdtext2);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error(`Error: ${(err as Error).message}`);
             return 'error';
         }
     }
@@ -370,7 +370,7 @@ export default class Sqlite78 {
 
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error(`Error: ${(err as Error).message}`);
             return 'error';
         }
     }
