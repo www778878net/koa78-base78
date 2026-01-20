@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiMethod = ApiMethod;
 const tslib_1 = require("tslib");
 const AuthService_1 = require("../services/AuthService");
+const mylogger_1 = require("../utils/mylogger");
+// 获取logger实例（单例模式）
+const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
 function ApiMethod() {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
@@ -35,7 +38,8 @@ function ApiMethod() {
                         error: errorMessage,
                         sid: (_e = this.up) === null || _e === void 0 ? void 0 : _e.sid
                     };
-                    console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                    // 使用MyLogger记录错误日志到文件
+                    log.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error);
                     // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
                     // 错误消息会被 httpServer.ts 中的错误处理器捕获
                     throw new Error(`参数验证失败: ${errorMessage}`);

@@ -1,5 +1,9 @@
 import { AuthService } from '../services/AuthService';
 import Base78 from '../controllers/Base78';
+import { MyLogger } from '../utils/mylogger';
+
+// 获取logger实例（单例模式）
+const log = MyLogger.getInstance("base78", 3, "koa78");
 
 export function ApiMethod() {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -34,7 +38,8 @@ export function ApiMethod() {
                     error: errorMessage,
                     sid: this.up?.sid
                 };
-                console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                // 使用MyLogger记录错误日志到文件
+                log.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error as Error);
 
                 // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
                 // 错误消息会被 httpServer.ts 中的错误处理器捕获
