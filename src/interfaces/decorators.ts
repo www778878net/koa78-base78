@@ -1,5 +1,9 @@
 import { AuthService } from '../services/AuthService';
 import Base78 from '../controllers/Base78';
+import { MyLogger } from '../utils/mylogger';
+
+// 延迟初始化logger缓存，避免模块加载时初始化导致502错误
+let _logger: MyLogger | null = null;
 
 export function ApiMethod() {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -20,12 +24,34 @@ export function ApiMethod() {
                 // 执行原始方法
                 return await originalMethod.apply(this, args);
             } catch (error) {
-                if (error instanceof Error) {
-                    this._setBack(-8888, error.message);
-                } else {
-                    this._setBack(-8888, 'An unknown error occurred');
+                const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+                this._setBack(-8888, errorMessage);
+
+                // 记录详细的错误信息（tbname, dbname, method, apisys, apiobj, apifun, error, sid）
+                const errorInfo = {
+                    tbname: this.tableConfig?.tbname || 'unknown',
+                    dbname: this.dbname || 'default',
+                    method: propertyKey,
+                    apisys: this.up?.apisys,
+                    apiobj: this.up?.apiobj,
+                    apifun: this.up?.apifun,
+                    error: errorMessage,
+                    sid: this.up?.sid
+                };
+
+                // 延迟初始化logger，只在首次使用时才创建，避免模块加载时初始化导致502
+                if (!_logger) {
+                    try {
+                        _logger = MyLogger.getInstance("base78", 3, "koa78");
+                    } catch (err) {
+                        // logger初始化失败，使用console.error作为后备
+                        console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                        throw new Error(`参数验证失败: ${errorMessage}`);
+                    }
                 }
-                throw error;
+                _logger.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error as Error);
+
+                throw new Error(`参数验证失败: ${errorMessage}`);
             }
         };
         return descriptor;
