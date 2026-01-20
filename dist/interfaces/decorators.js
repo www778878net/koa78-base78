@@ -4,8 +4,21 @@ exports.ApiMethod = ApiMethod;
 const tslib_1 = require("tslib");
 const AuthService_1 = require("../services/AuthService");
 const mylogger_1 = require("../utils/mylogger");
-// 获取logger实例（单例模式）
-const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
+// 延迟初始化logger，避免模块加载时就创建日志目录
+let _log = null;
+function getLog() {
+    if (!_log) {
+        try {
+            _log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
+        }
+        catch (err) {
+            // 如果logger初始化失败，返回null，后续会回退到console.error
+            console.error('Failed to initialize logger:', err);
+            return null;
+        }
+    }
+    return _log;
+}
 function ApiMethod() {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
@@ -39,7 +52,14 @@ function ApiMethod() {
                         sid: (_e = this.up) === null || _e === void 0 ? void 0 : _e.sid
                     };
                     // 使用MyLogger记录错误日志到文件
-                    log.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error);
+                    const log = getLog();
+                    if (log) {
+                        log.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error);
+                    }
+                    else {
+                        // 如果logger不可用，回退到console.error
+                        console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                    }
                     // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
                     // 错误消息会被 httpServer.ts 中的错误处理器捕获
                     throw new Error(`参数验证失败: ${errorMessage}`);
