@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import { Config } from '../config/Config';
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 
 import http from 'http';
 import { Elasticsearch78 } from '../services/elasticsearch78';
@@ -15,7 +15,7 @@ import bodyParser from 'koa-bodyparser';
 
 
 // const esClient = Elasticsearch78.getInstance();
-const log = TsLog78.Instance;
+const log = MyLogger.getInstance("base78", 3, "koa78");
 const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
@@ -134,11 +134,11 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         });
 
         httpServer.on('error', (error: NodeJS.ErrnoException) => {
-            log.error(`服务器错误: ${(error as Error).message}`);
+            log.error('服务器错误:', error);
             if (error.code === 'EADDRINUSE') {
                 log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
             } else {
-                log.error(`启动 HTTP 服务器失败: ${(error as Error).message}`);
+                log.error('启动 HTTP 服务器失败:', error);
             }
             reject(error);
         });
@@ -161,9 +161,9 @@ async function setupRoutes(app: Koa) {
 
             // 判断是否是心跳API，如果是则不输出详细日志
             const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                                   apisys.toLowerCase() === 'testmenu' &&
-                                   apiobj.toLowerCase() === 'test78' &&
-                                   apifun.toLowerCase() === 'test';
+                apisys.toLowerCase() === 'testmenu' &&
+                apiobj.toLowerCase() === 'test78' &&
+                apifun.toLowerCase() === 'test';
 
             // 设置标志供日志中间件使用
             (ctx as any).isHeartbeatApi = isHeartbeatApi;
@@ -245,34 +245,35 @@ async function setupRoutes(app: Koa) {
             };
 
         } catch (e) {
-            // 使用 TsLog78 的正确 API: error(errorOrSummary: Error | string, messageOrLevelOrObject?: any)
-            if (e instanceof Error) {
-                log.error(e, "Route error");
-            } else {
-                log.error("Route error:", e);
-            }
+            log.error("Route error:", e);
+            log.error("Stack trace:", e.stack);
 
             if (e instanceof Error) {
                 if (e.message.startsWith('err:get u info err3')) {
+                    log.error('Authentication Error:', e.message);
                     ctx.status = 401;
                     ctx.body = { error: 'Unauthorized', details: e.message };
                 } else {
                     switch (e.message) {
                         case 'err:get u info err3':
+                            log.error('Authentication Error:', e.message);
                             ctx.status = 401;
                             ctx.body = { error: 'Unauthorized', details: e.message };
                             break;
                         case (e.message.startsWith('防止重放攻击') ? e.message : ''):
+                            log.error('Replay Attack Prevention Error:', e.message);
                             ctx.status = 429;
                             ctx.body = { error: 'Too Many Requests', details: 'Possible replay attack detected' };
                             break;
                         case (e.message.startsWith('参数验证失败') ? e.message : ''):
                         case (e.message.startsWith('up order err:') ? e.message : ''):
                         case (e.message.startsWith('checkCols err:') ? e.message : ''):
+                            log.error('Bad Request Error:', e.message);
                             ctx.status = 400;
                             ctx.body = { error: 'Bad Request', details: e.message };
                             break;
                         default:
+                            log.error(`Unexpected Server Error: ${e.message}`, e);
                             ctx.status = 500;
                             ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                     }
@@ -303,7 +304,7 @@ export async function stopServer(server: http.Server) {
         if (server && server.close) {
             server.close((err: Error | undefined) => {
                 if (err) {
-                    log.error(`关闭服务器时出错: ${(err as Error).message}`);
+                    log.error('关闭服务器时出错:', err);
                     reject(err);
                 } else {
                     log.info('服务器成功关闭');
