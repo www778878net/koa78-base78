@@ -1,5 +1,9 @@
 import { AuthService } from '../services/AuthService';
 import Base78 from '../controllers/Base78';
+import { MyLogger } from '../utils/mylogger';
+
+// 延迟初始化logger缓存
+let _logger: MyLogger | null = null;
 
 export function ApiMethod() {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -35,8 +39,17 @@ export function ApiMethod() {
                     sid: this.up?.sid
                 };
                 // 记录错误日志：包含表名、方法名和错误信息
-                // 注意：装饰器中使用 console.error 而非 MyLogger，避免日志目录创建失败导致应用崩溃
-                console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                // 延迟初始化logger，只在首次使用时才创建
+                if (!_logger) {
+                    try {
+                        _logger = MyLogger.getInstance("base78", 3, "koa78");
+                    } catch (err) {
+                        // logger初始化失败，使用console.error
+                        console.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`);
+                        throw new Error(`参数验证失败: ${errorMessage}`);
+                    }
+                }
+                _logger.error(`[ApiMethod Error] ${JSON.stringify(errorInfo)}`, error as Error);
 
                 // 重新抛出错误，让上层处理器捕获并返回适当的 HTTP 状态码
                 // 错误消息会被 httpServer.ts 中的错误处理器捕获
