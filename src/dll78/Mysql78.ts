@@ -325,9 +325,10 @@ export default class Mysql78 {
             return { affectedRows };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
+            const errorWithSql = `${errorMsg} (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})`;
             this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
             this.log.error(`mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`, err as Error);
-            return { affectedRows: 0, error: errorMsg };
+            return { affectedRows: 0, error: errorWithSql };
         } finally {
             // if (statement) {
             //     await statement.close(); // 确保预处理语句被关闭
