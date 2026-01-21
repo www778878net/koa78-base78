@@ -304,9 +304,10 @@ class Mysql78 {
             }
             catch (err) {
                 const errorMsg = JSON.stringify(err);
+                const errorWithSql = `${errorMsg} (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})`;
                 this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
                 this.log.error(`mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`, err);
-                return { affectedRows: 0, error: errorMsg };
+                return { affectedRows: 0, error: errorWithSql };
             }
             finally {
                 // if (statement) {
