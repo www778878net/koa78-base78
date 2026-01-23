@@ -41,7 +41,7 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string;
     protected tbname: string;
     tableConfig: TableSet;
-    protected static lastMaintenanceDate: string;
+    protected static lastMaintenanceDateMap: Map<string, string>;
     protected shardingConfig?: ShardingConfig;
     protected isadmin: boolean;
     constructor();

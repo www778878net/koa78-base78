@@ -52,8 +52,8 @@ export default class Base78<T extends BaseSchema> {
     protected dbname: string = "default";//mysql数据库名（非表名）
     protected tbname: string;//表名
     public tableConfig: TableSet;
-    //维护命令一天执行一次
-    protected static lastMaintenanceDate: string = '';
+    //维护命令一天执行一次（每个表独立记录）
+    protected static lastMaintenanceDateMap: Map<string, string> = new Map();
     // 新增：分表配置对象
     protected shardingConfig?: ShardingConfig;
     // 新增：标识该表是否为管理员控制的全局表
@@ -153,52 +153,40 @@ export default class Base78<T extends BaseSchema> {
 
         const today = dayjs().format('YYYY-MM-DD');
         const retentionDays = this.shardingConfig.retentionDays || 5;
+        const mapKey = this.tableConfig.tbname;
 
         // 如果今天已经执行过维护任务，则跳过
-        if (Base78.lastMaintenanceDate === today) {
+        if (Base78.lastMaintenanceDateMap.get(mapKey) === today) {
             return;
         }
 
         try {
-            // 正常情况下：删除retentionDays天前的分表
-            const dropResult = await this.dropOldShardingTable(retentionDays);
+            // 1. 确保今天的表存在
+            const todayDateStr = this.shardingConfig.type === 'daily' ?
+                dayjs().format('YYYYMMDD') :
+                dayjs().format('YYYYMM');
+            await this.createShardingTable(todayDateStr);
 
-            if (dropResult === 1) {
-                // 如果删除成功，只新建第retentionDays天的表
+            // 2. 删除retentionDays天前的旧表
+            await this.dropOldShardingTable(retentionDays);
+
+            // 3. 创建未来需要的表（从明天到未来retentionDays天）
+            for (let i = 1; i <= retentionDays; i++) {
                 let futureDate;
-
                 if (this.shardingConfig.type === 'daily') {
-                    futureDate = dayjs().add(retentionDays, 'day');
-                } else { // monthly
-                    futureDate = dayjs().add(retentionDays, 'month');
+                    futureDate = dayjs().add(i, 'day');
+                } else {
+                    futureDate = dayjs().add(i, 'month');
                 }
 
                 const dateStr = this.shardingConfig.type === 'daily' ?
                     futureDate.format('YYYYMMDD') :
                     futureDate.format('YYYYMM');
                 await this.createShardingTable(dateStr);
-            } else {
-                // 如果删除失败，新建从后退(retentionDays-1)天开始到未来retentionDays天的表
-                const pastDays = retentionDays - 1;
-                const futureDays = retentionDays;
-
-                for (let i = -pastDays; i <= futureDays; i++) {
-                    let date;
-                    if (this.shardingConfig.type === 'daily') {
-                        date = dayjs().add(i, 'day');
-                    } else { // monthly
-                        date = dayjs().add(i, 'month');
-                    }
-
-                    const dateStr = this.shardingConfig.type === 'daily' ?
-                        date.format('YYYYMMDD') :
-                        date.format('YYYYMM');
-                    await this.createShardingTable(dateStr);
-                }
             }
 
             // 更新最后维护日期
-            Base78.lastMaintenanceDate = today;
+            Base78.lastMaintenanceDateMap.set(mapKey, today);
         } catch (error) {
             this.logger.error(`执行分表维护任务失败: ${error}`);
         }
