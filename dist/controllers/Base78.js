@@ -30,7 +30,7 @@ class Base78 {
         // myname: "base78" 固定，所有模块共用同一个文件
         // wfname: "koa78"，统一目录名
         this.logger = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
-        this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
+        // this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
@@ -112,47 +112,35 @@ class Base78 {
             }
             const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
             const retentionDays = this.shardingConfig.retentionDays || 5;
+            const mapKey = this.tableConfig.tbname;
             // 如果今天已经执行过维护任务，则跳过
-            if (Base78.lastMaintenanceDate === today) {
+            if (Base78.lastMaintenanceDateMap.get(mapKey) === today) {
                 return;
             }
             try {
-                // 正常情况下：删除retentionDays天前的分表
-                const dropResult = yield this.dropOldShardingTable(retentionDays);
-                if (dropResult === 1) {
-                    // 如果删除成功，只新建第retentionDays天的表
+                // 1. 确保今天的表存在
+                const todayDateStr = this.shardingConfig.type === 'daily' ?
+                    (0, dayjs_1.default)().format('YYYYMMDD') :
+                    (0, dayjs_1.default)().format('YYYYMM');
+                yield this.createShardingTable(todayDateStr);
+                // 2. 删除retentionDays天前的旧表
+                yield this.dropOldShardingTable(retentionDays);
+                // 3. 创建未来需要的表（从明天到未来retentionDays天）
+                for (let i = 1; i <= retentionDays; i++) {
                     let futureDate;
                     if (this.shardingConfig.type === 'daily') {
-                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'day');
+                        futureDate = (0, dayjs_1.default)().add(i, 'day');
                     }
-                    else { // monthly
-                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'month');
+                    else {
+                        futureDate = (0, dayjs_1.default)().add(i, 'month');
                     }
                     const dateStr = this.shardingConfig.type === 'daily' ?
                         futureDate.format('YYYYMMDD') :
                         futureDate.format('YYYYMM');
                     yield this.createShardingTable(dateStr);
                 }
-                else {
-                    // 如果删除失败，新建从后退(retentionDays-1)天开始到未来retentionDays天的表
-                    const pastDays = retentionDays - 1;
-                    const futureDays = retentionDays;
-                    for (let i = -pastDays; i <= futureDays; i++) {
-                        let date;
-                        if (this.shardingConfig.type === 'daily') {
-                            date = (0, dayjs_1.default)().add(i, 'day');
-                        }
-                        else { // monthly
-                            date = (0, dayjs_1.default)().add(i, 'month');
-                        }
-                        const dateStr = this.shardingConfig.type === 'daily' ?
-                            date.format('YYYYMMDD') :
-                            date.format('YYYYMM');
-                        yield this.createShardingTable(dateStr);
-                    }
-                }
                 // 更新最后维护日期
-                Base78.lastMaintenanceDate = today;
+                Base78.lastMaintenanceDateMap.set(mapKey, today);
             }
             catch (error) {
                 this.logger.error(`执行分表维护任务失败: ${error}`);
@@ -245,7 +233,7 @@ class Base78 {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config_1.Config.getInstance();
-        this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
+        // this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
         if (!config) {
             this.logger.error('Config is not initialized');
             throw new Error('Config is not initialized');
@@ -568,8 +556,8 @@ class Base78 {
         });
     }
 }
-//维护命令一天执行一次
-Base78.lastMaintenanceDate = '';
+//维护命令一天执行一次（每个表独立记录）
+Base78.lastMaintenanceDateMap = new Map();
 exports.default = Base78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
