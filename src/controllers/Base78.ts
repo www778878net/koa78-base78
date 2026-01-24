@@ -377,7 +377,7 @@ export default class Base78<T extends BaseSchema> {
         this.checkAdminPermission();
         await this.performShardingTableMaintenance();
 
-        colp = colp || this.tableConfig.colsImp;
+        colp = colp || this.up.cols || this.tableConfig.colsImp;
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
         }
@@ -413,7 +413,7 @@ export default class Base78<T extends BaseSchema> {
         this.checkAdminPermission();
         await this.performShardingTableMaintenance();
 
-        colp = colp || this.tableConfig.colsImp;
+        colp = colp || this.up.cols || this.tableConfig.colsImp;
 
         // 检查是否有足够的数据
         if (this.up.pars.length < colp.length) {

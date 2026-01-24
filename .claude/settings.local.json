@@ -38,7 +38,9 @@
       "Bash(npm version:*)",
       "Bash(npm publish:*)",
       "Bash(git pull:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run release:*)",
+      "Bash(npm run)"
     ]
   }
 }
