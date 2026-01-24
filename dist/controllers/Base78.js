@@ -310,7 +310,7 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
@@ -340,7 +340,7 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
             // 检查是否有足够的数据
             if (this.up.pars.length < colp.length) {
                 throw new Error('insufficient parameters for mAddMany');
