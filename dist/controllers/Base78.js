@@ -310,7 +310,7 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
@@ -340,7 +340,7 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
             // 检查是否有足够的数据
             if (this.up.pars.length < colp.length) {
                 throw new Error('insufficient parameters for mAddMany');
@@ -353,7 +353,7 @@ class Base78 {
             }
             // 检查是否有余数（参数数量必须是 colp.length 的整数倍）
             if (totalPars % colp.length !== 0) {
-                throw new Error('parameters count must be multiple of column count');
+                throw new Error(`parameters count must be multiple of column count (got ${totalPars} parameters for ${colp.length} columns: ${colp.join(', ')})`);
             }
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);

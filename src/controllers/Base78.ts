@@ -430,7 +430,7 @@ export default class Base78<T extends BaseSchema> {
 
         // 检查是否有余数（参数数量必须是 colp.length 的整数倍）
         if (totalPars % colp.length !== 0) {
-            throw new Error('parameters count must be multiple of column count');
+            throw new Error(`parameters count must be multiple of column count (got ${totalPars} parameters for ${colp.length} columns: ${colp.join(', ')})`);
         }
 
         // 为所有字段名添加反引号
