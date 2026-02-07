@@ -296,8 +296,13 @@ class Base78 {
             try {
                 const result = yield this.dbService.m(sb, pars, up, this.dbname);
                 if (result.error) {
-                    this._setBack(-1, result.error);
+                    this._setBack(-2003, result.error);
                     return result.error;
+                }
+                // 如果所有更新都成功但 affectedRows 为 0
+                if (result.affectedRows === 0) {
+                    this._setBack(-2003, "批量更新失败：没有记录被更新");
+                    return "0";
                 }
                 return result.affectedRows.toString();
             }
@@ -325,6 +330,11 @@ class Base78 {
             if (result.error) {
                 this._setBack(-1, result.error);
                 return result.error;
+            }
+            // 检查 insertId 是否为 0（插入失败）
+            if (result.insertId === 0) {
+                this._setBack(-1001, "插入失败：没有数据被插入");
+                return "插入失败：没有数据被插入";
             }
             // 返回可直接在SQL客户端执行的完整SQL（带参数值）
             let sql = query;
@@ -376,7 +386,12 @@ class Base78 {
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-1002, result.error);
+                return 0;
+            }
+            // 检查 affectedRows 是否为 0（没有行被插入）
+            if (result.affectedRows === 0) {
+                this._setBack(-1002, "批量插入失败：没有数据被插入");
                 return 0;
             }
             return result.affectedRows;
@@ -395,12 +410,14 @@ class Base78 {
             values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-2001, result.error);
                 return result.error;
             }
-            if (result.affectedRows == 0)
+            if (result.affectedRows == 0) {
+                this._setBack(-2001, "更新失败：记录不存在或没有数据被修改");
                 return this.up.midpk.toString() + " " + this.tableConfig.uidcid + " "
                     + this.up[this.tableConfig.uidcid] + " " + JSON.stringify(this.up);
+            }
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
         });
     }
@@ -424,8 +441,13 @@ class Base78 {
             values.push(this.up.uname || '', this.up.utime, idpk);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-2002, result.error);
                 return result.error;
+            }
+            // 检查 affectedRows 是否为 0（更新失败）
+            if (result.affectedRows === 0) {
+                this._setBack(-2002, "更新失败：没有记录被更新");
+                return "更新失败：没有记录被更新";
             }
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
         });
@@ -492,10 +514,14 @@ class Base78 {
             const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行删除
             const result = yield this.dbService.m(query, [idpk], this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-3001, result.error);
                 return result.error;
             }
-            return result.affectedRows === 0 ? "err:没有行被修改" : this.up.mid.toString();
+            if (result.affectedRows === 0) {
+                this._setBack(-3001, "删除失败：没有行被删除");
+                return "err:没有行被修改";
+            }
+            return this.up.mid.toString();
         });
     }
     mdelmany() {
@@ -514,8 +540,13 @@ class Base78 {
             try {
                 const result = yield this.dbService.m(query, idpkList, this.up, this.dbname);
                 if (result.error) {
-                    this._setBack(-1, result.error);
+                    this._setBack(-3002, result.error);
                     return result.error;
+                }
+                // 检查 affectedRows 是否为 0（没有行被删除）
+                if (result.affectedRows === 0) {
+                    this._setBack(-3002, "批量删除失败：没有行被删除");
+                    return "0";
                 }
                 return result.affectedRows.toString();
             }
