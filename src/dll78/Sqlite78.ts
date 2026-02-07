@@ -4,10 +4,15 @@ import { createHash } from 'node:crypto';
 // @ts-ignore
 import sqlite3 from '@vscode/sqlite3';
 import { promisify } from 'util';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import UpInfo from 'koa78-upinfo';
 import { MyLogger } from '../utils/mylogger';
 // @ts-ignore
 import md5 from 'md5';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 /**
  * SQLite数据库操作类
@@ -359,7 +364,7 @@ export default class Sqlite78 {
 
         try {
             await this._run(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5
+                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
             ]);
 
             // 更新计数器

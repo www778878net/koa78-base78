@@ -1,10 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
+const utc_1 = tslib_1.__importDefault(require("dayjs/plugin/utc"));
 const mysql = tslib_1.__importStar(require("mysql2/promise"));
 const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
 const mylogger_1 = require("../utils/mylogger");
 const md5_1 = tslib_1.__importDefault(require("md5"));
+// 扩展 dayjs 以支持 UTC
+dayjs_1.default.extend(utc_1.default);
 /**
  * 如果不行就回退到2.4.0
  */
@@ -442,7 +446,7 @@ class Mysql78 {
                 return this.isLog ? 'pool null' : 'isLog is false';
             }
             const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, koa78_upinfo_1.default.getNewid(), up.upid];
+            const values = [kind, up.apisys, up.apiobj, info, up.uname, (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), koa78_upinfo_1.default.getNewid(), up.upid];
             try {
                 const [results] = yield this._pool.execute(cmdtext, values);
                 return results.affectedRows;
@@ -471,7 +475,7 @@ class Mysql78 {
                 'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
             try {
                 yield this._pool.execute(sb, [
-                    up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), new Date(), cmdtextmd5,
+                    up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                     dlong, lendown
                 ]);
                 return 'ok';

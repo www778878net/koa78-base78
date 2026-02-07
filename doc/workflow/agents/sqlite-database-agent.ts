@@ -1,7 +1,12 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { Agent } from '../base/agent';
 import { TsLog78 } from 'tslog78';
 import Sqlite78 from '../../dll78/Sqlite78';
 import UpInfo from 'koa78-upinfo';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 const log = TsLog78.Instance;
 
@@ -128,6 +133,7 @@ export class SqliteDatabaseAgent extends Agent {
     up.apisys = 'system';
     up.apiobj = 'system';
     up.uptime = new Date();
+    up.utime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss');
     return up;
   }
 

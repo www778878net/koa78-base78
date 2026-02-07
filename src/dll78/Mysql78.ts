@@ -1,10 +1,14 @@
 import { promises as fs } from 'node:fs';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { createHash } from 'node:crypto';
 import * as mysql from 'mysql2/promise';
 import UpInfo from 'koa78-upinfo';
 import { MyLogger } from '../utils/mylogger';
 import md5 from 'md5';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 /**
  * 如果不行就回退到2.4.0
@@ -465,7 +469,7 @@ export default class Mysql78 {
         }
 
         const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+        const values = [kind, up.apisys, up.apiobj, info, up.uname, dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
 
         try {
             const [results] = await this._pool.execute(cmdtext, values);
@@ -495,7 +499,7 @@ export default class Mysql78 {
 
         try {
             await this._pool.execute(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5,
+                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                 dlong, lendown
             ]);
             return 'ok';

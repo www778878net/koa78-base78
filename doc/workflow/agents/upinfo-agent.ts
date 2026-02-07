@@ -1,6 +1,10 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { Agent } from '../base/agent';
 import { TsLog78 } from 'tslog78';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 const log = TsLog78.Instance;
 
@@ -36,7 +40,7 @@ export class UpInfoAgent extends Agent {
   apifun: string = "";
   apiver: string = "";
   uptime: Date = new Date();
-  utime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
+  utime: string = dayjs.utc().format('YYYY-MM-DD HH:mm:ss');
   errmessage: string = "";
 
   // 上传临时存 验证后再用
