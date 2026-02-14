@@ -5,7 +5,7 @@ import { AuthService } from '../services/AuthService';
 import { Config } from '../config/Config';
 import { TableSet, TableConfig } from '../config/tableConfig';
 
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { ApiMethod } from '../interfaces/decorators';

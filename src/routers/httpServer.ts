@@ -8,7 +8,7 @@ import { Elasticsearch78 } from '../services/elasticsearch78';
 import Router from '@koa/router';
 import { Context } from 'koa';
 import Base78 from '../controllers/Base78';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { ControllerLoader } from '../utils/ControllerLoader';
 import bodyParser from 'koa-bodyparser';
 
