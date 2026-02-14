@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { DatabaseConnections } from '../static/DatabaseConnections';
 import { ContainerManager } from '../ContainerManager';
 

@@ -5,7 +5,7 @@ import { AuthService } from '../services/AuthService';
 import { Config } from '../config/Config';
 import { TableSet, TableConfig } from '../config/tableConfig';
 
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { ApiMethod } from '../interfaces/decorators';
@@ -370,7 +370,7 @@ export default class Base78<T extends BaseSchema> {
             // 如果所有更新都成功但 affectedRows 为 0
             if (result.affectedRows === 0) {
                 this._setBack(-2003, "批量更新失败：没有记录被更新");
-                return "0";
+                return result;
             }
 
             return result.affectedRows.toString();

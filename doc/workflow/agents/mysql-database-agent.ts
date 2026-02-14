@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Agent } from '../base/agent';
 import { TsLog78 } from 'tslog78';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../../UpInfo';
 import { ConfigAgent } from './config-agent';
 
 // 扩展 dayjs 以支持 UTC
