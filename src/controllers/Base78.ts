@@ -370,7 +370,7 @@ export default class Base78<T extends BaseSchema> {
             // 如果所有更新都成功但 affectedRows 为 0
             if (result.affectedRows === 0) {
                 this._setBack(-2003, "批量更新失败：没有记录被更新");
-                return "0";
+                return result;
             }
 
             return result.affectedRows.toString();
