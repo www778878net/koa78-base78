@@ -4,7 +4,7 @@
  */
 // 使用真实的HTTP客户端进行测试
 import axios from 'axios';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../src/UpInfo';
 // import { Config } from '../src/config/Config';
 // import { DatabaseService } from '../src/services/DatabaseService';
 
