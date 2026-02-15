@@ -88,7 +88,7 @@ export default class Sqlite78 {
         const cmdtext1 = `CREATE TABLE IF NOT EXISTS sys_warn (
             uid TEXT NOT NULL DEFAULT '',
             kind TEXT NOT NULL DEFAULT '',
-            apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             content TEXT NOT NULL,
             upid TEXT NOT NULL DEFAULT '',
@@ -106,8 +106,8 @@ export default class Sqlite78 {
 
         const cmdtext2 = `CREATE TABLE IF NOT EXISTS sys_sql (
             cid TEXT NOT NULL DEFAULT '',
-            apiv TEXT NOT NULL DEFAULT '',
             apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             cmdtext TEXT NOT NULL,
             uname TEXT NOT NULL DEFAULT '',
@@ -125,7 +125,7 @@ export default class Sqlite78 {
             remark4 TEXT NOT NULL DEFAULT '',
             remark5 TEXT NOT NULL DEFAULT '',
             remark6 TEXT NOT NULL DEFAULT '',
-            UNIQUE(apiv, apisys, apiobj, cmdtext)
+            UNIQUE(apisys, apimicro, apiobj, cmdtext)
         )`;
 
         try {
@@ -156,7 +156,7 @@ export default class Sqlite78 {
             const rows = await this._all(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(rows).length;
@@ -164,7 +164,7 @@ export default class Sqlite78 {
 
             return rows;
         } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
+            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
             this.log.error('sqlite_doGet error', err as Error);
             throw err;
         }
@@ -245,7 +245,7 @@ export default class Sqlite78 {
             const result = await this._run(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -259,7 +259,7 @@ export default class Sqlite78 {
             return { affectedRows: result.changes };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
             this.log.error('sqlite_doM error', err as Error);
             return { affectedRows: 0, error: errorMsg };
         }
@@ -283,7 +283,7 @@ export default class Sqlite78 {
             const result = await this._run(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -297,7 +297,7 @@ export default class Sqlite78 {
             return { insertId: result.lastID };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
             this.log.error('sqlite_doMAdd error', err as Error);
             return { insertId: 0, error: errorMsg };
         }
@@ -334,8 +334,8 @@ export default class Sqlite78 {
             return this.isLog ? 'database not initialized' : 'isLog is false';
         }
 
-        const cmdtext = 'INSERT INTO sys_warn (kind,apisys,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+        const cmdtext = 'INSERT INTO sys_warn (kind,apimicro,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
 
         try {
             const result = await this._run(cmdtext, values);
@@ -360,11 +360,11 @@ export default class Sqlite78 {
         }
 
         const cmdtextmd5 = md5(cmdtext);
-        const sb = `INSERT OR IGNORE INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
+        const sb = `INSERT OR IGNORE INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
         try {
             await this._run(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
+                up.v, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
             ]);
 
             // 更新计数器
