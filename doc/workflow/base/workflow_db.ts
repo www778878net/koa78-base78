@@ -8,8 +8,8 @@ export class WorkflowDB {
     public description: string = "";
     public version: string = "1.0.0";
     public state: string = "active";  // active, inactive, draft, archived, error
-    public apiv: string = "";
     public apisys: string = "";
+    public apimicro: string = "";
     public apiobj: string = "";
 
     // 数据字段

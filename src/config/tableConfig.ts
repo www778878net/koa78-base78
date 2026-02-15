@@ -9,28 +9,28 @@ export interface TableSet {
 
 export interface TableConfig {
     colsImp: readonly string[];
-    apiver: string;
     apisys: string;
+    apimicro: string;
 }
 
 export const tableConfigs = {
     sys_ip: {
         colsImp: ['ip'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     Test78: {
         colsImp: ['field1', 'field2'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     testtb: {
         colsImp: ['kind', 'item', 'data'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
 } as const;
 

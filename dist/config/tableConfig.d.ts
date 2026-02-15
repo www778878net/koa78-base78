@@ -7,27 +7,27 @@ export interface TableSet {
 }
 export interface TableConfig {
     colsImp: readonly string[];
-    apiver: string;
     apisys: string;
+    apimicro: string;
 }
 export declare const tableConfigs: {
     readonly sys_ip: {
         readonly colsImp: readonly ["ip"];
         readonly uidcid: "cid";
-        readonly apiver: "apitest";
-        readonly apisys: "testmenu";
+        readonly apisys: "apitest";
+        readonly apimicroro: "testmenu";
     };
     readonly Test78: {
         readonly colsImp: readonly ["field1", "field2"];
         readonly uidcid: "cid";
-        readonly apiver: "apitest";
-        readonly apisys: "testmenu";
+        readonly apisys: "apitest";
+        readonly apimicroro: "testmenu";
     };
     readonly testtb: {
         readonly colsImp: readonly ["kind", "item", "data"];
         readonly uidcid: "cid";
-        readonly apiver: "apitest";
-        readonly apisys: "testmenu";
+        readonly apisys: "apitest";
+        readonly apimicroro: "testmenu";
     };
 };
 export type TableSchemas = {

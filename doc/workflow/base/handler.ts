@@ -2,8 +2,8 @@
 export class Handler {
     // 基本信息字段
     public cid: string = "";
-    public apiv: string = "";
     public apisys: string = "";
+    public apimicro: string = "";
     public apiobj: string = "";
 
     // 关联字段

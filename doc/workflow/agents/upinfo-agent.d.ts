@@ -19,10 +19,10 @@ export declare class UpInfoAgent extends Agent {
     ip: string;
     ctx: any;
     method: string;
-    apisys: string;
+    apimicro: string;
     apiobj: string;
     apifun: string;
-    apiver: string;
+    apimicro: string;
     uptime: Date;
     utime: string;
     errmessage: string;

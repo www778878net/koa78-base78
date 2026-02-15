@@ -27,12 +27,12 @@ export function ApiMethod() {
                 const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
                 this._setBack(-8888, errorMessage);
 
-                // 记录详细的错误信息（tbname, dbname, method, apisys, apiobj, apifun, error, sid）
+                // 记录详细的错误信息（tbname, dbname, method, apimicro, apiobj, apifun, error, sid）
                 const errorInfo = {
                     tbname: this.tableConfig?.tbname || 'unknown',
                     dbname: this.dbname || 'default',
                     method: propertyKey,
-                    apisys: this.up?.apisys,
+                    apimicro: this.up?.apimicro,
                     apiobj: this.up?.apiobj,
                     apifun: this.up?.apifun,
                     error: errorMessage,

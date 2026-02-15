@@ -66,7 +66,7 @@ import { Server } from './server';
 
 import {
     default as UpInfo
-} from '../Upinfo';
+} from './Upinfo';
 
 // 创建默认导出对象
 const koa78Base78 = {

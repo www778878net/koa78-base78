@@ -24,7 +24,7 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     //     return; // 直接返回，不进行统计
     // }
     // // 确保参数存在后再解构
-    // const { apiver, apisys, apiobj, apifun } = ctx.params;
+    // const { apisys, apimicro, apiobj, apifun } = ctx.params;
     // // 如果是测试接口，直接返回
     // if (apiobj == "testtb") return;
     // const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
@@ -34,8 +34,8 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     // const timestamp = new Date().toISOString();
     // // Prepare the document for Elasticsearch
     // const doc = {
-    //     apiv: apiver,            // API version
-    //     apisys: apisys,        // API system
+    //     apisys: apisys,            // API version
+    //     apimicroroapimicroicro,        // API system
     //     apiobj: apiobj,        // API object
     //     method: apifun,        // HTTP method
     //     num: 1,                // Invocation count (this will be incremented later)
@@ -45,9 +45,9 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     //     timestamp: timestamp
     // };
     // try {
-    //     // Elasticsearch index and document ID are based on the method, apisys, and apiobj
+    //     // Elasticsearch index and document ID are based on the method, apimicroro, and apiobj
     //     const index = 'sys_nodejs-main';
-    //     const id = `${apifun}-${apisys}-${apiobj}-${apiver}`;
+    //     const id = `${apifun}-${apimicroro}-${apiobj}-${apisys}`;
     //     // Prepare update fields for the upsert operation
     //     const updateData = {
     //         num: 1,              // Increment this field for each API call
@@ -127,30 +127,30 @@ function setupRoutes(app) {
         const containerManager = new ContainerManager_1.ContainerManager();
         const container = containerManager.getContainer() || global.appContainer;
         const controllerLoader = container.get(ControllerLoader_1.ControllerLoader);
-        router.all('/:apiver/:apisys/:apiobj/:apifun', (ctx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        router.all('/:apisys/:apimicroro/:apiobj/:apifun', (ctx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { apiver, apisys, apiobj, apifun } = ctx.params;
+                const { apisys, apimicroro, apiobj, apifun } = ctx.params;
                 // 判断是否是心跳API，如果是则不输出详细日志
-                const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                    apisys.toLowerCase() === 'testmenu' &&
+                const isHeartbeatApi = apisys.toLowerCase() === 'apitest' &&
+                    apimicroro.toLowerCase() === 'testmenu' &&
                     apiobj.toLowerCase() === 'test78' &&
                     apifun.toLowerCase() === 'test';
                 // 设置标志供日志中间件使用
                 ctx.isHeartbeatApi = isHeartbeatApi;
                 if (!isHeartbeatApi) {
-                    log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                    log.detail(`Received request for: /${apisys}/${apimicroro}/${apiobj}/${apifun}`);
                 }
-                if (apifun.startsWith('_') || !apiver.toLowerCase().startsWith('api') || apisys.toLowerCase().startsWith('dll')) {
-                    log.debug(`Access denied for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                if (apifun.startsWith('_') || !apisys.toLowerCase().startsWith('api') || apimicroro.toLowerCase().startsWith('dll')) {
+                    log.debug(`Access denied for: /${apisys}/${apimicroro}/${apiobj}/${apifun}`);
                     ctx.status = 403;
                     ctx.body = { error: 'Access denied' };
                     return;
                 }
-                const ControllerClass = controllerLoader.getController(`${apiver}/${apisys}/${apiobj}`);
+                const ControllerClass = controllerLoader.getController(`${apisys}/${apimicroro}/${apiobj}`);
                 if (!ControllerClass) {
-                    log.error(`Controller not found for: ${apiver}/${apisys}/${apiobj}`);
+                    log.error(`Controller not found for: ${apisys}/${apimicroro}/${apiobj}`);
                     ctx.status = 500;
-                    ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apiver}/${apisys}/${apiobj}` };
+                    ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apisys}/${apimicroro}/${apiobj}` };
                     return;
                 }
                 if (!isHeartbeatApi) {

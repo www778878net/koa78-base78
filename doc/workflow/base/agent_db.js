@@ -7,8 +7,8 @@ class AgentDB {
     constructor(json_data) {
         // 基本信息字段（数据库中必须的字段）
         this.cid = "";
-        this.apiv = "";
         this.apisys = "";
+        this.apimicro = "";
         this.apiobj = "";
         this.agentname = "";
         this.description = "";
@@ -124,7 +124,7 @@ class AgentDB {
             const handler = new handler_1.Handler();
             handler.setFromJson(handlerData); // 使用Handler类的setFromJson方法
             // 使用handler的type和capability作为映射的键
-            const type = handler.apisys || 'default';
+            const type = handler.apimicroro || 'default';
             const capability = handler.capability;
             const handlerName = handler.handler;
             // 添加到按类型和能力分类的映射中

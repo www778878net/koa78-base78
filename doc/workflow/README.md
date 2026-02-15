@@ -524,13 +524,13 @@ export class WorkflowEngine {
 // src/routers/httpServer.ts 中添加
 
 // 工作流路由处理器
-router.all('/wf/:apisys/:apiobj/:apifun', async (ctx: Context) => {
+router.all('/wf/:apimicro/:apiobj/:apifun', async (ctx: Context) => {
   try {
-    const { apisys, apiobj, apifun } = ctx.params;
-    const workflowKey = `${apisys}/${apiobj}/${apifun}`;
+    const { apimicro, apiobj, apifun } = ctx.params;
+    const workflowKey = `${apimicro}/${apiobj}/${apifun}`;
     
     // 动态加载工作流定义
-    const workflowModule = await import(`../workflow/definitions/api/v1/${apisys}/${apiobj}/${apifun}`);
+    const workflowModule = await import(`../workflow/definitions/api/v1/${apimicro}/${apiobj}/${apifun}`);
     const workflow = workflowModule.default;
     
     if (!workflow) {

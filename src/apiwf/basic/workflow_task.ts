@@ -13,8 +13,8 @@ export default class workflow_task extends CidBase78<TableSchemas['workflow_task
                     idpk INT AUTO_INCREMENT PRIMARY KEY,  -- 自增主键
                     cid VARCHAR(36) NOT NULL DEFAULT '' COMMENT '公司/组织ID',  
                     uid VARCHAR(36) NOT NULL DEFAULT '' COMMENT '用户ID',        
-                    apiv VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'API版本',
-                    apisys VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'API系统',
+                    apisys VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'API版本',
+                    apimicro VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'API系统',
                     apiobj VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'API对象',
 
                     idworkflowinstance VARCHAR(36) NOT NULL DEFAULT '' COMMENT '工作流实例ID',

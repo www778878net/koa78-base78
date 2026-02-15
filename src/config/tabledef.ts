@@ -2,32 +2,32 @@ export const tableConfigs = {
     sys_ip: {
         colsImp: ['ip'] as const,
         uidcid: 'uid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     sqlitetest: {
         colsImp: ['field1', 'field2'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     Test78: {
         colsImp: ['field1', 'field2'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     testtb: {
         colsImp: ['kind', 'item', 'data'] as const,
         uidcid: 'cid' as const,
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     workflow_definition: {
         // 工作流定义        
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apisys', 'apimicro', 'apiobj',
             // 工作流名称    描述    版本    状态
             'wfname', 'description', 'version', 'state',
             // 工作流结构
@@ -40,13 +40,13 @@ export const tableConfigs = {
             'runcount', 'successcount', 'errorcount', 'successrate', 'executiontime'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_instance: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apisys', 'apimicro', 'apiobj',
             // 工作流ID    状态    优先级
             'idworkflow', 'state', 'priority',
             // 工作流定义
@@ -65,13 +65,13 @@ export const tableConfigs = {
             'actualcost', 'actualrevenue', 'actualprofit', 'executiontime'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_agent: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apisys', 'apimicro', 'apiobj',
             // 代理名称    描述
             'agentname', 'description',
             // 最大并发数
@@ -89,13 +89,13 @@ export const tableConfigs = {
             'costdescription', 'pricedescription'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_task: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apisys', 'apimicro', 'apiobj',
             // 工作流实例ID    工作流定义ID    任务定义ID
             'idworkflowinstance', 'idworkflowdefinition', 'idtaskdefinition',
             // 任务名称    处理器函数名    执行的Agent ID
@@ -128,13 +128,13 @@ export const tableConfigs = {
             'successcount', 'errorcount', 'runcount'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_handler: {
         colsImp: [
             // 前5个字段必须按索引顺序排列
-            'idagent', 'capability', 'apiv', 'apisys', 'apiobj',
+            'idagent', 'capability', 'apisys', 'apimicro', 'apiobj',
             // 其他必要字段
             'idworkflow', 'handler', 'description', 'state',
             // 价格成本相关字段
@@ -145,13 +145,13 @@ export const tableConfigs = {
             'costdescription', 'pricedescription'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_definition_task: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apisys', 'apimicro', 'apiobj',
             // 工作流定义ID    任务名称    处理器函数名
             'idworkflowdefinition', 'taskname', 'handler',
             // 描述    状态
@@ -172,7 +172,7 @@ export const tableConfigs = {
             'runcount', 'successcount', 'errorcount', 'successrate', 'executiontime'
         ] as const,
         uidcid: 'cid' as const,
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     }
 } as const;

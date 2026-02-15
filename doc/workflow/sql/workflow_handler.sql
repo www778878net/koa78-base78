@@ -4,8 +4,8 @@ CREATE TABLE `workflow_handler` (
   -- 前5个索引字段必须按此顺序排列
   `idagent` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 代理唯一标识符，关联 workflow_agent 表
   `capability` varchar(200) NOT NULL,  -- 能力名称，如"文件保存"
-  `apiv` varchar(20) NOT NULL DEFAULT '',  -- 版本号，用于区分实现版本
-  `apisys` varchar(50) NOT NULL DEFAULT '',  -- 系统/目录，如"网盘保存"
+  `apisys` varchar(20) NOT NULL DEFAULT '',  -- 版本号，用于区分实现版本
+  `apimicro` varchar(50) NOT NULL DEFAULT '',  -- 系统/目录，如"网盘保存"
   `apiobj` varchar(100) NOT NULL DEFAULT '',  -- 对象/文件，如"百度网盘"
   
   -- 其他必要字段
@@ -47,14 +47,14 @@ CREATE TABLE `workflow_handler` (
   
   PRIMARY KEY (`idpk`),
   UNIQUE KEY `i_id` (`id`),
-  UNIQUE KEY `u_agent_capability_impl` (`idagent`, `capability`, `apiv`, `apisys`, `apiobj`),
+  UNIQUE KEY `u_agent_capability_impl` (`idagent`, `capability`, `apisys`, `apimicro`, `apiobj`),
   INDEX `idx_capability` (`capability`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 -- 表字段说明:
 -- cid: 关联ID
--- apiv: API版本
--- apisys: API系统
+-- apisys: API版本
+-- apimicro: API系统
 -- apiobj: API对象
 -- idagent: 代理唯一标识符，关联 workflow_agent 表
 -- idworkflow: 工作流ID，关联工作流表
@@ -90,7 +90,7 @@ CREATE TABLE `workflow_handler` (
 3.1 数据示例
 -- 百度网盘Agent
 INSERT INTO workflow_handler 
-(cid, idagent, capability, apiv, apisys, apiobj, handler, idworkflow,
+(cid, idagent, capability, apisys, apimicro, apiobj, handler, idworkflow,
  description, pricebase, price, costunit, 
  costdescription, pricedescription)
 VALUES (
@@ -103,7 +103,7 @@ VALUES (
 
 -- 天翼网盘Agent
 INSERT INTO workflow_handler 
-(cid, idagent, capability, apiv, apisys, apiobj, handler, idworkflow,
+(cid, idagent, capability, apisys, apimicro, apiobj, handler, idworkflow,
  description, pricebase, price, costunit,
  costdescription, pricedescription)
 VALUES (
@@ -116,7 +116,7 @@ VALUES (
 
 -- 综合文件保存Agent（百度实现）
 INSERT INTO workflow_handler 
-(cid, idagent, capability, apiv, apisys, apiobj, handler, idworkflow,
+(cid, idagent, capability, apisys, apimicro, apiobj, handler, idworkflow,
  description, pricebase, price, costunit,
  costdescription, pricedescription)
 VALUES (
@@ -129,7 +129,7 @@ VALUES (
 
 -- 综合文件保存Agent（天翼实现）
 INSERT INTO workflow_handler 
-(cid, idagent, capability, apiv, apisys, apiobj, handler, idworkflow,
+(cid, idagent, capability, apisys, apimicro, apiobj, handler, idworkflow,
  description, pricebase, price, costunit,
  costdescription, pricedescription)
 VALUES (
@@ -142,7 +142,7 @@ VALUES (
 
 -- 综合文件保存Agent（自动选择）
 INSERT INTO workflow_handler 
-(cid, idagent, capability, apiv, apisys, apiobj, handler, idworkflow,
+(cid, idagent, capability, apisys, apimicro, apiobj, handler, idworkflow,
  description, pricebase, price, costunit,
  costdescription, pricedescription)
 VALUES (
@@ -156,7 +156,7 @@ VALUES (
 4.1 按能力搜索
 -- 需求方搜索"文件保存"能力
 SELECT 
-    idagent, capability, apisys, apiobj, handler,
+    idagent, capability, apimicro, apiobj, handler,
     description, price, costdescription, pricedescription,
     successrate, runcount, successcount
 FROM workflow_handler
@@ -167,13 +167,13 @@ ORDER BY price ASC, successrate DESC;
 -- 在"文件保存"中只查看"网盘保存"系统
 SELECT * FROM workflow_handler
 WHERE capability = '文件保存'
-  AND apisys = '网盘保存'
+  AND apimicro = '网盘保存'
   AND state = 'active';
 4.3 按对象过滤
 -- 查看所有"百度网盘"的实现
 SELECT * FROM workflow_handler
 WHERE capability = '文件保存'
-  AND apisys = '网盘保存'
+  AND apimicro = '网盘保存'
   AND apiobj = '百度网盘'
   AND state = 'active';
 5. 字段使用的建议
@@ -181,7 +181,7 @@ WHERE capability = '文件保存'
 核心标识字段：
 1. idagent: 必须，标识哪个Agent
 2. capability: 必须，能力分类
-3. apisys: 必须，系统目录
+3. apimicro: 必须，系统目录
 4. apiobj: 必须，具体对象
 5. handler: 必须，处理器函数
 6. idworkflow: 必须，关联的工作流ID
@@ -250,11 +250,11 @@ CREATE TABLE workflow_definitions (
 8.1 可以考虑的优化
 -- 1. 添加索引提高查询性能
 ADD INDEX idx_apiobj (apiobj);
-ADD INDEX idx_apisys (apisys);
+ADD INDEX idx_apimicro (apimicro);
 ADD INDEX idx_state (state);
 
 -- 2. 可以考虑添加常用搜索的组合索引
-ADD INDEX idx_capability_apisys (capability, apisys);
+ADD INDEX idx_capability_apimicro (capability, apimicro);
 ADD INDEX idx_capability_price (capability, price);
 
 -- 3. 可以考虑添加时间索引
@@ -266,7 +266,7 @@ MODIFY COLUMN capability varchar(200)
 COMMENT '能力分类，如文件保存、股票采集，用于需求方搜索';
 
 ALTER TABLE workflow_handler 
-MODIFY COLUMN apisys varchar(50) 
+MODIFY COLUMN apimicro varchar(50) 
 COMMENT '系统目录，如网盘保存、日志存储，表示实现所属的系统';
 
 ALTER TABLE workflow_handler 
@@ -278,7 +278,7 @@ MODIFY COLUMN handler varchar(200)
 COMMENT '处理器函数名，对应Agent中的具体处理函数';
 9. 总结
 9.1 设计优点
-1. 层次清晰：capability→apisys→apiobj→handler
+1. 层次清晰：capability→apimicro→apiobj→handler
 2. 信息完整：包含定价、成本、统计
 3. 灵活支持：一个Agent可注册多个实现
 4. 便于查询：按不同维度过滤

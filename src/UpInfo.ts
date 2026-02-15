@@ -30,6 +30,7 @@ export default class UpInfo {
     apisvc: string = "";
     apiobj: string = "";
     apifun: string = "";
+    apimicro: string = "";
     apisys: string = "";
     uptime: Date = new Date();
     utime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -76,6 +77,7 @@ export default class UpInfo {
 
         if (ctx.params) {
             this.apisys = ctx.params.apisys;
+            this.apimicro = ctx.params.apimicro;
             this.apisvc = ctx.params.apisvc;
             this.apiobj = ctx.params.apiobj;
             this.apifun = ctx.params.apifun;
@@ -90,8 +92,9 @@ export default class UpInfo {
         } else if (req.method === "SOCK") {
             pars = req.header;
             this.method = req.header["method"];
-            const [apisys, apisvc, apiobj, apifun] = this.method.split("/");
+            const [apisys, apimicro, apisvc, apiobj, apifun] = this.method.split("/");
             this.apisys = apisys;
+            this.apimicro = apimicro;
             this.apisvc = apisvc;
             this.apiobj = apiobj;
             this.apifun = apifun;

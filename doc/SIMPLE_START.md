@@ -259,14 +259,14 @@ const customTableConfigs = {
   user_table: {
     colsImp: ['name', 'email', 'phone'] as const,
     uidcid: 'uid' as const,
-    apiver: 'api/v1',
-    apisys: 'user'
+    apisys: 'api/v1',
+    apimicro: 'user'
   },
   product_table: {
     colsImp: ['product_name', 'price', 'category'] as const,
     uidcid: 'cid' as const,
-    apiver: 'api/v1',
-    apisys: 'product'
+    apisys: 'api/v1',
+    apimicro: 'product'
   }
 } as const;
 

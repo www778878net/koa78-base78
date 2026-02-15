@@ -15,14 +15,14 @@ koa78-base78 支持通过外部配置文件来自定义表格配置。用户可�
   "my_table": {
     "colsImp": ["field1", "field2", "field3"],
     "uidcid": "cid",
-    "apiver": "apiv1",
-    "apisys": "mysystem"
+    "apisys": "apisys1",
+    "apimicro": "mysystem"
   },
   "another_table": {
     "colsImp": ["name", "description"],
     "uidcid": "uid",
-    "apiver": "apiv2",
-    "apisys": "anothersys"
+    "apisys": "apisys2",
+    "apimicro": "anothersys"
   }
 }
 ```
@@ -46,8 +46,8 @@ koa78-base78 支持通过外部配置文件来自定义表格配置。用户可�
 
 - `colsImp`: 字符串数组，定义表的核心字段
 - `uidcid`: 字符串，值为 "uid" 或 "cid"，决定用户标识类型
-- `apiver`: 字符串，API 版本
-- `apisys`: 字符串，API 系统分类
+- `apisys`: 字符串，API 版本
+- `apimicro`: 字符串，API 系统分类
 
 ## 示例
 
@@ -58,8 +58,8 @@ koa78-base78 支持通过外部配置文件来自定义表格配置。用户可�
   "product": {
     "colsImp": ["name", "price", "category", "stock"],
     "uidcid": "cid",
-    "apiver": "apishop",
-    "apisys": "ecommerce"
+    "apisys": "apishop",
+    "apimicro": "ecommerce"
   }
 }
 ```

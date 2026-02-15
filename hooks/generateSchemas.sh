@@ -15,7 +15,7 @@ echo "Found config file: $TABLE_CONFIG"
 
 # 提取表名
 echo "=== Extracting table information ==="
-TABLES=$(grep -E '^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*:' "$TABLE_CONFIG" | grep -v "colsImp\|uidcid\|apiver\|apisys" | sed 's/[[:space:]]*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/')
+TABLES=$(grep -E '^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*:' "$TABLE_CONFIG" | grep -v "colsImp\|uidcid\|apisys\|apimicro" | sed 's/[[:space:]]*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/')
 
 echo "Found tables:"
 echo "$TABLES"
@@ -46,13 +46,13 @@ for tableName in $TABLES; do
     # 提取表定义块
     tableDefinition=$(sed -n "${startLine},${endLine}p" "$TABLE_CONFIG")
     
-    # 提取apiver
-    apiver=$(echo "$tableDefinition" | grep "apiver:" | sed -n "s/.*apiver:[[:space:]]*'\([^']*\)'.*/\1/p" | head -1)
-    echo "  apiver: $apiver"
-    
     # 提取apisys
     apisys=$(echo "$tableDefinition" | grep "apisys:" | sed -n "s/.*apisys:[[:space:]]*'\([^']*\)'.*/\1/p" | head -1)
     echo "  apisys: $apisys"
+    
+    # 提取apimicro
+    apimicro=$(echo "$tableDefinition" | grep "apimicro:" | sed -n "s/.*apimicro:[[:space:]]*'\([^']*\)'.*/\1/p" | head -1)
+    echo "  apimicro: $apimicro"
     
     # 提取uidcid
     uidcid=$(echo "$tableDefinition" | grep "uidcid:" | sed -n "s/.*uidcid:[[:space:]]*'\([^']*\)'.*/\1/p" | head -1)
@@ -100,8 +100,8 @@ for tableName in $TABLES; do
     echo "  colsImp: $colsImp"
     
     # 构造目录和文件路径
-    TS_DIR="src/$apiver/$apisys"
-    PROTO_DIR="src/proto/$apiver/$apisys"
+    TS_DIR="src/$apisys/$apimicro"
+    PROTO_DIR="src/proto/$apisys/$apimicro"
     TS_FILE="$TS_DIR/${tableName}.ts"
     PROTO_FILE="$PROTO_DIR/${tableName}.proto"
     
@@ -143,7 +143,7 @@ EOF
     # 创建Protocol Buffer文件（如果不存在）
     if [ ! -f "$PROTO_FILE" ]; then
         echo "  Creating Protocol Buffer file: $PROTO_FILE"
-        PACKAGE_NAME="${apiver}_${apisys}"
+        PACKAGE_NAME="${apisys}_${apimicro}"
         
         # 将colsImp转换为数组
         IFS=',' read -ra COLS <<< "$colsImp"

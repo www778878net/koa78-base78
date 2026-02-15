@@ -3,8 +3,8 @@ import { Handler } from './handler';
 export class AgentDB {
     // 基本信息字段（数据库中必须的字段）
     public cid: string = "";
-    public apiv: string = "";
     public apisys: string = "";
+    public apimicro: string = "";
     public apiobj: string = "";
     public agentname: string = "";
     public description: string = "";
@@ -139,7 +139,7 @@ export class AgentDB {
             handler.setFromJson(handlerData);  // 使用Handler类的setFromJson方法
 
             // 使用handler的type和capability作为映射的键
-            const type = handler.apisys || 'default';
+            const type = handler.apimicroro || 'default';
             const capability = handler.capability;
             const handlerName = handler.handler;
 

@@ -123,13 +123,13 @@ export class ControllerLoader {
             this.loadControllers();
         }
 
-        const [apiver, apisys, apiobj] = path.split('/');
-        const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();
+        const [apimicro, apimicro, apiobj] = path.split('/');
+        const controllerKey = `${apimicro}/${apimicro}/${apiobj}`.toLowerCase();
 
         // 判断是否是心跳API，如果是则不输出详细日志
-        const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                               apisys.toLowerCase() === 'testmenu' &&
-                               apiobj.toLowerCase() === 'test78';
+        const isHeartbeatApi = apimicro.toLowerCase() === 'apitest' &&
+            apimicro.toLowerCase() === 'testmenu' &&
+            apiobj.toLowerCase() === 'test78';
 
         if (!isHeartbeatApi) {
             log.detail(`Attempting to get controller with key: ${controllerKey}`);

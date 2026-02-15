@@ -22,20 +22,20 @@ declare const koa78Base78: {
         readonly sys_ip: {
             readonly colsImp: readonly ["ip"];
             readonly uidcid: "cid";
-            readonly apiver: "apitest";
-            readonly apisys: "testmenu";
+            readonly apimicro: "apitest";
+            readonly apimicro: "testmenu";
         };
         readonly Test78: {
             readonly colsImp: readonly ["field1", "field2"];
             readonly uidcid: "cid";
-            readonly apiver: "apitest";
-            readonly apisys: "testmenu";
+            readonly apimicro: "apitest";
+            readonly apimicroro: "testmenu";
         };
         readonly testtb: {
             readonly colsImp: readonly ["kind", "item", "data"];
             readonly uidcid: "cid";
-            readonly apiver: "apitest";
-            readonly apisys: "testmenu";
+            readonly apimicro: "apitest";
+            readonly apimicroro: "testmenu";
         };
     };
     DatabaseConnections: typeof DatabaseConnections;

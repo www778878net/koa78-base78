@@ -115,8 +115,8 @@ export default class Mysql78 {
             return 'pool null';
         }
 
-        const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apisys` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
-        const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apiv` varchar(50) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apiv`,`apisys`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+        const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apimicro` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+        const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`,`apimicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
 
         try {
             await this._pool.execute(cmdtext1);
@@ -167,7 +167,7 @@ export default class Mysql78 {
             const back = rows as any[];
 
             if (debug) {
-                this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(back).length;
@@ -175,7 +175,7 @@ export default class Mysql78 {
 
             return back;
         } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
+            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
             this.log.error('mysql_doGet error', err as Error);
             throw err;
         } finally {
@@ -267,7 +267,7 @@ export default class Mysql78 {
             const [result] = await statement.execute(values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -276,7 +276,7 @@ export default class Mysql78 {
             return { result };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
             this.log.error('mysql_doMBack error', err as Error);
             return { result: {}, error: errorMsg };
         } finally {
@@ -315,7 +315,7 @@ export default class Mysql78 {
             const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -330,7 +330,7 @@ export default class Mysql78 {
         } catch (err) {
             const errorMsg = JSON.stringify(err);
             const errorWithSql = `${errorMsg} (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})`;
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
             this.log.error(`mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`, err as Error);
             return { affectedRows: 0, error: errorWithSql };
         } finally {
@@ -363,7 +363,7 @@ export default class Mysql78 {
             const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -377,7 +377,7 @@ export default class Mysql78 {
             return { insertId };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
             this.log.error('mysql_doMAdd error', err as Error);
             return { insertId: 0, error: errorMsg };
         }
@@ -468,8 +468,8 @@ export default class Mysql78 {
             return this.isLog ? 'pool null' : 'isLog is false';
         }
 
-        const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
+        const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname, dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
 
         try {
             const [results] = await this._pool.execute(cmdtext, values);
@@ -494,12 +494,12 @@ export default class Mysql78 {
         }
 
         const cmdtextmd5 = md5(cmdtext);
-        const sb = 'INSERT INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
+        const sb = 'INSERT INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
             'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
 
         try {
             await this._pool.execute(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
+                up.v, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                 dlong, lendown
             ]);
             return 'ok';

@@ -62,13 +62,13 @@ class testtb extends Base78_1.CidBase78 {
                 this.logger.debug("1. 开始执行 testProto 方法");
                 const result = mockData;
                 this.logger.debug(`2. 模拟数据结果: ${JSON.stringify(result)}`);
-                const { apiver, apisys, apiobj } = this.up;
-                if (!apiver || !apisys || !apiobj) {
-                    throw new Error(`Missing required parameters in up object: apiver=${apiver}, apisys=${apisys}, apiobj=${apiobj}`);
+                const { apisys, apimicro, apiobj } = this.up;
+                if (!apisys || !apimicroro || !apiobj) {
+                    throw new Error(`Missing required parameters in up object: apisys=${apisys}, apimicroro=apimicroicro}, apiobj=${apiobj}`);
                 }
-                const packageName = `${apiver}_${apisys}`;
+                const packageName = `${apisys}_${apimicroro}`;
                 this.logger.debug(`3. 使用的包名: ${packageName}`);
-                const protoPath = path.resolve(__dirname, `../../proto/${apiver}/${apisys}/${apiobj}.proto`);
+                const protoPath = path.resolve(__dirname, `../../proto/${apisys}/${apimicroro}/${apiobj}.proto`);
                 this.logger.debug(`4. Proto 文件路径: ${protoPath}`);
                 let root;
                 try {

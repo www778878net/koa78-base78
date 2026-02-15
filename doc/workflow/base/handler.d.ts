@@ -1,7 +1,7 @@
 export declare class Handler {
     cid: string;
-    apiv: string;
     apisys: string;
+    apimicro: string;
     apiobj: string;
     idagent: string;
     idworkflow: string;
