@@ -4,7 +4,7 @@ const tslib_1 = require("tslib");
 const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
 const utc_1 = tslib_1.__importDefault(require("dayjs/plugin/utc"));
 const mysql = tslib_1.__importStar(require("mysql2/promise"));
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
+const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const mylogger_1 = require("../utils/mylogger");
 const md5_1 = tslib_1.__importDefault(require("md5"));
 // 扩展 dayjs 以支持 UTC
@@ -107,7 +107,7 @@ class Mysql78 {
                 return 'pool null';
             }
             const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apimicro` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
-            const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicroro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`apimicroicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+            const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`,`apimicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
             try {
                 yield this._pool.execute(cmdtext1);
                 yield this._pool.execute(cmdtext2);
@@ -155,14 +155,14 @@ class Mysql78 {
                 const [rows] = yield statement.execute(values);
                 const back = rows;
                 if (debug) {
-                    this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicroro, up);
+                    this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(back).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
                 return back;
             }
             catch (err) {
-                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicroro, up);
+                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
                 this.log.error('mysql_doGet error', err);
                 throw err;
             }
@@ -249,7 +249,7 @@ class Mysql78 {
                 statement = yield this.getStatement(connection, cmdtext);
                 const [result] = yield statement.execute(values);
                 if (debug) {
-                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicroro, up);
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
@@ -257,7 +257,7 @@ class Mysql78 {
             }
             catch (err) {
                 const errorMsg = JSON.stringify(err);
-                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicroro, up);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
                 this.log.error('mysql_doMBack error', err);
                 return { result: {}, error: errorMsg };
             }
@@ -296,7 +296,7 @@ class Mysql78 {
                 const [result] = yield statement.execute(values);
                 const affectedRows = result.affectedRows;
                 if (debug) {
-                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicroro, up);
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
@@ -309,7 +309,7 @@ class Mysql78 {
             catch (err) {
                 const errorMsg = JSON.stringify(err);
                 const errorWithSql = `${errorMsg} (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})`;
-                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicroro, up);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
                 this.log.error(`mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`, err);
                 return { affectedRows: 0, error: errorWithSql };
             }
@@ -342,7 +342,7 @@ class Mysql78 {
                 const insertId = result.insertId;
                 const affectedRows = result.affectedRows;
                 if (debug) {
-                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicroro, up);
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
@@ -354,7 +354,7 @@ class Mysql78 {
             }
             catch (err) {
                 const errorMsg = JSON.stringify(err);
-                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicroro, up);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
                 this.log.error('mysql_doMAdd error', err);
                 return { insertId: 0, error: errorMsg };
             }
@@ -445,8 +445,8 @@ class Mysql78 {
             if (!this._pool || !this.isLog) {
                 return this.isLog ? 'pool null' : 'isLog is false';
             }
-            const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicroro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apimicroro, up.apiobj, info, up.uname, (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), koa78_upinfo_1.default.getNewid(), up.upid];
+            const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
+            const values = [kind, up.apimicro, up.apiobj, info, up.uname, (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo_1.default.getNewid(), up.upid];
             try {
                 const [results] = yield this._pool.execute(cmdtext, values);
                 return results.affectedRows;
@@ -471,11 +471,11 @@ class Mysql78 {
                 return this.isCount ? 'pool null' : 'isCount is false';
             }
             const cmdtextmd5 = (0, md5_1.default)(cmdtext);
-            const sb = 'INSERT INTO sys_sql(apisys,apimicroro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
+            const sb = 'INSERT INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
                 'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
             try {
                 yield this._pool.execute(sb, [
-                    up.apisys, up.apimicroro, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
+                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                     dlong, lendown
                 ]);
                 return 'ok';

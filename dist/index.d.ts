@@ -13,6 +13,7 @@ import { ApiMethod } from './interfaces/decorators';
 import { ContainerManager } from './ContainerManager';
 import { ControllerLoader } from './utils/ControllerLoader';
 import { Server } from './server';
+import { default as UpInfo } from './UpInfo';
 declare const koa78Base78: {
     Base78: typeof Base78;
     CidBase78: typeof CidBase78;
@@ -22,20 +23,20 @@ declare const koa78Base78: {
         readonly sys_ip: {
             readonly colsImp: readonly ["ip"];
             readonly uidcid: "cid";
-            readonly apimicro: "apitest";
+            readonly apisys: "apitest";
             readonly apimicro: "testmenu";
         };
         readonly Test78: {
             readonly colsImp: readonly ["field1", "field2"];
             readonly uidcid: "cid";
-            readonly apimicro: "apitest";
-            readonly apimicroro: "testmenu";
+            readonly apisys: "apitest";
+            readonly apimicro: "testmenu";
         };
         readonly testtb: {
             readonly colsImp: readonly ["kind", "item", "data"];
             readonly uidcid: "cid";
-            readonly apimicro: "apitest";
-            readonly apimicroro: "testmenu";
+            readonly apisys: "apitest";
+            readonly apimicro: "testmenu";
         };
     };
     DatabaseConnections: typeof DatabaseConnections;
@@ -49,6 +50,7 @@ declare const koa78Base78: {
     ContainerManager: typeof ContainerManager;
     ControllerLoader: typeof ControllerLoader;
     Server: typeof Server;
+    UpInfo: typeof UpInfo;
 };
-export { BaseSchema, CidSchema, UidSchema, Base78, CidBase78, UidBase78, Config, TableSet, TableConfig, tableConfigs, TableSchemas, DatabaseConnections, DatabaseService, CacheService, AuthService, Elasticsearch78, Request78, QueryBuilder, ApiMethod, ContainerManager, ControllerLoader, Server };
+export { BaseSchema, CidSchema, UidSchema, Base78, CidBase78, UidBase78, Config, TableSet, TableConfig, tableConfigs, TableSchemas, DatabaseConnections, DatabaseService, CacheService, AuthService, Elasticsearch78, Request78, QueryBuilder, ApiMethod, ContainerManager, ControllerLoader, Server, UpInfo };
 export default koa78Base78;

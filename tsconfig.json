@@ -47,7 +47,7 @@
     },
     "include": [
         "src/**/*",
-        "Upinfo.ts"
+        "up.apisysUpInfo.ts"
     ],
     "exclude": [
         "node_modules",

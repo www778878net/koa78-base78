@@ -3,7 +3,7 @@ import { CidBase78 } from '../../controllers/Base78';
 import { ApiMethod } from '../../interfaces/decorators';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import { TableSchemas } from '../../config/tableConfig';
-import UpInfo from '../../Upinfo';
+import UpInfo from '../../UpInfo';
 
 export default class sqlitetest extends CidBase78<TableSchemas['SqliteTest']> {
 

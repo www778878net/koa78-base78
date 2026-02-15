@@ -32,7 +32,7 @@ function ApiMethod() {
                         tbname: ((_a = this.tableConfig) === null || _a === void 0 ? void 0 : _a.tbname) || 'unknown',
                         dbname: this.dbname || 'default',
                         method: propertyKey,
-                        apimicroro: (_b = this.up) === null || _b === void 0 ? void 0 : _apimicroicro,
+                        apimicro: (_b = this.up) === null || _b === void 0 ? void 0 : _b.apimicro,
                         apiobj: (_c = this.up) === null || _c === void 0 ? void 0 : _c.apiobj,
                         apifun: (_d = this.up) === null || _d === void 0 ? void 0 : _d.apifun,
                         error: errorMessage,

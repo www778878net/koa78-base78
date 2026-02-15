@@ -12,13 +12,13 @@ exports.tableConfigs = {
         colsImp: ['field1', 'field2'],
         uidcid: 'cid',
         apisys: 'apitest',
-        apimicroro: 'testmenu'
+        apimicro: 'testmenu'
     },
     testtb: {
         colsImp: ['kind', 'item', 'data'],
         uidcid: 'cid',
         apisys: 'apitest',
-        apimicroro: 'testmenu'
+        apimicro: 'testmenu'
     },
 };
 //# sourceMappingURL=tableConfig.js.map
