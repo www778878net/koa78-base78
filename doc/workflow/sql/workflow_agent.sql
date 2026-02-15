@@ -2,8 +2,8 @@ CREATE TABLE `workflow_agent` (
   -- 插入时必须的字段
   `cid` varchar(36) NOT NULL DEFAULT '' COMMENT '公司/组织ID',
   `agentname` varchar(200) NOT NULL DEFAULT '' COMMENT 'Agent名称',
-  `apiv` varchar(20) NOT NULL DEFAULT '' COMMENT 'API版本',
-  `apisys` varchar(50) NOT NULL DEFAULT '' COMMENT 'API系统目录',
+  `apisys` varchar(20) NOT NULL DEFAULT '' COMMENT 'API版本',
+  `apimicro` varchar(50) NOT NULL DEFAULT '' COMMENT 'API系统目录',
   `apiobj` varchar(100) NOT NULL DEFAULT '' COMMENT 'API对象',
   `description` varchar(500) NOT NULL DEFAULT '' COMMENT '描述',
   `maxcopy` int NOT NULL DEFAULT 1 COMMENT '最大并发数',

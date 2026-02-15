@@ -1,5 +1,5 @@
 import * as mysql from 'mysql2/promise';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 /**
  * 如果不行就回退到2.4.0
  */

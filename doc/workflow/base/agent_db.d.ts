@@ -1,7 +1,7 @@
 export declare class AgentDB {
     cid: string;
-    apiv: string;
     apisys: string;
+    apimicro: string;
     apiobj: string;
     agentname: string;
     description: string;

@@ -232,8 +232,8 @@ INSERT INTO `sys_ip` VALUES ('', 'GUEST888-8888-8888-8888-GUEST88GUEST', '127.0.
 DROP TABLE IF EXISTS `sys_nodejs`;
 CREATE TABLE `sys_nodejs`  (
   `cid` varchar(36) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
-  `apiv` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
-  `apisys` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
+  `apisys` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
+  `apimicro` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `apiobj` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `method` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `num` int(0) NOT NULL DEFAULT 0,
@@ -251,7 +251,7 @@ CREATE TABLE `sys_nodejs`  (
   `remark5` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `remark6` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`idpk`) USING BTREE,
-  UNIQUE INDEX `u_v_sys_obj_method`(`apiv`, `apisys`, `apiobj`, `method`) USING BTREE
+  UNIQUE INDEX `u_v_sys_obj_method`(`apisys`, `apimicro`, `apiobj`, `method`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 196 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -266,8 +266,8 @@ INSERT INTO `sys_nodejs` VALUES ('', 'api7817', 'TestMenu', 'Test78', '/Api7822/
 DROP TABLE IF EXISTS `sys_sql`;
 CREATE TABLE `sys_sql`  (
   `cid` varchar(36) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
-  `apiv` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `apisys` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
+  `apimicro` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `apiobj` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `cmdtext` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `uname` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
@@ -286,13 +286,13 @@ CREATE TABLE `sys_sql`  (
   `remark5` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `remark6` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`idpk`) USING BTREE,
-  UNIQUE INDEX `u_v_sys_obj_cmdtext`(`apiv`, `apisys`, `apiobj`, `cmdtextmd5`) USING BTREE
+  UNIQUE INDEX `u_v_sys_obj_cmdtext`(`apisys`, `apimicro`, `apiobj`, `cmdtextmd5`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 306 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_sql
 -- ----------------------------
-INSERT INTO `sys_sql` VALUES ('', '17.2', 'ucenter', 'lovers', 'insert into sys_nodejs(apiv,apisys,apiobj, method,num,dlong,uplen,downlen,uptime,id)values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?', '', 8, 39, 1032, '', '0998023bd7565d877cb04b6e707d4613', '2022-10-25 21:34:16', 203, '3a8cbed5-939a-e942-983e-c44ee5643eb8', '', '', '', '', '', '');
+INSERT INTO `sys_sql` VALUES ('', '17.2', 'ucenter', 'lovers', 'insert into sys_nodejs(apisys,apimicro,apiobj, method,num,dlong,uplen,downlen,uptime,id)values(?,?,?,?,?,?,?,?,?,?)ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,uplen=uplen+?,downlen=downlen+?', '', 8, 39, 1032, '', '0998023bd7565d877cb04b6e707d4613', '2022-10-25 21:34:16', 203, '3a8cbed5-939a-e942-983e-c44ee5643eb8', '', '', '', '', '', '');
 INSERT INTO `sys_sql` VALUES ('', '17.2', 'ucenter', 'lovers', ' INSERT INTO  lovers  (cid, uname,pwd,sid,sid_web,sid_web_date,id,upby,uptime,idcodef) SELECT ?,?,?,?,?,?,?,?,?,?', '', 1, 8, 166, '', '175e6e9cb95c188b2df82925c65bf33c', '2022-10-25 21:39:05', 226, 'a96d300c-3cc7-e24c-21ce-038884d6c060', '', '', '', '', '', '');
 INSERT INTO `sys_sql` VALUES ('', '17.2', 'ucenter', 'lovers', 'UPDATE lovers SET sid_web=?,sid_web_date=?,uptime=? WHERE uname=?', '', 4, 47, 672, '', '4c6ab3975bb2ccd83f1e63447469ec96', '2022-10-25 21:40:26', 252, '57532d88-b506-4c36-4b35-2955d0bea242', '', '', '', '', '', '');
 
@@ -303,7 +303,7 @@ DROP TABLE IF EXISTS `sys_warn`;
 CREATE TABLE `sys_warn`  (
   `uid` varchar(36) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `kind` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
-  `apisys` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
+  `apimicro` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `apiobj` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',
   `content` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `upid` varchar(36) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',

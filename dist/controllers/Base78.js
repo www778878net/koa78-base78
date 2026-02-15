@@ -6,7 +6,7 @@ require("reflect-metadata");
 const DatabaseService_1 = require("../services/DatabaseService");
 const CacheService_1 = require("../services/CacheService");
 const Config_1 = require("../config/Config");
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
+const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const QueryBuilder_1 = require("../utils/QueryBuilder");
 const decorators_1 = require("../interfaces/decorators");
 const mylogger_1 = require("../utils/mylogger");
@@ -302,7 +302,7 @@ class Base78 {
                 // 如果所有更新都成功但 affectedRows 为 0
                 if (result.affectedRows === 0) {
                     this._setBack(-2003, "批量更新失败：没有记录被更新");
-                    return "0";
+                    return result;
                 }
                 return result.affectedRows.toString();
             }
@@ -320,7 +320,7 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const values = this.up.pars.slice(0, colp.length);
-            values.push(koa78_upinfo_1.default.getNewid(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            values.push(UpInfo_1.default.getNewid(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
@@ -379,7 +379,7 @@ class Base78 {
                 // 添加业务字段值
                 values.push(...rowValues);
                 // 为每条记录自动生成 UUID id
-                values.push(koa78_upinfo_1.default.getNewid());
+                values.push(UpInfo_1.default.getNewid());
                 // 添加系统字段值（每行都相同）
                 values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             }

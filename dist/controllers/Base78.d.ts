@@ -3,7 +3,7 @@ import { DatabaseService } from '../services/DatabaseService';
 import { CacheService } from '../services/CacheService';
 import { Config } from '../config/Config';
 import { TableSet } from '../config/tableConfig';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { MyLogger } from '../utils/mylogger';

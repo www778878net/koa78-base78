@@ -6,8 +6,8 @@ export declare class WorkflowDB {
     description: string;
     version: string;
     state: string;
-    apiv: string;
     apisys: string;
+    apimicro: string;
     apiobj: string;
     inputdata: string;
     outputdata: string;

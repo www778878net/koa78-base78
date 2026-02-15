@@ -1,5 +1,5 @@
 import { Agent } from '../base/agent';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../../UpInfo';
 export declare class SqliteDatabaseAgent extends Agent {
     private sqliteConnections;
     private config;

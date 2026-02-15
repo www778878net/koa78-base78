@@ -7,8 +7,8 @@ class Handler {
     constructor(handlerData) {
         // 基本信息字段
         this.cid = "";
-        this.apiv = "";
         this.apisys = "";
+        this.apimicro = "";
         this.apiobj = "";
         // 关联字段
         this.idagent = ""; // 关联到workflow_agent表的id

@@ -499,7 +499,7 @@ export default class Mysql78 {
 
         try {
             await this._pool.execute(sb, [
-                up.v, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
+                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                 dlong, lendown
             ]);
             return 'ok';

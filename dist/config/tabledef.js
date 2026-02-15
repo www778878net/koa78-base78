@@ -5,32 +5,32 @@ exports.tableConfigs = {
     sys_ip: {
         colsImp: ['ip'],
         uidcid: 'uid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     sqlitetest: {
         colsImp: ['field1', 'field2'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     Test78: {
         colsImp: ['field1', 'field2'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     testtb: {
         colsImp: ['kind', 'item', 'data'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     workflow_definition: {
         // 工作流定义        
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apiv', 'apimicro', 'apiobj',
             // 工作流名称    描述    版本    状态
             'wfname', 'description', 'version', 'state',
             // 工作流结构
@@ -43,13 +43,13 @@ exports.tableConfigs = {
             'runcount', 'successcount', 'errorcount', 'successrate', 'executiontime'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_instance: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apiv', 'apimicro', 'apiobj',
             // 工作流ID    状态    优先级
             'idworkflow', 'state', 'priority',
             // 工作流定义
@@ -68,13 +68,13 @@ exports.tableConfigs = {
             'actualcost', 'actualrevenue', 'actualprofit', 'executiontime'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_agent: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apiv', 'apimicro', 'apiobj',
             // 代理名称    描述
             'agentname', 'description',
             // 最大并发数
@@ -92,13 +92,13 @@ exports.tableConfigs = {
             'costdescription', 'pricedescription'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_task: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apiv', 'apimicro', 'apiobj',
             // 工作流实例ID    工作流定义ID    任务定义ID
             'idworkflowinstance', 'idworkflowdefinition', 'idtaskdefinition',
             // 任务名称    处理器函数名    执行的Agent ID
@@ -131,13 +131,13 @@ exports.tableConfigs = {
             'successcount', 'errorcount', 'runcount'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_handler: {
         colsImp: [
             // 前5个字段必须按索引顺序排列
-            'idagent', 'capability', 'apiv', 'apisys', 'apiobj',
+            'idagent', 'capability', 'apiv', 'apimicro', 'apiobj',
             // 其他必要字段
             'idworkflow', 'handler', 'description', 'state',
             // 价格成本相关字段
@@ -148,13 +148,13 @@ exports.tableConfigs = {
             'costdescription', 'pricedescription'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     },
     workflow_definition_task: {
         colsImp: [
             // API 版本    API 系统    API 对象
-            'apiv', 'apisys', 'apiobj',
+            'apiv', 'apimicro', 'apiobj',
             // 工作流定义ID    任务名称    处理器函数名
             'idworkflowdefinition', 'taskname', 'handler',
             // 描述    状态
@@ -175,8 +175,8 @@ exports.tableConfigs = {
             'runcount', 'successcount', 'errorcount', 'successrate', 'executiontime'
         ],
         uidcid: 'cid',
-        apiver: 'apiwf',
-        apisys: 'basic'
+        apisys: 'apiwf',
+        apimicro: 'basic'
     }
 };
 //# sourceMappingURL=tabledef.js.map

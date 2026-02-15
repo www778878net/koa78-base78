@@ -223,7 +223,7 @@ export class MysqlDatabaseAgent extends Agent {
     // 创建一个默认的UpInfo实例
     const up = new UpInfo(null);
     up.uname = 'system';
-    up.apisys = 'system';
+    up.apimicro = 'system';
     up.apiobj = 'system';
     up.uptime = new Date();
     up.utime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss');

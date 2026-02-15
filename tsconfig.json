@@ -46,7 +46,8 @@
         "baseUrl": "."
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "up.apisysUpInfo.ts"
     ],
     "exclude": [
         "node_modules",
