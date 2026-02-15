@@ -23,17 +23,15 @@ export default class UpInfo {
     cache: string = "";
 
     // 自动获取或服务器生成
-    ip: string = "";
-    ctx: any = null;
-    method: string = "";
-
-    apisvc: string = "";
-    apiobj: string = "";
-    apifun: string = "";
-    apimicro: string = "";
-    apisys: string = "";
-    uptime: Date = new Date();
-    utime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
+      ip: string = "";
+      ctx: any = null;
+      method: string = "";
+    
+      apiobj: string = "";   // 类或能力或微服务中的步骤
+      apifun: string = "";   // 类中的函数
+      apimicro: string = ""; // 微服务
+      apisys: string = "";   // 多个微服务组合的系统
+      uptime: Date = new Date();    utime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
     upby: string = "";
     errmessage: string = "";
 
@@ -78,7 +76,6 @@ export default class UpInfo {
         if (ctx.params) {
             this.apisys = ctx.params.apisys;
             this.apimicro = ctx.params.apimicro;
-            this.apisvc = ctx.params.apisvc;
             this.apiobj = ctx.params.apiobj;
             this.apifun = ctx.params.apifun;
         }
@@ -92,10 +89,9 @@ export default class UpInfo {
         } else if (req.method === "SOCK") {
             pars = req.header;
             this.method = req.header["method"];
-            const [apisys, apimicro, apisvc, apiobj, apifun] = this.method.split("/");
+            const [apisys, apimicro, apiobj, apifun] = this.method.split("/");
             this.apisys = apisys;
             this.apimicro = apimicro;
-            this.apisvc = apisvc;
             this.apiobj = apiobj;
             this.apifun = apifun;
         }

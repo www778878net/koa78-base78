@@ -340,7 +340,7 @@ class Sqlite78 {
             const sb = `INSERT OR IGNORE INTO sys_sql(apisys,apimicroro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
             try {
                 yield this._run(sb, [
-                    up.v, up.apimicroro, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
+                    up.apisys, up.apimicroro, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
                 ]);
                 // 更新计数器
                 yield this._run('UPDATE sys_sql SET num=num+1,dlong=dlong+?,downlen=downlen+? WHERE cmdtextmd5=?', [dlong, lendown, cmdtextmd5]);

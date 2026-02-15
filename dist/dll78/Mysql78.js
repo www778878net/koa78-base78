@@ -475,7 +475,7 @@ class Mysql78 {
                 'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
             try {
                 yield this._pool.execute(sb, [
-                    up.v, up.apimicroro, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
+                    up.apisys, up.apimicroro, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                     dlong, lendown
                 ]);
                 return 'ok';

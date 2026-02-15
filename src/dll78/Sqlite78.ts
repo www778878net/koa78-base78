@@ -364,7 +364,7 @@ export default class Sqlite78 {
 
         try {
             await this._run(sb, [
-                up.v, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
+                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
             ]);
 
             // 更新计数器
