@@ -28,7 +28,7 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     //     return; // 直接返回，不进行统计
     // }
     // // 确保参数存在后再解构
-    // const { apimicro, apimicro, apiobj, apifun } = ctx.params;
+    // const { apisys, apimicro, apiobj, apifun } = ctx.params;
 
     // // 如果是测试接口，直接返回
     // if (apiobj == "testtb") return;
@@ -42,7 +42,7 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
 
     // // Prepare the document for Elasticsearch
     // const doc = {
-    //     apisys: apimicro,            // API version
+    //     apiv: apisys,            // API version
     //     apimicro: apimicro,        // API system
     //     apiobj: apiobj,        // API object
     //     method: apifun,        // HTTP method
@@ -56,7 +56,7 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     // try {
     //     // Elasticsearch index and document ID are based on the method, apimicro, and apiobj
     //     const index = 'sys_nodejs-main';
-    //     const id = `${apifun}-${apimicro}-${apiobj}-${apimicro}`;
+    //     const id = `${apifun}-${apimicro}-${apiobj}-${apisys}`;
 
     //     // Prepare update fields for the upsert operation
     //     const updateData = {
@@ -155,12 +155,12 @@ async function setupRoutes(app: Koa) {
 
     const controllerLoader = container.get(ControllerLoader);
 
-    router.all('/:apimicro/:apimicro/:apiobj/:apifun', async (ctx: Context) => {
+    router.all('/:apisys/:apimicro/:apiobj/:apifun', async (ctx: Context) => {
         try {
-            const { apimicro, apimicro, apiobj, apifun } = ctx.params;
+            const { apisys, apimicro, apiobj, apifun } = ctx.params;
 
             // 判断是否是心跳API，如果是则不输出详细日志
-            const isHeartbeatApi = apimicro.toLowerCase() === 'apitest' &&
+            const isHeartbeatApi = apisys.toLowerCase() === 'apitest' &&
                 apimicro.toLowerCase() === 'testmenu' &&
                 apiobj.toLowerCase() === 'test78' &&
                 apifun.toLowerCase() === 'test';
@@ -169,22 +169,22 @@ async function setupRoutes(app: Koa) {
             (ctx as any).isHeartbeatApi = isHeartbeatApi;
 
             if (!isHeartbeatApi) {
-                log.detail(`Received request for: /${apimicro}/${apimicro}/${apiobj}/${apifun}`);
+                log.detail(`Received request for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
             }
 
-            if (apifun.startsWith('_') || !apimicro.toLowerCase().startsWith('api') || apimicro.toLowerCase().startsWith('dll')) {
-                log.debug(`Access denied for: /${apimicro}/${apimicro}/${apiobj}/${apifun}`);
+            if (apifun.startsWith('_') || !apisys.toLowerCase().startsWith('api') || apimicro.toLowerCase().startsWith('dll')) {
+                log.debug(`Access denied for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
                 ctx.status = 403;
                 ctx.body = { error: 'Access denied' };
                 return;
             }
 
-            const ControllerClass = controllerLoader.getController(`${apimicro}/${apimicro}/${apiobj}`);
+            const ControllerClass = controllerLoader.getController(`${apisys}/${apimicro}/${apiobj}`);
 
             if (!ControllerClass) {
-                log.error(`Controller not found for: ${apimicro}/${apimicro}/${apiobj}`);
+                log.error(`Controller not found for: ${apisys}/${apimicro}/${apiobj}`);
                 ctx.status = 500;
-                ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apimicro}/${apimicro}/${apiobj}` };
+                ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apisys}/${apimicro}/${apiobj}` };
                 return;
             }
 
