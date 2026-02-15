@@ -19,7 +19,7 @@ export default class UpInfo {
     pcid: string = "";
     pcname: string = "";
     source: string = "";
-    v: number = 24; // api版本号不同于apisys
+    v: number = 24; // api版本号不同于apisys是后端逻辑不要弄进数据库
     cache: string = "";
 
     // 自动获取或服务器生成
