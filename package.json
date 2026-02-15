@@ -1,6 +1,6 @@
 {
     "name": "koa78-base78",
-    "version": "3.1.8",
+    "version": "3.1.9",
     "description": "nodejs koa78框架 基类",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -79,7 +79,6 @@
         "koa": "^3.1.1",
         "koa-bodyparser": "^4.4.1",
         "koa-convert": "^2.0.0",
-        "koa78-upinfo": "^4.1.1",
         "md5": "^2.3.0",
         "memcache78": "^2.1.6",
         "mysql2": "^3.16.0",
