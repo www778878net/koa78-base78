@@ -46,7 +46,8 @@
         "baseUrl": "."
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "Upinfo.ts"
     ],
     "exclude": [
         "node_modules",

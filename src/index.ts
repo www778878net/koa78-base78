@@ -64,6 +64,10 @@ import {
 
 import { Server } from './server';
 
+import {
+    default as UpInfo
+} from '../Upinfo';
+
 // 创建默认导出对象
 const koa78Base78 = {
     Base78,
@@ -81,7 +85,8 @@ const koa78Base78 = {
     ApiMethod,
     ContainerManager,
     ControllerLoader,
-    Server
+    Server,
+    UpInfo
 };
 
 // 导出所有内容
@@ -107,7 +112,8 @@ export {
     ApiMethod,
     ContainerManager,
     ControllerLoader,
-    Server
+    Server,
+    UpInfo
 };
 
 // 默认导出整个对象
