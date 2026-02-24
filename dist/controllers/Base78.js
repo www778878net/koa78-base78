@@ -423,7 +423,7 @@ class Base78 {
             // 每行实际需要的参数数：colp 字段 + id + 3个系统字段（upby, uptime, uidcid）
             const fieldsPerRow = colp.length + 4;
             // 构建 SQL：和 mAddMany 一样包含 id 字段
-            const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+            const query = `INSERT IGNORE INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
             // 构建参数数组
             const values = [];
             for (let i = 0; i < rowCount; i++) {

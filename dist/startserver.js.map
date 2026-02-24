@@ -1,0 +1,1 @@
+{"version":3,"file":"startserver.js","sourceRoot":"","sources":["../src/startserver.ts"],"names":[],"mappings":";;AAEA;;;GAGG;;;AAEH,mCAAiC;AAEjC,SAAe,IAAI;;QACf,MAAM,MAAM,GAAG,IAAI,cAAM,EAAE,CAAC;QAC5B,MAAM,MAAM,CAAC,KAAK,EAAE,CAAC;IACzB,CAAC;CAAA;AAED,mBAAmB;AACnB,IAAI,OAAO,CAAC,IAAI,KAAK,MAAM,EAAE,CAAC;IAC1B,IAAI,EAAE,CAAC;AACX,CAAC"}
