@@ -231,9 +231,11 @@ export default class UpInfo {
             return "checkcolsallok";
         }
         let isback = "checkcolsallok";
+        // 固定字段豁免：这些字段在所有表中都存在，不需要在 cols 中定义
+        const systemFields = ['id', 'idpk', 'uptime', 'upby', 'upby', 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'];
         try {
             this.cols.forEach(item => {
-                if (!cols.includes(item))
+                if (!cols.includes(item) && !systemFields.includes(item))
                     isback = item;
             });
         } catch (e) {

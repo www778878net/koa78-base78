@@ -18,8 +18,8 @@ export function ApiMethod() {
 
                 const authService: AuthService = container ? container.get(AuthService) : AuthService.getInstance();
 
-                // 执行 upcheck
-                await authService.upcheck(this.up, this.tableConfig.cols, this.dbname);
+                // 执行 upcheck - 使用 colsImp 作为默认允许字段列表（不包括 remark 等扩展字段）
+                await authService.upcheck(this.up, this.tableConfig.colsImp, this.dbname);
 
                 // 执行原始方法
                 return await originalMethod.apply(this, args);
