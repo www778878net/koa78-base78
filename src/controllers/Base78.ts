@@ -524,7 +524,7 @@ export default class Base78<T extends BaseSchema> {
         const fieldsPerRow = colp.length + 4;
 
         // 构建 SQL：和 mAddMany 一样包含 id 字段
-        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+        const query = `INSERT IGNORE INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
 
         // 构建参数数组
         const values: any[] = [];
