@@ -490,6 +490,77 @@ export default class Base78<T extends BaseSchema> {
     }
 
     @ApiMethod()
+    async mAddManyByid(colp?: string[]): Promise<number> {
+        this.checkAdminPermission();
+        await this.performShardingTableMaintenance();
+
+        colp = colp || this.up.cols || this.tableConfig.colsImp;
+
+        // 每行用户参数数：colp 字段 + id（客户端提供）
+        const userFieldsPerRow = colp.length + 1;
+
+        // 检查是否有足够的数据
+        if (this.up.pars.length < userFieldsPerRow) {
+            throw new Error('insufficient parameters for mAddManyByid');
+        }
+
+        // 计算行数：用户参数数 / (colp.length + 1)
+        const totalPars = this.up.pars.length;
+        const rowCount = Math.floor(totalPars / userFieldsPerRow);
+
+        if (rowCount === 0) {
+            throw new Error('no data to insert');
+        }
+
+        // 检查是否有余数
+        if (totalPars % userFieldsPerRow !== 0) {
+            throw new Error(`parameters count must be multiple of column count + id (got ${totalPars} parameters for ${userFieldsPerRow} fields per row: ${colp.join(', ')} + id)`);
+        }
+
+        // 为所有字段名添加反引号
+        const quotedColp = colp.map(col => `\`${col}\``);
+
+        // 每行实际需要的参数数：colp 字段 + id + 3个系统字段（upby, uptime, uidcid）
+        const fieldsPerRow = colp.length + 4;
+
+        // 构建 SQL：和 mAddMany 一样包含 id 字段
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+
+        // 构建参数数组
+        const values: any[] = [];
+
+        for (let i = 0; i < rowCount; i++) {
+            const startIndex = i * userFieldsPerRow;
+            const rowValues = this.up.pars.slice(startIndex, startIndex + userFieldsPerRow);
+
+            // 添加业务字段值（colp 个）
+            values.push(...rowValues.slice(0, colp.length));
+
+            // 添加客户端提供的 id
+            values.push(rowValues[colp.length]);
+
+            // 添加系统字段值（每行都相同）
+            values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+        }
+
+        const result = await this.dbService.m(query, values, this.up, this.dbname);
+
+        // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
+        if (result.error) {
+            this._setBack(-1003, result.error);
+            return 0;
+        }
+
+        // 检查 affectedRows 是否为 0（没有行被插入）
+        if (result.affectedRows === 0) {
+            this._setBack(-1003, "批量插入失败：没有数据被插入");
+            return 0;
+        }
+
+        return result.affectedRows;
+    }
+
+    @ApiMethod()
     async mUpdateIdpk(colp?: string[]): Promise<string> {
         this.checkAdminPermission();
         colp = colp || this.up.cols || this.tableConfig.colsImp;
