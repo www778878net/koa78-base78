@@ -115,8 +115,8 @@ export class AuthService {
             throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
         }
 
-        if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
-            up.cols = cols;
+        // if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
+        //     up.cols = cols;
 
         let mem_sid = "lovers_sid2_";
         let tmp = await this.cacheService?.tbget(mem_sid + dbname + up.sid, up.debug);

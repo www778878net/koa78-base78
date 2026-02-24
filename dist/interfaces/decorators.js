@@ -19,8 +19,8 @@ function ApiMethod() {
                         throw new Error('App container not initialized');
                     }
                     const authService = container ? container.get(AuthService_1.AuthService) : AuthService_1.AuthService.getInstance();
-                    // 执行 upcheck
-                    yield authService.upcheck(this.up, this.tableConfig.cols, this.dbname);
+                    // 执行 upcheck - 使用 colsImp 作为默认允许字段列表（不包括 remark 等扩展字段）
+                    yield authService.upcheck(this.up, this.tableConfig.colsImp, this.dbname);
                     // 执行原始方法
                     return yield originalMethod.apply(this, args);
                 }
