@@ -76,6 +76,7 @@ export default class Base78<T extends BaseSchema> {
     mUpdateMany(colpin?: string[]): Promise<any>;
     mAdd(colp?: string[]): Promise<string>;
     mAddMany(colp?: string[]): Promise<number>;
+    mAddManyByid(colp?: string[]): Promise<number>;
     mUpdateIdpk(colp?: string[]): Promise<string>;
     mUpdate(colp?: string[]): Promise<string>;
     midpk(colp?: string[]): Promise<number | string | {
