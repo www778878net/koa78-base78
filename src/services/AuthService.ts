@@ -1,4 +1,4 @@
-import UpInfo from '../UpInfo';
+import UpInfo from '../utils/UpInfo';
 import { DatabaseService } from './DatabaseService';
 import { CacheService } from './CacheService';
 import { z } from 'zod';

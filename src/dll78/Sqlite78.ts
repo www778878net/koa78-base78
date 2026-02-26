@@ -6,7 +6,7 @@ import sqlite3 from '@vscode/sqlite3';
 import { promisify } from 'util';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import UpInfo from '../UpInfo';
+import UpInfo from '../utils/UpInfo';
 import { MyLogger } from '../utils/mylogger';
 // @ts-ignore
 import md5 from 'md5';

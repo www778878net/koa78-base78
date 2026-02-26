@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { createHash } from 'node:crypto';
 import * as mysql from 'mysql2/promise';
-import UpInfo from '../UpInfo';
+import UpInfo from '../utils/UpInfo';
 import { MyLogger } from '../utils/mylogger';
 import md5 from 'md5';
 
