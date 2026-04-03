@@ -24,8 +24,7 @@
  * - 控制台只输出 DEBUG 级别及以上的日志
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MyLogger = exports.Environment = exports.LogLevel = void 0;
-exports.getLogger = getLogger;
+exports.getLogger = exports.MyLogger = exports.Environment = exports.LogLevel = void 0;
 const tslib_1 = require("tslib");
 const fs = tslib_1.__importStar(require("fs"));
 const path = tslib_1.__importStar(require("path"));
@@ -39,7 +38,7 @@ var LogLevel;
     LogLevel[LogLevel["INFO"] = 20] = "INFO";
     LogLevel[LogLevel["WARN"] = 30] = "WARN";
     LogLevel[LogLevel["ERROR"] = 40] = "ERROR";
-})(LogLevel || (exports.LogLevel = LogLevel = {}));
+})(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
 /**
  * 环境类型枚举
  */
@@ -48,7 +47,7 @@ var Environment;
     Environment["PRODUCTION"] = "production";
     Environment["DEVELOPMENT"] = "development";
     Environment["TEST"] = "test";
-})(Environment || (exports.Environment = Environment = {}));
+})(Environment = exports.Environment || (exports.Environment = {}));
 /**
  * 日志级别名称映射
  */
@@ -427,4 +426,5 @@ MyLogger._instances = new Map();
 function getLogger(myname, logRetentionDays = 3, wfname = '') {
     return MyLogger.getInstance(myname, logRetentionDays, wfname);
 }
+exports.getLogger = getLogger;
 //# sourceMappingURL=mylogger.js.map

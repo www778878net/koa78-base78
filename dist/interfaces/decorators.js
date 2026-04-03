@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApiMethod = ApiMethod;
+exports.ApiMethod = void 0;
 const tslib_1 = require("tslib");
 const AuthService_1 = require("../services/AuthService");
 const mylogger_1 = require("../utils/mylogger");
@@ -10,8 +10,8 @@ function ApiMethod() {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
         descriptor.value = function (...args) {
+            var _a, _b, _c, _d, _e;
             return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e;
                 try {
                     // 从容器中获取AuthService实例
                     const container = global.appContainer;
@@ -57,4 +57,5 @@ function ApiMethod() {
         return descriptor;
     };
 }
+exports.ApiMethod = ApiMethod;
 //# sourceMappingURL=decorators.js.map

@@ -469,7 +469,7 @@ export default class Mysql78 {
         }
 
         const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apimicro, up.apiobj, info, up.uname, dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname || '', dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
 
         try {
             const [results] = await this._pool.execute(cmdtext, values);

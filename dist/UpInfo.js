@@ -99,7 +99,7 @@ class UpInfo {
         this.pwd = (_q = (_p = req.header['pwd']) !== null && _p !== void 0 ? _p : pars.pwd) !== null && _q !== void 0 ? _q : '';
         this.sid = (_s = (_r = req.header['sid']) !== null && _r !== void 0 ? _r : pars.sid) !== null && _s !== void 0 ? _s : '';
         (_t = this.sid) !== null && _t !== void 0 ? _t : (this.sid = "");
-        this.mid = (_u = pars.mid) !== null && _u !== void 0 ? _u : _a.getNewid();
+        this.mid = (_u = pars.mid) !== null && _u !== void 0 ? _u : UpInfo.getNewid();
         this.midpk = +((_v = pars.midpk) !== null && _v !== void 0 ? _v : -1);
         this.getnumber = +((_w = pars.getnumber) !== null && _w !== void 0 ? _w : 15);
         this.pcid = (_y = (_x = req.header['pcid']) !== null && _x !== void 0 ? _x : pars.pcid) !== null && _y !== void 0 ? _y : '';
@@ -110,7 +110,7 @@ class UpInfo {
         this.order = (_4 = pars.order) !== null && _4 !== void 0 ? _4 : 'idpk desc';
         this.jsonp = (_5 = pars.jsonp) !== null && _5 !== void 0 ? _5 : false;
         this.backtype = (_6 = pars.backtype) !== null && _6 !== void 0 ? _6 : "json";
-        this.upid = (_7 = pars.upid) !== null && _7 !== void 0 ? _7 : _a.getNewid();
+        this.upid = (_7 = pars.upid) !== null && _7 !== void 0 ? _7 : UpInfo.getNewid();
         this.cache = (_9 = (_8 = req.header['cache']) !== null && _8 !== void 0 ? _8 : pars.cache) !== null && _9 !== void 0 ? _9 : this.mid;
         this.cols = typeof this.colsn === 'string' ? JSON.parse(this.colsn) : this.colsn;
         this.base64 = (_10 = pars.base64) !== null && _10 !== void 0 ? _10 : false;
@@ -184,7 +184,7 @@ class UpInfo {
     }
     ;
     static getGuest() {
-        const up2 = new _a(null);
+        const up2 = new UpInfo(null);
         Object.assign(up2, {
             sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
             cid: 'GUEST000-8888-8888-8888-GUEST00GUEST',
@@ -243,14 +243,14 @@ class UpInfo {
     }
     ;
     clone() {
-        const clonedUpInfo = new _a(null);
+        const clonedUpInfo = new UpInfo(null);
         clonedUpInfo.sid = this.sid;
         clonedUpInfo.uname = this.uname;
         clonedUpInfo.bcid = this.bcid;
         return clonedUpInfo;
     }
 }
+exports.default = UpInfo;
 _a = UpInfo;
 UpInfo._masterInstance = _a.getGuest();
-exports.default = UpInfo;
 //# sourceMappingURL=UpInfo.js.map

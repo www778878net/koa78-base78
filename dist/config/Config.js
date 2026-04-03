@@ -125,10 +125,10 @@ let Config = Config_1 = class Config {
         }
     }
 };
-exports.Config = Config;
 Config.instance = null;
-exports.Config = Config = Config_1 = tslib_1.__decorate([
+Config = Config_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
     tslib_1.__metadata("design:paramtypes", [])
 ], Config);
+exports.Config = Config;
 //# sourceMappingURL=Config.js.map

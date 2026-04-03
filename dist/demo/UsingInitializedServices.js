@@ -3,12 +3,7 @@
  * 演示如何在另一个文件中使用已初始化的容器和服务
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ServiceAccessor = void 0;
-exports.useServicesViaGlobal = useServicesViaGlobal;
-exports.useServicesViaModule = useServicesViaModule;
-exports.useServicesViaFunction = useServicesViaFunction;
-exports.useServicesViaAccessor = useServicesViaAccessor;
-exports.getContainer = getContainer;
+exports.getContainer = exports.ServiceAccessor = exports.useServicesViaAccessor = exports.useServicesViaFunction = exports.useServicesViaModule = exports.useServicesViaGlobal = void 0;
 const tslib_1 = require("tslib");
 // 方式一：通过全局变量访问容器
 function useServicesViaGlobal() {
@@ -25,6 +20,7 @@ function useServicesViaGlobal() {
     // databaseService.query('SELECT * FROM users');
     // cacheService.get('key');
 }
+exports.useServicesViaGlobal = useServicesViaGlobal;
 // 方式二：通过模块导入访问容器
 const ContainerManager_1 = require("../ContainerManager");
 // 创建 ContainerManager 的第二个实例（不会重复初始化，会复用已有的容器）
@@ -41,6 +37,7 @@ function useServicesViaModule() {
     // databaseService.query('SELECT * FROM users');
     // cacheService.get('key');
 }
+exports.useServicesViaModule = useServicesViaModule;
 // 方式三：创建专门的服务获取函数
 let cachedContainer = null;
 function getContainer() {
@@ -54,6 +51,7 @@ function getContainer() {
         return cachedContainer;
     });
 }
+exports.getContainer = getContainer;
 function useServicesViaFunction() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
@@ -70,6 +68,7 @@ function useServicesViaFunction() {
         }
     });
 }
+exports.useServicesViaFunction = useServicesViaFunction;
 // 方式四：创建专门的服务访问器
 class ServiceAccessor {
     static getDatabaseService() {
@@ -101,6 +100,7 @@ function useServicesViaAccessor() {
         }
     });
 }
+exports.useServicesViaAccessor = useServicesViaAccessor;
 // 主函数演示
 function main() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {

@@ -52,8 +52,8 @@ class AuthService {
         return AuthService.instance;
     }
     upcheck(up, cols, dbname) {
+        var _a, _b, _c, _d, _e, _f;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d, _e, _f;
             if (up.errmsg === "ok") {
                 return "ok";
             }
@@ -100,6 +100,16 @@ class AuthService {
             const checkColsResult = up.checkCols(cols);
             if (checkColsResult !== "checkcolsallok") {
                 throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
+            }
+            // 处理GUEST sid
+            if (up.sid === 'GUEST888-8888-8888-8888-GUEST88GUEST') {
+                up.uid = 'GUEST';
+                up.uname = 'guest';
+                up.cid = AuthService.CID_GUEST;
+                up.coname = '测试帐套';
+                up.bcid = up.bcid || up.cid;
+                up.errmsg = "ok";
+                return "ok";
             }
             // if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
             //     up.cols = cols;
@@ -156,8 +166,8 @@ class AuthService {
         });
     }
     preventReplayAttack(up) {
+        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cacheKey = up.ctx.request.path + up.cache;
             const existingCache = yield ((_a = this.cacheService) === null || _a === void 0 ? void 0 : _a.get(cacheKey));
             if (existingCache) {

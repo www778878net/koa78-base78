@@ -315,7 +315,7 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.up.cols || this.tableConfig.colsImp;
+            colp = colp || (this.up.cols && this.up.cols.length > 0 && this.up.cols[0] !== 'all' ? this.up.cols : this.tableConfig.colsImp);
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
@@ -642,7 +642,6 @@ class Base78 {
 }
 //维护命令一天执行一次（每个表独立记录）
 Base78.lastMaintenanceDateMap = new Map();
-exports.default = Base78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -721,6 +720,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mByFirstField", null);
+exports.default = Base78;
 class CidBase78 extends Base78 {
 }
 exports.CidBase78 = CidBase78;
