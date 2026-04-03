@@ -115,6 +115,17 @@ export class AuthService {
             throw new Error("checkCols err:" + checkColsResult + JSON.stringify(up.cols));
         }
 
+        // 处理GUEST sid
+        if (up.sid === 'GUEST888-8888-8888-8888-GUEST88GUEST') {
+            up.uid = 'GUEST';
+            up.uname = 'guest';
+            up.cid = AuthService.CID_GUEST;
+            up.coname = '测试帐套';
+            up.bcid = up.bcid || up.cid;
+            up.errmsg = "ok";
+            return "ok";
+        }
+
         // if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
         //     up.cols = cols;
 

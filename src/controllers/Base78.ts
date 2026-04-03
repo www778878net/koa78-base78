@@ -384,7 +384,7 @@ export default class Base78<T extends BaseSchema> {
         this.checkAdminPermission();
         await this.performShardingTableMaintenance();
 
-        colp = colp || this.up.cols || this.tableConfig.colsImp;
+        colp = colp || (this.up.cols && this.up.cols.length > 0 && this.up.cols[0] !== 'all' ? this.up.cols : this.tableConfig.colsImp);
         if (this.up.pars.length < colp.length) {
             colp = colp.slice(0, this.up.pars.length);
         }
