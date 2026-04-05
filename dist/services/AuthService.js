@@ -111,8 +111,8 @@ class AuthService {
                 up.errmsg = "ok";
                 return "ok";
             }
-            // if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
-            //     up.cols = cols;
+            if (!up.cols || up.cols.length === 0 || (up.cols.length === 1 && (up.cols[0] === "all" || up.cols[0] === "")))
+                up.cols = cols;
             let mem_sid = "lovers_sid2_";
             let tmp = yield ((_a = this.cacheService) === null || _a === void 0 ? void 0 : _a.tbget(mem_sid + dbname + up.sid, up.debug));
             if (tmp === "pool null")
