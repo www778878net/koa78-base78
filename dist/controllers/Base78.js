@@ -329,21 +329,29 @@ class Base78 {
             // 如果返回结果包含错误信息，设置 res 为负值并返回错误信息
             if (result.error) {
                 this._setBack(-1, result.error);
-                return result.error;
+                // 失败时返回 SQL 语句方便调试
+                let sql = query;
+                for (let i = 0; i < values.length; i++) {
+                    const val = values[i];
+                    const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                    sql = sql.replace('?', replacement);
+                }
+                return Object.assign(Object.assign({}, result), { sql });
             }
             // 检查 insertId 是否为 0（插入失败）
             if (result.insertId === 0) {
                 this._setBack(-1001, "插入失败：没有数据被插入");
-                return "插入失败：没有数据被插入";
+                // 失败时返回 SQL 语句方便调试
+                let sql = query;
+                for (let i = 0; i < values.length; i++) {
+                    const val = values[i];
+                    const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                    sql = sql.replace('?', replacement);
+                }
+                return Object.assign(Object.assign({}, result), { sql });
             }
-            // 返回可直接在SQL客户端执行的完整SQL（带参数值）
-            let sql = query;
-            for (let i = 0; i < values.length; i++) {
-                const val = values[i];
-                const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
-                sql = sql.replace('?', replacement);
-            }
-            return sql;
+            // 成功时直接返回 result 对象，包含 insertId 等信息
+            return result;
         });
     }
     mAddMany(colp) {
