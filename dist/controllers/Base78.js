@@ -69,38 +69,72 @@ class Base78 {
             yield this.dbService.m(sqlWithTableName, [], this.up, this.dbname);
         });
     }
-    // 新增：删除指定日期之前的分表
+    // 新增：删除指定日期之前的所有分表
     dropOldShardingTable(daysAgo) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.shardingConfig) {
                 return 0; // 没有配置分表，直接返回
             }
-            let targetDate;
+            let cutoffDate;
+            let dateFormat;
             if (this.shardingConfig.type === 'daily') {
-                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'day').format('YYYYMMDD');
+                cutoffDate = (0, dayjs_1.default)().subtract(daysAgo, 'day');
+                dateFormat = 'YYYYMMDD';
             }
             else if (this.shardingConfig.type === 'monthly') {
-                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'month').format('YYYYMM');
+                cutoffDate = (0, dayjs_1.default)().subtract(daysAgo, 'month');
+                dateFormat = 'YYYYMM';
             }
             else {
                 return 0; // 不是分表类型，返回
             }
-            const tableName = `${this.tableConfig.tbname}_${targetDate}`;
-            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+            const tablePrefix = `${this.tableConfig.tbname}_`;
+            let deletedCount = 0;
             try {
-                // 先检查表是否存在
-                const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
-                const tableExists = yield this.dbService.get(checkTableSQL, [], this.up, this.dbname);
-                // 如果表不存在，直接返回0
-                if (tableExists.length === 0) {
+                // 查找所有匹配的表
+                const checkTableSQL = `SHOW TABLES LIKE '${tablePrefix}%'`;
+                const tables = yield this.dbService.get(checkTableSQL, [], this.up, this.dbname);
+                if (tables.length === 0) {
                     return 0;
                 }
-                yield this.dbService.m(dropTableSQL, [], this.up, this.dbname);
-                return 1; // 成功删除返回1
+                // 遍历所有匹配的表
+                for (const tableRow of tables) {
+                    const tableName = Object.values(tableRow)[0];
+                    if (!tableName)
+                        continue;
+                    // 提取日期部分
+                    const dateStr = tableName.substring(tablePrefix.length);
+                    // 解析日期
+                    let tableDate;
+                    try {
+                        if (this.shardingConfig.type === 'daily') {
+                            tableDate = (0, dayjs_1.default)(dateStr, 'YYYYMMDD');
+                        }
+                        else {
+                            tableDate = (0, dayjs_1.default)(dateStr, 'YYYYMM');
+                        }
+                    }
+                    catch (e) {
+                        continue; // 日期解析失败，跳过
+                    }
+                    // 检查是否过期
+                    if (tableDate.isValid() && tableDate.isBefore(cutoffDate)) {
+                        try {
+                            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+                            yield this.dbService.m(dropTableSQL, [], this.up, this.dbname);
+                            deletedCount++;
+                            this.logger.debug(`成功删除过期表: ${tableName}`);
+                        }
+                        catch (error) {
+                            this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+                        }
+                    }
+                }
+                return deletedCount;
             }
             catch (error) {
-                this.logger.error(`删除表 ${tableName} 失败: ${error}`);
-                return 0; // 删除失败返回0
+                this.logger.error(`删除过期分表失败: ${error}`);
+                return 0;
             }
         });
     }
