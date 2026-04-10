@@ -490,7 +490,7 @@ class Mysql78 {
      * @param up 用户上传信息
      */
     _addWarn(info, kind, up) {
-        var _a;
+        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.warnHandler) {
                 try {
@@ -504,7 +504,7 @@ class Mysql78 {
                 return this.isLog ? 'pool null' : 'isLog is false';
             }
             const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, koa78_upinfo_1.default.getNewid(), (_a = up.upid) !== null && _a !== void 0 ? _a : null];
+            const values = [kind, up.apisys, up.apiobj, info, (_a = up.uname) !== null && _a !== void 0 ? _a : '', up.uptime, koa78_upinfo_1.default.getNewid(), (_b = up.upid) !== null && _b !== void 0 ? _b : null];
             try {
                 const [results] = yield this._pool.execute(cmdtext, values);
                 return results.affectedRows;
