@@ -152,6 +152,10 @@ export default class Mysql78 {
         const dstart = new Date();
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
+
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+
         try {
 
             connection = await this.retryOperation(() => this.getConnectionWithRetry());
@@ -170,14 +174,33 @@ export default class Mysql78 {
             this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
             return back;
-        } catch (err) {
+        } catch (err: any) {
+            const errCode = err?.code || '';
+            // 连接损坏时：销毁连接并重试一次
+            if (connectionLostCodes.includes(errCode) && connection) {
+                this.log.error(err as Error, `mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
+                connection.destroy();
+                connection = null;
+                statement = null;
+
+                try {
+                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                    if (connection) {
+                        statement = await this.getStatement(connection, cmdtext);
+                        const [rows] = await statement.execute(values);
+                        const back = rows as any[];
+                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(back).length, up);
+                        return back;
+                    }
+                } catch (retryErr: any) {
+                    this.log.error(retryErr as Error, `mysql_doGet 重试仍然失败(${retryErr?.code})`);
+                }
+            }
+
             this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
             this.log.error(err as Error, 'mysql_doGet');
             throw err;
         } finally {
-            // if (statement) {
-            //     await statement.close(); // 确保预处理语句被关闭
-            // }
             if (connection) {
                 connection.release(); // 确保连接被释放
             }
@@ -254,6 +277,9 @@ export default class Mysql78 {
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
 
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+
         try {
             connection = await this.retryOperation(() => this.getConnectionWithRetry());
             if (!connection) {
@@ -270,15 +296,33 @@ export default class Mysql78 {
             this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
             return { result };
-        } catch (err) {
+        } catch (err: any) {
+            const errCode = err?.code || '';
+            // 连接损坏时：销毁连接并重试一次
+            if (connectionLostCodes.includes(errCode) && connection) {
+                this.log.error(err as Error, `mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
+                connection.destroy();
+                connection = null;
+                statement = null;
+
+                try {
+                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                    if (connection) {
+                        statement = await this.getStatement(connection, cmdtext);
+                        const [result] = await statement.execute(values);
+                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
+                        return { result };
+                    }
+                } catch (retryErr: any) {
+                    this.log.error(retryErr as Error, `mysql_doMBack 重试仍然失败(${retryErr?.code})`);
+                }
+            }
+
             const errorMsg = JSON.stringify(err);
             this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
             this.log.error(err as Error, 'mysql_doMBack');
             return { result: {}, error: errorMsg };
         } finally {
-            // if (statement) {
-            //     await statement.close(); // 确保预处理语句被关闭
-            // }
             if (connection) {
                 connection.release(); // 确保连接被释放
             }
@@ -300,6 +344,9 @@ export default class Mysql78 {
         const dstart = new Date();
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
+
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
 
         try {
             connection = await this.retryOperation(() => this.getConnectionWithRetry());
@@ -323,15 +370,38 @@ export default class Mysql78 {
             }
 
             return { affectedRows };
-        } catch (err) {
+        } catch (err: any) {
+            const errCode = err?.code || '';
+            // 连接损坏时：销毁连接并重试一次
+            if (connectionLostCodes.includes(errCode) && connection) {
+                this.log.error(err as Error, `mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
+                connection.destroy();
+                connection = null;
+                statement = null;
+
+                try {
+                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                    if (connection) {
+                        statement = await this.getStatement(connection, cmdtext);
+                        const [result] = await statement.execute(values);
+                        const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
+                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
+
+                        if (affectedRows === 0) {
+                            return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext})` };
+                        }
+                        return { affectedRows };
+                    }
+                } catch (retryErr: any) {
+                    this.log.error(retryErr as Error, `mysql_doM 重试仍然失败(${retryErr?.code})`);
+                }
+            }
+
             const errorMsg = JSON.stringify(err);
             this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
             this.log.error(err as Error, `mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`);
             return { affectedRows: 0, error: errorMsg };
         } finally {
-            // if (statement) {
-            //     await statement.close(); // 确保预处理语句被关闭
-            // }
             if (connection) {
                 connection.release(); // 确保连接被释放
             }
