@@ -534,7 +534,7 @@ export default class Mysql78 {
         }
 
         const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+        const values = [kind, up.apisys, up.apiobj, info, up.uname ?? '', up.uptime, UpInfo.getNewid(), up.upid ?? null];
 
         try {
             const [results] = await this._pool.execute(cmdtext, values);
