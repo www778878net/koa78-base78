@@ -52,8 +52,8 @@ class AuthService {
         return AuthService.instance;
     }
     upcheck(up, cols, dbname) {
+        var _a, _b, _c, _d;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d;
             if (up.errmsg === "ok") {
                 return "ok";
             }
@@ -153,8 +153,8 @@ class AuthService {
         });
     }
     preventReplayAttack(up) {
+        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cacheKey = up.ctx.request.path + up.cache;
             const existingCache = yield ((_a = this.cacheService) === null || _a === void 0 ? void 0 : _a.get(cacheKey));
             if (existingCache) {

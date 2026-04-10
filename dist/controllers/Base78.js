@@ -569,7 +569,6 @@ class Base78 {
 }
 //维护命令一天执行一次
 Base78.lastMaintenanceDate = '';
-exports.default = Base78;
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -642,6 +641,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mByFirstField", null);
+exports.default = Base78;
 class CidBase78 extends Base78 {
 }
 exports.CidBase78 = CidBase78;

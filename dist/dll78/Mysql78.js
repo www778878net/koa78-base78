@@ -49,8 +49,8 @@ class Mysql78 {
     }
     // 获取连接，并在发生错误时重试
     getConnectionWithRetry() {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             let attempts = 0;
             while (attempts < this.maxRetryAttempts) {
                 try {
@@ -133,8 +133,8 @@ class Mysql78 {
      * @param up user upload
      */
     doGet(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._pool) {
                 return [];
             }
@@ -142,6 +142,8 @@ class Mysql78 {
             const dstart = new Date();
             let connection = null;
             let statement = null;
+            // 连接损坏的错误码，遇到时销毁连接并重试
+            const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
             try {
                 connection = yield this.retryOperation(() => this.getConnectionWithRetry());
                 if (!connection) {
@@ -158,14 +160,32 @@ class Mysql78 {
                 return back;
             }
             catch (err) {
+                const errCode = (err === null || err === void 0 ? void 0 : err.code) || '';
+                // 连接损坏时：销毁连接并重试一次
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(err, `mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    try {
+                        connection = yield this.retryOperation(() => this.getConnectionWithRetry());
+                        if (connection) {
+                            statement = yield this.getStatement(connection, cmdtext);
+                            const [rows] = yield statement.execute(values);
+                            const back = rows;
+                            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(back).length, up);
+                            return back;
+                        }
+                    }
+                    catch (retryErr) {
+                        this.log.error(retryErr, `mysql_doGet 重试仍然失败(${retryErr === null || retryErr === void 0 ? void 0 : retryErr.code})`);
+                    }
+                }
                 this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
                 this.log.error(err, 'mysql_doGet');
                 throw err;
             }
             finally {
-                // if (statement) {
-                //     await statement.close(); // 确保预处理语句被关闭
-                // }
                 if (connection) {
                     connection.release(); // 确保连接被释放
                 }
@@ -173,8 +193,8 @@ class Mysql78 {
         });
     }
     doT(cmds, values, errtexts, logtext, logvalue, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._pool) {
                 return 'pool null';
             }
@@ -228,8 +248,8 @@ class Mysql78 {
     * @param up user upload
     */
     doMBack(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._pool) {
                 return { result: {}, error: 'pool null' };
             }
@@ -237,6 +257,8 @@ class Mysql78 {
             const dstart = new Date();
             let connection = null;
             let statement = null;
+            // 连接损坏的错误码，遇到时销毁连接并重试
+            const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
             try {
                 connection = yield this.retryOperation(() => this.getConnectionWithRetry());
                 if (!connection) {
@@ -252,15 +274,32 @@ class Mysql78 {
                 return { result };
             }
             catch (err) {
+                const errCode = (err === null || err === void 0 ? void 0 : err.code) || '';
+                // 连接损坏时：销毁连接并重试一次
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(err, `mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    try {
+                        connection = yield this.retryOperation(() => this.getConnectionWithRetry());
+                        if (connection) {
+                            statement = yield this.getStatement(connection, cmdtext);
+                            const [result] = yield statement.execute(values);
+                            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
+                            return { result };
+                        }
+                    }
+                    catch (retryErr) {
+                        this.log.error(retryErr, `mysql_doMBack 重试仍然失败(${retryErr === null || retryErr === void 0 ? void 0 : retryErr.code})`);
+                    }
+                }
                 const errorMsg = JSON.stringify(err);
                 this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
                 this.log.error(err, 'mysql_doMBack');
                 return { result: {}, error: errorMsg };
             }
             finally {
-                // if (statement) {
-                //     await statement.close(); // 确保预处理语句被关闭
-                // }
                 if (connection) {
                     connection.release(); // 确保连接被释放
                 }
@@ -274,8 +313,8 @@ class Mysql78 {
      * @param up user upload
      */
     doM(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._pool) {
                 return { affectedRows: 0, error: 'pool null' };
             }
@@ -283,6 +322,8 @@ class Mysql78 {
             const dstart = new Date();
             let connection = null;
             let statement = null;
+            // 连接损坏的错误码，遇到时销毁连接并重试
+            const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
             try {
                 connection = yield this.retryOperation(() => this.getConnectionWithRetry());
                 if (!connection) {
@@ -303,15 +344,36 @@ class Mysql78 {
                 return { affectedRows };
             }
             catch (err) {
+                const errCode = (err === null || err === void 0 ? void 0 : err.code) || '';
+                // 连接损坏时：销毁连接并重试一次
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(err, `mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    try {
+                        connection = yield this.retryOperation(() => this.getConnectionWithRetry());
+                        if (connection) {
+                            statement = yield this.getStatement(connection, cmdtext);
+                            const [result] = yield statement.execute(values);
+                            const affectedRows = result.affectedRows;
+                            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
+                            if (affectedRows === 0) {
+                                return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext})` };
+                            }
+                            return { affectedRows };
+                        }
+                    }
+                    catch (retryErr) {
+                        this.log.error(retryErr, `mysql_doM 重试仍然失败(${retryErr === null || retryErr === void 0 ? void 0 : retryErr.code})`);
+                    }
+                }
                 const errorMsg = JSON.stringify(err);
                 this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
                 this.log.error(err, `mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`);
                 return { affectedRows: 0, error: errorMsg };
             }
             finally {
-                // if (statement) {
-                //     await statement.close(); // 确保预处理语句被关闭
-                // }
                 if (connection) {
                     connection.release(); // 确保连接被释放
                 }
@@ -325,8 +387,8 @@ class Mysql78 {
      * @param up
      */
     doMAdd(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._pool) {
                 return { insertId: 0, error: 'pool null' };
             }
@@ -365,8 +427,8 @@ class Mysql78 {
      * @param up
      */
     doTran(cmdtext, values, con, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             const debug = (_a = up.debug) !== null && _a !== void 0 ? _a : false;
             try {
                 const [result] = yield con.execute(cmdtext, values);
@@ -428,6 +490,7 @@ class Mysql78 {
      * @param up 用户上传信息
      */
     _addWarn(info, kind, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.warnHandler) {
                 try {
@@ -441,7 +504,7 @@ class Mysql78 {
                 return this.isLog ? 'pool null' : 'isLog is false';
             }
             const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, koa78_upinfo_1.default.getNewid(), up.upid];
+            const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, koa78_upinfo_1.default.getNewid(), (_a = up.upid) !== null && _a !== void 0 ? _a : null];
             try {
                 const [results] = yield this._pool.execute(cmdtext, values);
                 return results.affectedRows;

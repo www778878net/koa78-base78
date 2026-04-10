@@ -62,8 +62,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
     search250623(params) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this.client) {
                 throw new Error('Elasticsearch client is not initialized.');
             }
@@ -87,8 +87,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
      * @returns
      */
     upsertDataWithReplace(index, id, data, updateFields, replaceFields) {
+        var _a, _b, _c;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
             if (!this.client) {
                 console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -145,8 +145,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
      * @returns
      */
     upsertData(index, id, data, updateFields) {
+        var _a, _b, _c;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
             if (!this.client) {
                 //console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -192,8 +192,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
     // 添加数据
-    add(index_1, data_1, id_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (index, data, id, refresh = false) {
+    add(index, data, id, refresh = false) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.client) {
                 console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -214,8 +214,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
     // 如果文档不存在则添加数据
-    addIfNotExists(index_1, data_1, id_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (index, data, id, refresh = false) {
+    addIfNotExists(index, data, id, refresh = false) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.client) {
                 console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -265,9 +265,9 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
     // 查询数据
-    get(index_1, body_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (index, body, size = 100, isdebug = false) {
-            var _a;
+    get(index, body, size = 100, isdebug = false) {
+        var _a;
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.client) {
                 console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -306,8 +306,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
     // 修改数据
-    updateById(index_1, id_1, newData_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (index, id, newData, refresh = false, updateTimestamp = true) {
+    updateById(index, id, newData, refresh = false, updateTimestamp = true) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.client) {
                 console.warn('Elasticsearch client is not initialized.');
                 return null;
@@ -319,7 +319,7 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
                 const response = yield this.client.update({
                     index: index,
                     id: id,
-                    refresh: refresh, // 新增refresh参数控制立即刷新
+                    refresh: refresh,
                     body: {
                         doc: updatedData,
                     },
@@ -333,8 +333,8 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
             }
         });
     }
-    updateByQuerySize(index_1, body_1) {
-        return tslib_1.__awaiter(this, arguments, void 0, function* (index, body, size = 10) {
+    updateByQuerySize(index, body, size = 10) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // await updateByQuerySize('my_index', {
             //     query: {
             //         match: { status: 'active' }
@@ -426,11 +426,11 @@ let Elasticsearch78 = Elasticsearch78_1 = class Elasticsearch78 {
         });
     }
 };
-exports.Elasticsearch78 = Elasticsearch78;
 Elasticsearch78.instance = null;
-exports.Elasticsearch78 = Elasticsearch78 = Elasticsearch78_1 = tslib_1.__decorate([
+Elasticsearch78 = Elasticsearch78_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
     tslib_1.__metadata("design:paramtypes", [])
 ], Elasticsearch78);
+exports.Elasticsearch78 = Elasticsearch78;
 exports.default = Elasticsearch78;
 //# sourceMappingURL=elasticsearch78.js.map

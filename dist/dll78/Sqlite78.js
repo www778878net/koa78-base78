@@ -130,8 +130,8 @@ class Sqlite78 {
      * @param up 用户信息
      */
     doGet(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._db) {
                 return [];
             }
@@ -163,8 +163,8 @@ class Sqlite78 {
      * @param up 用户信息
      */
     doT(cmds, values, errtexts, logtext, logvalue, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._db) {
                 return 'database not initialized';
             }
@@ -214,8 +214,8 @@ class Sqlite78 {
      * @param up 用户信息
      */
     doM(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._db) {
                 return { affectedRows: 0, error: 'database not initialized' };
             }
@@ -249,8 +249,8 @@ class Sqlite78 {
      * @param up 用户信息
      */
     doMAdd(cmdtext, values, up) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (!this._db) {
                 return { insertId: 0, error: 'database not initialized' };
             }
