@@ -12,8 +12,8 @@ class WorkflowDB {
         this.description = "";
         this.version = "1.0.0";
         this.state = "active"; // active, inactive, draft, archived, error
-        this.apiv = "";
         this.apisys = "";
+        this.apimicro = "";
         this.apiobj = "";
         // 数据字段
         this.inputdata = JSON.stringify({}); // 输入数据，JSON格式

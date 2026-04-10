@@ -5,13 +5,13 @@ const tslib_1 = require("tslib");
 const koa_1 = tslib_1.__importDefault(require("koa"));
 const Config_1 = require("../config/Config");
 const ContainerManager_1 = require("../ContainerManager");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("../utils/mylogger");
 const router_1 = tslib_1.__importDefault(require("@koa/router"));
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
+const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const ControllerLoader_1 = require("../utils/ControllerLoader");
 const koa_bodyparser_1 = tslib_1.__importDefault(require("koa-bodyparser"));
 // const esClient = Elasticsearch78.getInstance();
-const log = tslog78_1.TsLog78.Instance;
+const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
 const router = new router_1.default();
 // 统计中间件
 const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
@@ -23,7 +23,7 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     //     return; // 直接返回，不进行统计
     // }
     // // 确保参数存在后再解构
-    // const { apiver, apisys, apiobj, apifun } = ctx.params;
+    // const { apisys, apimicro, apiobj, apifun } = ctx.params;
     // // 如果是测试接口，直接返回
     // if (apiobj == "testtb") return;
     // const back = ctx.response.body ? JSON.stringify(ctx.response.body) : "";  // Response body
@@ -33,8 +33,8 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     // const timestamp = new Date().toISOString();
     // // Prepare the document for Elasticsearch
     // const doc = {
-    //     apiv: apiver,            // API version
-    //     apisys: apisys,        // API system
+    //     apiv: apisys,            // API version
+    //     apimicro: apimicro,        // API system
     //     apiobj: apiobj,        // API object
     //     method: apifun,        // HTTP method
     //     num: 1,                // Invocation count (this will be incremented later)
@@ -44,9 +44,9 @@ const statsMiddleware = (ctx, next) => tslib_1.__awaiter(void 0, void 0, void 0,
     //     timestamp: timestamp
     // };
     // try {
-    //     // Elasticsearch index and document ID are based on the method, apisys, and apiobj
+    //     // Elasticsearch index and document ID are based on the method, apimicro, and apiobj
     //     const index = 'sys_nodejs-main';
-    //     const id = `${apifun}-${apisys}-${apiobj}-${apiver}`;
+    //     const id = `${apifun}-${apimicro}-${apiobj}-${apisys}`;
     //     // Prepare update fields for the upsert operation
     //     const updateData = {
     //         num: 1,              // Increment this field for each API call
@@ -106,12 +106,12 @@ function startServer(port) {
                 resolve({ app, httpServer });
             });
             httpServer.on('error', (error) => {
-                log.error(error, '服务器错误:');
+                log.error('服务器错误:', error);
                 if (error.code === 'EADDRINUSE') {
                     log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
                 }
                 else {
-                    log.error(error, '启动 HTTP 服务器失败:');
+                    log.error('启动 HTTP 服务器失败:', error);
                 }
                 reject(error);
             });
@@ -127,30 +127,30 @@ function setupRoutes(app) {
         const containerManager = new ContainerManager_1.ContainerManager();
         const container = containerManager.getContainer() || global.appContainer;
         const controllerLoader = container.get(ControllerLoader_1.ControllerLoader);
-        router.all('/:apiver/:apisys/:apiobj/:apifun', (ctx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        router.all('/:apisys/:apimicro/:apiobj/:apifun', (ctx) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { apiver, apisys, apiobj, apifun } = ctx.params;
+                const { apisys, apimicro, apiobj, apifun } = ctx.params;
                 // 判断是否是心跳API，如果是则不输出详细日志
-                const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                    apisys.toLowerCase() === 'testmenu' &&
+                const isHeartbeatApi = apisys.toLowerCase() === 'apitest' &&
+                    apimicro.toLowerCase() === 'testmenu' &&
                     apiobj.toLowerCase() === 'test78' &&
                     apifun.toLowerCase() === 'test';
                 // 设置标志供日志中间件使用
                 ctx.isHeartbeatApi = isHeartbeatApi;
                 if (!isHeartbeatApi) {
-                    log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                    log.detail(`Received request for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
                 }
-                if (apifun.startsWith('_') || !apiver.toLowerCase().startsWith('api') || apisys.toLowerCase().startsWith('dll')) {
-                    log.debug(`Access denied for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                if (apifun.startsWith('_') || !apisys.toLowerCase().startsWith('api') || apimicro.toLowerCase().startsWith('dll')) {
+                    log.debug(`Access denied for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
                     ctx.status = 403;
                     ctx.body = { error: 'Access denied' };
                     return;
                 }
-                const ControllerClass = controllerLoader.getController(`${apiver}/${apisys}/${apiobj}`);
+                const ControllerClass = controllerLoader.getController(`${apisys}/${apimicro}/${apiobj}`);
                 if (!ControllerClass) {
-                    log.error(`Controller not found for: ${apiver}/${apisys}/${apiobj}`);
+                    log.error(`Controller not found for: ${apisys}/${apimicro}/${apiobj}`);
                     ctx.status = 500;
-                    ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apiver}/${apisys}/${apiobj}` };
+                    ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apisys}/${apimicro}/${apiobj}` };
                     return;
                 }
                 if (!isHeartbeatApi) {
@@ -160,7 +160,7 @@ function setupRoutes(app) {
                 if (!isHeartbeatApi) {
                     log.detail(`Controller instance created: ${controller.constructor.name}`);
                 }
-                const upInfo = new koa78_upinfo_1.default(ctx);
+                const upInfo = new UpInfo_1.default(ctx);
                 controller.setup(upInfo);
                 if (typeof controller[apifun] !== 'function' || apifun.startsWith('_')) {
                     log.debug(`API function not found or not accessible: ${apifun}`);
@@ -209,26 +209,31 @@ function setupRoutes(app) {
                 log.error("Stack trace:", e.stack);
                 if (e instanceof Error) {
                     if (e.message.startsWith('err:get u info err3')) {
+                        log.error('Authentication Error:', e.message);
                         ctx.status = 401;
                         ctx.body = { error: 'Unauthorized', details: e.message };
                     }
                     else {
                         switch (e.message) {
                             case 'err:get u info err3':
+                                log.error('Authentication Error:', e.message);
                                 ctx.status = 401;
                                 ctx.body = { error: 'Unauthorized', details: e.message };
                                 break;
                             case (e.message.startsWith('防止重放攻击') ? e.message : ''):
+                                log.error('Replay Attack Prevention Error:', e.message);
                                 ctx.status = 429;
                                 ctx.body = { error: 'Too Many Requests', details: 'Possible replay attack detected' };
                                 break;
                             case (e.message.startsWith('参数验证失败') ? e.message : ''):
                             case (e.message.startsWith('up order err:') ? e.message : ''):
                             case (e.message.startsWith('checkCols err:') ? e.message : ''):
+                                log.error('Bad Request Error:', e.message);
                                 ctx.status = 400;
                                 ctx.body = { error: 'Bad Request', details: e.message };
                                 break;
                             default:
+                                log.error(`Unexpected Server Error: ${e.message}`, e);
                                 ctx.status = 500;
                                 ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                         }
@@ -258,7 +263,7 @@ function stopServer(server) {
             if (server && server.close) {
                 server.close((err) => {
                     if (err) {
-                        log.error(err, '关闭服务器时出错:');
+                        log.error('关闭服务器时出错:', err);
                         reject(err);
                     }
                     else {

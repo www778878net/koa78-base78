@@ -1,4 +1,4 @@
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { DatabaseService } from './DatabaseService';
 import { CacheService } from './CacheService';
 export declare class AuthService {

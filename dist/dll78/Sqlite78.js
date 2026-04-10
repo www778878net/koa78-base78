@@ -4,10 +4,14 @@ const tslib_1 = require("tslib");
 // @ts-ignore
 const sqlite3_1 = tslib_1.__importDefault(require("@vscode/sqlite3"));
 const util_1 = require("util");
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
-const tslog78_1 = tslib_1.__importDefault(require("tslog78"));
+const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
+const utc_1 = tslib_1.__importDefault(require("dayjs/plugin/utc"));
+const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
+const mylogger_1 = require("../utils/mylogger");
 // @ts-ignore
 const md5_1 = tslib_1.__importDefault(require("md5"));
+// 扩展 dayjs 以支持 UTC
+dayjs_1.default.extend(utc_1.default);
 /**
  * SQLite数据库操作类
  * 参考Mysql78类实现
@@ -19,7 +23,7 @@ class Sqlite78 {
         this._filename = '';
         this.isLog = false;
         this.isCount = false;
-        this.log = tslog78_1.default.Instance;
+        this.log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
         this.warnHandler = null;
         // 设置重试次数和重试延迟
         this.maxRetryAttempts = 3;
@@ -57,7 +61,7 @@ class Sqlite78 {
                 this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
             }
             catch (err) {
-                this.log.error(err, `SQLite数据库连接初始化失败: ${this._filename}`);
+                this.log.error(`SQLite数据库连接初始化失败: ${this._filename}`, err);
                 throw err;
             }
         });
@@ -74,7 +78,7 @@ class Sqlite78 {
             const cmdtext1 = `CREATE TABLE IF NOT EXISTS sys_warn (
             uid TEXT NOT NULL DEFAULT '',
             kind TEXT NOT NULL DEFAULT '',
-            apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             content TEXT NOT NULL,
             upid TEXT NOT NULL DEFAULT '',
@@ -91,8 +95,8 @@ class Sqlite78 {
         )`;
             const cmdtext2 = `CREATE TABLE IF NOT EXISTS sys_sql (
             cid TEXT NOT NULL DEFAULT '',
-            apiv TEXT NOT NULL DEFAULT '',
             apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             cmdtext TEXT NOT NULL,
             uname TEXT NOT NULL DEFAULT '',
@@ -110,7 +114,7 @@ class Sqlite78 {
             remark4 TEXT NOT NULL DEFAULT '',
             remark5 TEXT NOT NULL DEFAULT '',
             remark6 TEXT NOT NULL DEFAULT '',
-            UNIQUE(apiv, apisys, apiobj, cmdtext)
+            UNIQUE(apisys, apimicro, apiobj, cmdtext)
         )`;
             try {
                 yield this._run(cmdtext1);
@@ -118,7 +122,7 @@ class Sqlite78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error('creatTb error', err);
                 return 'error';
             }
         });
@@ -140,15 +144,15 @@ class Sqlite78 {
             try {
                 const rows = yield this._all(cmdtext, values);
                 if (debug) {
-                    this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                    this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(rows).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
                 return rows;
             }
             catch (err) {
-                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-                this.log.error(err, 'sqlite_doGet');
+                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
+                this.log.error('sqlite_doGet error', err);
                 throw err;
             }
         });
@@ -200,9 +204,9 @@ class Sqlite78 {
                     yield this._run('ROLLBACK');
                 }
                 catch (rollbackErr) {
-                    this.log.error(rollbackErr, 'sqlite_doT_rollback');
+                    this.log.error('sqlite_doT_rollback error', rollbackErr);
                 }
-                this.log.error(err, 'sqlite_doT');
+                this.log.error('sqlite_doT error', err);
                 return 'error';
             }
         });
@@ -224,7 +228,7 @@ class Sqlite78 {
             try {
                 const result = yield this._run(cmdtext, values);
                 if (debug) {
-                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
@@ -236,8 +240,8 @@ class Sqlite78 {
             }
             catch (err) {
                 const errorMsg = JSON.stringify(err);
-                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-                this.log.error(err, 'sqlite_doM');
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+                this.log.error('sqlite_doM error', err);
                 return { affectedRows: 0, error: errorMsg };
             }
         });
@@ -259,7 +263,7 @@ class Sqlite78 {
             try {
                 const result = yield this._run(cmdtext, values);
                 if (debug) {
-                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
                 }
                 const lendown = JSON.stringify(result).length;
                 this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
@@ -271,8 +275,8 @@ class Sqlite78 {
             }
             catch (err) {
                 const errorMsg = JSON.stringify(err);
-                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-                this.log.error(err, 'sqlite_doMAdd');
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+                this.log.error('sqlite_doMAdd error', err);
                 return { insertId: 0, error: errorMsg };
             }
         });
@@ -301,20 +305,20 @@ class Sqlite78 {
                     return yield this.warnHandler(info, kind, up);
                 }
                 catch (err) {
-                    this.log.error(err, 'sqlite__addWarn_handler');
+                    this.log.error('sqlite__addWarn_handler error', err);
                 }
             }
             if (!this._db || !this.isLog) {
                 return this.isLog ? 'database not initialized' : 'isLog is false';
             }
-            const cmdtext = 'INSERT INTO sys_warn (kind,apisys,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, koa78_upinfo_1.default.getNewid(), up.upid];
+            const cmdtext = 'INSERT INTO sys_warn (kind,apimicro,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
+            const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, UpInfo_1.default.getNewid(), up.upid];
             try {
                 const result = yield this._run(cmdtext, values);
                 return result.changes;
             }
             catch (err) {
-                this.log.error(err, 'sqlite__addWarn');
+                this.log.error('sqlite__addWarn error', err);
                 return 0;
             }
         });
@@ -333,17 +337,17 @@ class Sqlite78 {
                 return this.isCount ? 'database not initialized' : 'isCount is false';
             }
             const cmdtextmd5 = (0, md5_1.default)(cmdtext);
-            const sb = `INSERT OR IGNORE INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
+            const sb = `INSERT OR IGNORE INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
             try {
                 yield this._run(sb, [
-                    up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, koa78_upinfo_1.default.getNewid(), new Date(), cmdtextmd5
+                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
                 ]);
                 // 更新计数器
                 yield this._run('UPDATE sys_sql SET num=num+1,dlong=dlong+?,downlen=downlen+? WHERE cmdtextmd5=?', [dlong, lendown, cmdtextmd5]);
                 return 'ok';
             }
             catch (err) {
-                this.log.error(err);
+                this.log.error('_saveLog error', err);
                 return 'error';
             }
         });

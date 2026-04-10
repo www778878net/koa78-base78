@@ -1,4 +1,4 @@
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../../UpInfo';
 import { Agent } from '../base/agent';
 import { MysqlDatabaseAgent } from './mysql-database-agent';
 import { CacheServiceAgent } from './cache-service-agent';

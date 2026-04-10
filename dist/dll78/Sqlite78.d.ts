@@ -1,4 +1,4 @@
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 /**
  * SQLite数据库操作类
  * 参考Mysql78类实现

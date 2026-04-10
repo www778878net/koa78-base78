@@ -1,5 +1,5 @@
 import { Agent } from '../base/agent';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../../UpInfo';
 import { ConfigAgent } from './config-agent';
 export declare class MysqlDatabaseAgent extends Agent {
     private mysqlConnections;

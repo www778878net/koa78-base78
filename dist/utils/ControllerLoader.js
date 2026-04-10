@@ -6,8 +6,7 @@ const inversify_1 = require("inversify");
 const path = tslib_1.__importStar(require("path"));
 const fs = tslib_1.__importStar(require("fs"));
 const Base78_1 = tslib_1.__importDefault(require("../controllers/Base78"));
-const ContainerManager_1 = require("../ContainerManager");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("../utils/mylogger");
 let ControllerLoader = class ControllerLoader {
     constructor() {
         this.controllers = new Map();
@@ -16,7 +15,7 @@ let ControllerLoader = class ControllerLoader {
     }
     loadControllers() {
         // 获取日志实例（此时容器应该已经初始化完成）
-        const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
+        const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
         log.detail('ControllerLoader loadControllers');
         // 确保只加载一次
         if (this.loaded) {
@@ -58,7 +57,7 @@ let ControllerLoader = class ControllerLoader {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             var _a;
             // 获取日志实例
-            const log = ContainerManager_1.ContainerManager.getLogger() || new tslog78_1.TsLog78();
+            const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
             for (const item of fs.readdirSync(dir)) {
                 const fullPath = path.join(dir, item);
                 const stat = fs.statSync(fullPath);
@@ -103,16 +102,16 @@ let ControllerLoader = class ControllerLoader {
     }
     getController(path, retryCount = 0) {
         // 获取日志实例
-        const log = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
+        const log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
         // 确保控制器已加载
         if (!this.loaded) {
             this.loadControllers();
         }
-        const [apiver, apisys, apiobj] = path.split('/');
-        const controllerKey = `${apiver}/${apisys}/${apiobj}`.toLowerCase();
+        const [apisys, apimicro, apiobj] = path.split('/');
+        const controllerKey = `${apisys}/${apimicro}/${apiobj}`.toLowerCase();
         // 判断是否是心跳API，如果是则不输出详细日志
-        const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-            apisys.toLowerCase() === 'testmenu' &&
+        const isHeartbeatApi = apisys.toLowerCase() === 'apitest' &&
+            apimicro.toLowerCase() === 'testmenu' &&
             apiobj.toLowerCase() === 'test78';
         if (!isHeartbeatApi) {
             log.detail(`Attempting to get controller with key: ${controllerKey}`);

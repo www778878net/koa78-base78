@@ -1,21 +1,21 @@
 import Koa from 'koa';
 import { Config } from '../config/Config';
 import { ContainerManager } from '../ContainerManager';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 
 import http from 'http';
 import { Elasticsearch78 } from '../services/elasticsearch78';
 import Router from '@koa/router';
 import { Context } from 'koa';
 import Base78 from '../controllers/Base78';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { ControllerLoader } from '../utils/ControllerLoader';
 import bodyParser from 'koa-bodyparser';
 
 
 
 // const esClient = Elasticsearch78.getInstance();
-const log = TsLog78.Instance;
+const log = MyLogger.getInstance("base78", 3, "koa78");
 const router = new Router();
 // 统计中间件
 const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
@@ -28,7 +28,7 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     //     return; // 直接返回，不进行统计
     // }
     // // 确保参数存在后再解构
-    // const { apiver, apisys, apiobj, apifun } = ctx.params;
+    // const { apisys, apimicro, apiobj, apifun } = ctx.params;
 
     // // 如果是测试接口，直接返回
     // if (apiobj == "testtb") return;
@@ -42,8 +42,8 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
 
     // // Prepare the document for Elasticsearch
     // const doc = {
-    //     apiv: apiver,            // API version
-    //     apisys: apisys,        // API system
+    //     apiv: apisys,            // API version
+    //     apimicro: apimicro,        // API system
     //     apiobj: apiobj,        // API object
     //     method: apifun,        // HTTP method
     //     num: 1,                // Invocation count (this will be incremented later)
@@ -54,9 +54,9 @@ const statsMiddleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
     // };
 
     // try {
-    //     // Elasticsearch index and document ID are based on the method, apisys, and apiobj
+    //     // Elasticsearch index and document ID are based on the method, apimicro, and apiobj
     //     const index = 'sys_nodejs-main';
-    //     const id = `${apifun}-${apisys}-${apiobj}-${apiver}`;
+    //     const id = `${apifun}-${apimicro}-${apiobj}-${apisys}`;
 
     //     // Prepare update fields for the upsert operation
     //     const updateData = {
@@ -134,11 +134,11 @@ export async function startServer(port?: number): Promise<{ app: Koa, httpServer
         });
 
         httpServer.on('error', (error: NodeJS.ErrnoException) => {
-            log.error(error, '服务器错误:');
+            log.error('服务器错误:', error);
             if (error.code === 'EADDRINUSE') {
                 log.error(`端口 ${httpPort} 已被占用。请选择一个不同的端口。`);
             } else {
-                log.error(error, '启动 HTTP 服务器失败:');
+                log.error('启动 HTTP 服务器失败:', error);
             }
             reject(error);
         });
@@ -155,36 +155,36 @@ async function setupRoutes(app: Koa) {
 
     const controllerLoader = container.get(ControllerLoader);
 
-    router.all('/:apiver/:apisys/:apiobj/:apifun', async (ctx: Context) => {
+    router.all('/:apisys/:apimicro/:apiobj/:apifun', async (ctx: Context) => {
         try {
-            const { apiver, apisys, apiobj, apifun } = ctx.params;
+            const { apisys, apimicro, apiobj, apifun } = ctx.params;
 
             // 判断是否是心跳API，如果是则不输出详细日志
-            const isHeartbeatApi = apiver.toLowerCase() === 'apitest' &&
-                                   apisys.toLowerCase() === 'testmenu' &&
-                                   apiobj.toLowerCase() === 'test78' &&
-                                   apifun.toLowerCase() === 'test';
+            const isHeartbeatApi = apisys.toLowerCase() === 'apitest' &&
+                apimicro.toLowerCase() === 'testmenu' &&
+                apiobj.toLowerCase() === 'test78' &&
+                apifun.toLowerCase() === 'test';
 
             // 设置标志供日志中间件使用
             (ctx as any).isHeartbeatApi = isHeartbeatApi;
 
             if (!isHeartbeatApi) {
-                log.detail(`Received request for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+                log.detail(`Received request for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
             }
 
-            if (apifun.startsWith('_') || !apiver.toLowerCase().startsWith('api') || apisys.toLowerCase().startsWith('dll')) {
-                log.debug(`Access denied for: /${apiver}/${apisys}/${apiobj}/${apifun}`);
+            if (apifun.startsWith('_') || !apisys.toLowerCase().startsWith('api') || apimicro.toLowerCase().startsWith('dll')) {
+                log.debug(`Access denied for: /${apisys}/${apimicro}/${apiobj}/${apifun}`);
                 ctx.status = 403;
                 ctx.body = { error: 'Access denied' };
                 return;
             }
 
-            const ControllerClass = controllerLoader.getController(`${apiver}/${apisys}/${apiobj}`);
+            const ControllerClass = controllerLoader.getController(`${apisys}/${apimicro}/${apiobj}`);
 
             if (!ControllerClass) {
-                log.error(`Controller not found for: ${apiver}/${apisys}/${apiobj}`);
+                log.error(`Controller not found for: ${apisys}/${apimicro}/${apiobj}`);
                 ctx.status = 500;
-                ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apiver}/${apisys}/${apiobj}` };
+                ctx.body = { error: 'Internal Server Error', details: `Controller not found for: ${apisys}/${apimicro}/${apiobj}` };
                 return;
             }
 
@@ -250,25 +250,30 @@ async function setupRoutes(app: Koa) {
 
             if (e instanceof Error) {
                 if (e.message.startsWith('err:get u info err3')) {
+                    log.error('Authentication Error:', e.message);
                     ctx.status = 401;
                     ctx.body = { error: 'Unauthorized', details: e.message };
                 } else {
                     switch (e.message) {
                         case 'err:get u info err3':
+                            log.error('Authentication Error:', e.message);
                             ctx.status = 401;
                             ctx.body = { error: 'Unauthorized', details: e.message };
                             break;
                         case (e.message.startsWith('防止重放攻击') ? e.message : ''):
+                            log.error('Replay Attack Prevention Error:', e.message);
                             ctx.status = 429;
                             ctx.body = { error: 'Too Many Requests', details: 'Possible replay attack detected' };
                             break;
                         case (e.message.startsWith('参数验证失败') ? e.message : ''):
                         case (e.message.startsWith('up order err:') ? e.message : ''):
                         case (e.message.startsWith('checkCols err:') ? e.message : ''):
+                            log.error('Bad Request Error:', e.message);
                             ctx.status = 400;
                             ctx.body = { error: 'Bad Request', details: e.message };
                             break;
                         default:
+                            log.error(`Unexpected Server Error: ${e.message}`, e);
                             ctx.status = 500;
                             ctx.body = { error: 'Server Error', details: e.message, stack: e.stack };
                     }
@@ -299,7 +304,7 @@ export async function stopServer(server: http.Server) {
         if (server && server.close) {
             server.close((err: Error | undefined) => {
                 if (err) {
-                    log.error(err, '关闭服务器时出错:');
+                    log.error('关闭服务器时出错:', err);
                     reject(err);
                 } else {
                     log.info('服务器成功关闭');

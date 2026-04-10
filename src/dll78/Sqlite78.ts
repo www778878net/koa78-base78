@@ -4,10 +4,15 @@ import { createHash } from 'node:crypto';
 // @ts-ignore
 import sqlite3 from '@vscode/sqlite3';
 import { promisify } from 'util';
-import UpInfo from 'koa78-upinfo';
-import TsLog78 from 'tslog78';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import UpInfo from '../UpInfo';
+import { MyLogger } from '../utils/mylogger';
 // @ts-ignore
 import md5 from 'md5';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 /**
  * SQLite数据库操作类
@@ -18,7 +23,7 @@ export default class Sqlite78 {
     private _filename: string = '';
     public isLog: boolean = false;
     public isCount: boolean = false;
-    private log: TsLog78 = TsLog78.Instance;
+    private log: MyLogger = MyLogger.getInstance("base78", 3, "koa78");
     private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
 
     // 设置重试次数和重试延迟
@@ -66,7 +71,7 @@ export default class Sqlite78 {
 
             this.log.debug(`SQLite数据库连接初始化成功: ${this._filename}`);
         } catch (err) {
-            this.log.error(err as Error, `SQLite数据库连接初始化失败: ${this._filename}`);
+            this.log.error(`SQLite数据库连接初始化失败: ${this._filename}`, err as Error);
             throw err;
         }
     }
@@ -83,7 +88,7 @@ export default class Sqlite78 {
         const cmdtext1 = `CREATE TABLE IF NOT EXISTS sys_warn (
             uid TEXT NOT NULL DEFAULT '',
             kind TEXT NOT NULL DEFAULT '',
-            apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             content TEXT NOT NULL,
             upid TEXT NOT NULL DEFAULT '',
@@ -101,8 +106,8 @@ export default class Sqlite78 {
 
         const cmdtext2 = `CREATE TABLE IF NOT EXISTS sys_sql (
             cid TEXT NOT NULL DEFAULT '',
-            apiv TEXT NOT NULL DEFAULT '',
             apisys TEXT NOT NULL DEFAULT '',
+            apimicro TEXT NOT NULL DEFAULT '',
             apiobj TEXT NOT NULL DEFAULT '',
             cmdtext TEXT NOT NULL,
             uname TEXT NOT NULL DEFAULT '',
@@ -120,7 +125,7 @@ export default class Sqlite78 {
             remark4 TEXT NOT NULL DEFAULT '',
             remark5 TEXT NOT NULL DEFAULT '',
             remark6 TEXT NOT NULL DEFAULT '',
-            UNIQUE(apiv, apisys, apiobj, cmdtext)
+            UNIQUE(apisys, apimicro, apiobj, cmdtext)
         )`;
 
         try {
@@ -128,7 +133,7 @@ export default class Sqlite78 {
             await this._run(cmdtext2);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('creatTb error', err as Error);
             return 'error';
         }
     }
@@ -151,7 +156,7 @@ export default class Sqlite78 {
             const rows = await this._all(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(rows) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(rows).length;
@@ -159,8 +164,8 @@ export default class Sqlite78 {
 
             return rows;
         } catch (err) {
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doGet');
+            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
+            this.log.error('sqlite_doGet error', err as Error);
             throw err;
         }
     }
@@ -215,9 +220,9 @@ export default class Sqlite78 {
             try {
                 await this._run('ROLLBACK');
             } catch (rollbackErr) {
-                this.log.error(rollbackErr as Error, 'sqlite_doT_rollback');
+                this.log.error('sqlite_doT_rollback error', rollbackErr as Error);
             }
-            this.log.error(err as Error, 'sqlite_doT');
+            this.log.error('sqlite_doT error', err as Error);
             return 'error';
         }
     }
@@ -240,7 +245,7 @@ export default class Sqlite78 {
             const result = await this._run(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -254,8 +259,8 @@ export default class Sqlite78 {
             return { affectedRows: result.changes };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doM');
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+            this.log.error('sqlite_doM error', err as Error);
             return { affectedRows: 0, error: errorMsg };
         }
     }
@@ -278,7 +283,7 @@ export default class Sqlite78 {
             const result = await this._run(cmdtext, values);
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -292,8 +297,8 @@ export default class Sqlite78 {
             return { insertId: result.lastID };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'sqlite_doMAdd');
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+            this.log.error('sqlite_doMAdd error', err as Error);
             return { insertId: 0, error: errorMsg };
         }
     }
@@ -321,7 +326,7 @@ export default class Sqlite78 {
             try {
                 return await this.warnHandler(info, kind, up);
             } catch (err) {
-                this.log.error(err as Error, 'sqlite__addWarn_handler');
+                this.log.error('sqlite__addWarn_handler error', err as Error);
             }
         }
 
@@ -329,14 +334,14 @@ export default class Sqlite78 {
             return this.isLog ? 'database not initialized' : 'isLog is false';
         }
 
-        const cmdtext = 'INSERT INTO sys_warn (kind,apisys,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+        const cmdtext = 'INSERT INTO sys_warn (kind,apimicro,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
 
         try {
             const result = await this._run(cmdtext, values);
             return result.changes;
         } catch (err) {
-            this.log.error(err as Error, 'sqlite__addWarn');
+            this.log.error('sqlite__addWarn error', err as Error);
             return 0;
         }
     }
@@ -355,11 +360,11 @@ export default class Sqlite78 {
         }
 
         const cmdtextmd5 = md5(cmdtext);
-        const sb = `INSERT OR IGNORE INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
+        const sb = `INSERT OR IGNORE INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
         try {
             await this._run(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5
+                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
             ]);
 
             // 更新计数器
@@ -370,7 +375,7 @@ export default class Sqlite78 {
 
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('_saveLog error', err as Error);
             return 'error';
         }
     }

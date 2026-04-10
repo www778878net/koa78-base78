@@ -1,10 +1,14 @@
 import { promises as fs } from 'node:fs';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { createHash } from 'node:crypto';
 import * as mysql from 'mysql2/promise';
-import UpInfo from 'koa78-upinfo';
-import TsLog78 from 'tslog78';
+import UpInfo from '../UpInfo';
+import { MyLogger } from '../utils/mylogger';
 import md5 from 'md5';
+
+// 扩展 dayjs 以支持 UTC
+dayjs.extend(utc);
 
 /**
  * 如果不行就回退到2.4.0
@@ -15,7 +19,7 @@ export default class Mysql78 {
     private _host: string = '';
     public isLog: boolean = false;
     public isCount: boolean = false;
-    private log: TsLog78 = TsLog78.Instance;
+    private log: MyLogger = MyLogger.getInstance("base78", 3, "koa78");
     private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
 
     // 设置重试次数和重试延迟
@@ -111,15 +115,15 @@ export default class Mysql78 {
             return 'pool null';
         }
 
-        const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apisys` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
-        const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apiv` varchar(50) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apiv`,`apisys`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+        const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apimicro` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+        const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`,`apimicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
 
         try {
             await this._pool.execute(cmdtext1);
             await this._pool.execute(cmdtext2);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('creatTb error', err as Error);
             return 'error';
         }
     }
@@ -148,63 +152,56 @@ export default class Mysql78 {
             return [];
         }
 
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+
         const debug = up.debug ?? false;
         const dstart = new Date();
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
+        let attempts = 0;
+        const maxAttempts = 2;
 
-        // 连接损坏的错误码，遇到时销毁连接并重试
-        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                if (!connection) {
+                    throw new Error("Failed to get a valid connection.");
+                }
+                statement = await this.getStatement(connection, cmdtext);
+                const [rows] = await statement.execute(values);
+                const back = rows as any[];
 
-        try {
+                if (debug) {
+                    this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
+                }
 
-            connection = await this.retryOperation(() => this.getConnectionWithRetry());
-            if (!connection) {
-                throw new Error("Failed to get a valid connection.");
-            }
-            statement = await this.getStatement(connection, cmdtext);
-            const [rows] = await statement.execute(values);
-            const back = rows as any[];
+                const lendown = JSON.stringify(back).length;
+                this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            if (debug) {
-                this._addWarn(JSON.stringify(back) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
-
-            const lendown = JSON.stringify(back).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
-
-            return back;
-        } catch (err: any) {
-            const errCode = err?.code || '';
-            // 连接损坏时：销毁连接并重试一次
-            if (connectionLostCodes.includes(errCode) && connection) {
-                this.log.error(err as Error, `mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
-                connection.destroy();
-                connection = null;
-                statement = null;
-
-                try {
-                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
-                    if (connection) {
-                        statement = await this.getStatement(connection, cmdtext);
-                        const [rows] = await statement.execute(values);
-                        const back = rows as any[];
-                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(back).length, up);
-                        return back;
+                return back;
+            } catch (err: any) {
+                const errCode = err?.code || err?.errno;
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(`mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    if (attempts < maxAttempts) {
+                        continue;
                     }
-                } catch (retryErr: any) {
-                    this.log.error(retryErr as Error, `mysql_doGet 重试仍然失败(${retryErr?.code})`);
+                }
+                this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apimicro, up);
+                this.log.error('mysql_doGet error', err as Error);
+                throw err;
+            } finally {
+                if (connection) {
+                    connection.release();
                 }
             }
-
-            this._addWarn(JSON.stringify(err) + " c:" + cmdtext + " v" + values.join(","), "err_" + up.apisys, up);
-            this.log.error(err as Error, 'mysql_doGet');
-            throw err;
-        } finally {
-            if (connection) {
-                connection.release(); // 确保连接被释放
-            }
         }
+        return [];
     }
 
     async doT(cmds: string[], values: string[][], errtexts: string[], logtext: string, logvalue: string[], up: UpInfo): Promise<any> {
@@ -256,7 +253,7 @@ export default class Mysql78 {
                 await connection.rollback();
                 connection.release();
             }
-            this.log.error(err as Error, 'mysql_doT');
+            this.log.error('mysql_doT error', err as Error);
             return 'error';
         }
     }
@@ -272,61 +269,56 @@ export default class Mysql78 {
             return { result: {}, error: 'pool null' };
         }
 
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+
         const debug = up.debug ?? false;
         const dstart = new Date();
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
+        let attempts = 0;
+        const maxAttempts = 2;
 
-        // 连接损坏的错误码，遇到时销毁连接并重试
-        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                if (!connection) {
+                    throw new Error("Failed to get a valid connection.");
+                }
+                statement = await this.getStatement(connection, cmdtext);
+                const [result] = await statement.execute(values);
 
-        try {
-            connection = await this.retryOperation(() => this.getConnectionWithRetry());
-            if (!connection) {
-                throw new Error("Failed to get a valid connection.");
-            }
-            statement = await this.getStatement(connection, cmdtext);
-            const [result] = await statement.execute(values);
+                if (debug) {
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
+                }
 
-            if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
+                const lendown = JSON.stringify(result).length;
+                this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            const lendown = JSON.stringify(result).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
-
-            return { result };
-        } catch (err: any) {
-            const errCode = err?.code || '';
-            // 连接损坏时：销毁连接并重试一次
-            if (connectionLostCodes.includes(errCode) && connection) {
-                this.log.error(err as Error, `mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
-                connection.destroy();
-                connection = null;
-                statement = null;
-
-                try {
-                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
-                    if (connection) {
-                        statement = await this.getStatement(connection, cmdtext);
-                        const [result] = await statement.execute(values);
-                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
-                        return { result };
+                return { result };
+            } catch (err: any) {
+                const errCode = err?.code || err?.errno;
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(`mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    if (attempts < maxAttempts) {
+                        continue;
                     }
-                } catch (retryErr: any) {
-                    this.log.error(retryErr as Error, `mysql_doMBack 重试仍然失败(${retryErr?.code})`);
+                }
+                const errorMsg = JSON.stringify(err);
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+                this.log.error('mysql_doMBack error', err as Error);
+                return { result: {}, error: errorMsg };
+            } finally {
+                if (connection) {
+                    connection.release();
                 }
             }
-
-            const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'mysql_doMBack');
-            return { result: {}, error: errorMsg };
-        } finally {
-            if (connection) {
-                connection.release(); // 确保连接被释放
-            }
         }
+        return { result: {}, error: 'max attempts exceeded' };
     }
 
     /**
@@ -340,72 +332,63 @@ export default class Mysql78 {
             return { affectedRows: 0, error: 'pool null' };
         }
 
+        // 连接损坏的错误码，遇到时销毁连接并重试
+        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+
         const debug = up.debug ?? false;
         const dstart = new Date();
         let connection: mysql.PoolConnection | null = null;
         let statement: mysql.PreparedStatementInfo | null = null;
+        let attempts = 0;
+        const maxAttempts = 2;
 
-        // 连接损坏的错误码，遇到时销毁连接并重试
-        const connectionLostCodes = ['ER_MALFORMED_PACKET', 'PROTOCOL_CONNECTION_LOST', 'PROTOCOL_ENQUEUE_AFTER_CLOSE', 'CONN_UNEXPECTEDLY_CLOSED'];
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                connection = await this.retryOperation(() => this.getConnectionWithRetry());
+                if (!connection) {
+                    throw new Error("Failed to get a valid connection.");
+                }
+                statement = await this.getStatement(connection, cmdtext);
+                const [result] = await statement.execute(values);
+                const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
 
-        try {
-            connection = await this.retryOperation(() => this.getConnectionWithRetry());
-            if (!connection) {
-                throw new Error("Failed to get a valid connection.");
-            }
-            statement = await this.getStatement(connection, cmdtext);
-            const [result] = await statement.execute(values);
-            const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
+                if (debug) {
+                    this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
+                }
 
-            if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
-            }
+                const lendown = JSON.stringify(result).length;
+                this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
 
-            const lendown = JSON.stringify(result).length;
-            this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), lendown, up);
+                // 如果受影响行数为0，返回明确的错误信息
+                if (affectedRows === 0) {
+                    return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})` };
+                }
 
-            // 如果受影响行数为0，返回明确的错误信息
-            if (affectedRows === 0) {
-                return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})` };
-            }
-
-            return { affectedRows };
-        } catch (err: any) {
-            const errCode = err?.code || '';
-            // 连接损坏时：销毁连接并重试一次
-            if (connectionLostCodes.includes(errCode) && connection) {
-                this.log.error(err as Error, `mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
-                connection.destroy();
-                connection = null;
-                statement = null;
-
-                try {
-                    connection = await this.retryOperation(() => this.getConnectionWithRetry());
-                    if (connection) {
-                        statement = await this.getStatement(connection, cmdtext);
-                        const [result] = await statement.execute(values);
-                        const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
-                        this._saveLog(cmdtext, values, new Date().getTime() - dstart.getTime(), JSON.stringify(result).length, up);
-
-                        if (affectedRows === 0) {
-                            return { affectedRows: 0, error: `更新失败，没有找到匹配的记录或数据未发生变化 (cmdtext: ${cmdtext})` };
-                        }
-                        return { affectedRows };
+                return { affectedRows };
+            } catch (err: any) {
+                const errCode = err?.code || err?.errno;
+                if (connectionLostCodes.includes(errCode) && connection) {
+                    this.log.error(`mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
+                    connection.destroy();
+                    connection = null;
+                    statement = null;
+                    if (attempts < maxAttempts) {
+                        continue;
                     }
-                } catch (retryErr: any) {
-                    this.log.error(retryErr as Error, `mysql_doM 重试仍然失败(${retryErr?.code})`);
+                }
+                const errorMsg = JSON.stringify(err);
+                const errorWithSql = `${errorMsg} (cmdtext: ${cmdtext}, values: ${JSON.stringify(values)})`;
+                this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+                this.log.error(`mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`, err as Error);
+                return { affectedRows: 0, error: errorWithSql };
+            } finally {
+                if (connection) {
+                    connection.release();
                 }
             }
-
-            const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, `mysql_doM cmdtext: ${cmdtext} values: ${JSON.stringify(values)}`);
-            return { affectedRows: 0, error: errorMsg };
-        } finally {
-            if (connection) {
-                connection.release(); // 确保连接被释放
-            }
         }
+        return { affectedRows: 0, error: 'max attempts exceeded' };
     }
 
     /**
@@ -428,7 +411,7 @@ export default class Mysql78 {
             const affectedRows = (result as mysql.ResultSetHeader).affectedRows;
 
             if (debug) {
-                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apisys, up);
+                this._addWarn(JSON.stringify(result) + " c:" + cmdtext + " v" + values.join(","), "debug_" + up.apimicro, up);
             }
 
             const lendown = JSON.stringify(result).length;
@@ -442,8 +425,8 @@ export default class Mysql78 {
             return { insertId };
         } catch (err) {
             const errorMsg = JSON.stringify(err);
-            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apisys, up);
-            this.log.error(err as Error, 'mysql_doMAdd');
+            this._addWarn(errorMsg + " c:" + cmdtext + " v" + values.join(","), "err" + up.apimicro, up);
+            this.log.error('mysql_doMAdd error', err as Error);
             return { insertId: 0, error: errorMsg };
         }
     }
@@ -470,7 +453,7 @@ export default class Mysql78 {
 
             return result;
         } catch (err) {
-            this.log.error(err as Error, 'mysql_doTran');
+            this.log.error('mysql_doTran error', err as Error);
             throw err;
         }
     }
@@ -497,7 +480,7 @@ export default class Mysql78 {
             const connection = await this._pool.getConnection();
             return connection;
         } catch (err) {
-            this.log.error(err as Error, 'mysql_getConnection');
+            this.log.error('mysql_getConnection error', err as Error);
             return null;
         }
     }
@@ -525,7 +508,7 @@ export default class Mysql78 {
             try {
                 return await this.warnHandler(info, kind, up);
             } catch (err) {
-                this.log.error(err as Error, 'mysql__addWarn_handler');
+                this.log.error('mysql__addWarn_handler error', err as Error);
             }
         }
 
@@ -533,14 +516,14 @@ export default class Mysql78 {
             return this.isLog ? 'pool null' : 'isLog is false';
         }
 
-        const cmdtext = 'INSERT INTO sys_warn (`kind`,apisys,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apisys, up.apiobj, info, up.uname ?? '', up.uptime, UpInfo.getNewid(), up.upid ?? null];
+        const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname || '', dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo.getNewid(), up.upid];
 
         try {
             const [results] = await this._pool.execute(cmdtext, values);
             return (results as mysql.ResultSetHeader).affectedRows;
         } catch (err) {
-            this.log.error(err as Error, 'mysql__addWarn');
+            this.log.error('mysql__addWarn error', err as Error);
             return 0;
         }
     }
@@ -559,17 +542,17 @@ export default class Mysql78 {
         }
 
         const cmdtextmd5 = md5(cmdtext);
-        const sb = 'INSERT INTO sys_sql(apiv,apisys,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
+        const sb = 'INSERT INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?) ' +
             'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
 
         try {
             await this._pool.execute(sb, [
-                up.v, up.apisys, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), new Date(), cmdtextmd5,
+                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                 dlong, lendown
             ]);
             return 'ok';
         } catch (err) {
-            this.log.error(err as Error);
+            this.log.error('_saveLog error', err as Error);
             return 'error';
         }
     }

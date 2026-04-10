@@ -16,8 +16,8 @@ export default class workflow_instance extends CidBase78<TableSchemas['workflow_
                     idpk INT AUTO_INCREMENT PRIMARY KEY,
                     cid VARCHAR(36) NOT NULL DEFAULT '',
                     uid VARCHAR(36) NOT NULL DEFAULT '',
-                    apiv VARCHAR(20) NOT NULL DEFAULT '', -- API 版本 
-                    apisys VARCHAR(50) NOT NULL DEFAULT '', -- API 系统 
+                    apisys VARCHAR(20) NOT NULL DEFAULT '', -- API 版本 
+                    apimicro VARCHAR(50) NOT NULL DEFAULT '', -- API 系统 
                     apiobj VARCHAR(100) NOT NULL DEFAULT '', -- API 对象 
 
                     lastoktime DATETIME NULL, -- 最后成功时间 

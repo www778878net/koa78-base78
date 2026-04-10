@@ -5,20 +5,20 @@ exports.tableConfigs = {
     sys_ip: {
         colsImp: ['ip'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     Test78: {
         colsImp: ['field1', 'field2'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
     testtb: {
         colsImp: ['kind', 'item', 'data'],
         uidcid: 'cid',
-        apiver: 'apitest',
-        apisys: 'testmenu'
+        apisys: 'apitest',
+        apimicro: 'testmenu'
     },
 };
 //# sourceMappingURL=tableConfig.js.map

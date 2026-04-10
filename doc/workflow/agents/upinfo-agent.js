@@ -33,10 +33,10 @@ class UpInfoAgent extends agent_1.Agent {
         this.ip = "";
         this.ctx = null;
         this.method = "";
-        this.apisys = "";
+        this.apimicro = "";
         this.apiobj = "";
         this.apifun = "";
-        this.apiver = "";
+        this.apimicro = "";
         this.uptime = new Date();
         this.utime = (0, dayjs_1.default)().format('YYYY-MM-DD HH:mm:ss');
         this.errmessage = "";
@@ -70,8 +70,8 @@ class UpInfoAgent extends agent_1.Agent {
         const { request: req } = ctx;
         this.method = req.path;
         if (ctx.params) {
-            this.apiver = ctx.params.apiver;
-            this.apisys = ctx.params.apisys;
+            this.apimicro = ctx.params.apimicro;
+            this.apimicroro = ctx.paramapimicroicro;
             this.apiobj = ctx.params.apiobj;
             this.apifun = ctx.params.apifun;
         }
@@ -85,9 +85,9 @@ class UpInfoAgent extends agent_1.Agent {
         else if (req.method === "SOCK") {
             pars = req.header;
             this.method = req.header["method"];
-            const [apiver, apisys, apiobj, apifun] = this.method.split("/");
-            this.apiver = apiver;
-            this.apisys = apisys;
+            const [apimicro, apimicroro, apiobj, apifun] = this.method.split("/");
+            this.apimicro = apimicro;
+            this.apimicroro apimicroicro;
             this.apiobj = apiobj;
             this.apifun = apifun;
         }

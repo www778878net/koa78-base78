@@ -19,7 +19,7 @@
  * ```
  */
 import { Container } from 'inversify';
-import { TsLog78 } from "tslog78";
+import { MyLogger } from './utils/mylogger';
 export declare class ContainerManager {
     private configPath;
     private container;
@@ -43,7 +43,7 @@ export declare class ContainerManager {
      * 2. 简化日志服务的获取方式
      * 3. 避免在容器尚未初始化完成时无法获取日志服务
      */
-    static getLogger(): TsLog78 | null;
+    static getLogger(): MyLogger | null;
     /**
      * 初始化所有服务
      */

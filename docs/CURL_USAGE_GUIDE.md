@@ -15,21 +15,21 @@
 所有 API 请求遵循统一的 URL 模式：
 
 ```
-http://your-host:port/:apiver/:apisys/:apiobj/:apifun
+http://your-host:port/:apisys/:apimicro/:apiobj/:apifun
 ```
 
 ### 参数说明
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `apiver` | API 版本，必须以 "api" 开头 | `apiv1`, `apitest` |
-| `apisys` | API 系统/模块名 | `stock`, `user`, `order` |
-| `apiobj` | API 对象/控制器名（对应类名） | `StockMine`, `UserInfo` |
-| `apifun` | API 方法名 | `mAdd`, `get`, `mUpdate` |
+| 参数       | 说明                          | 示例                     |
+| ---------- | ----------------------------- | ------------------------ |
+| `apisys`   | API 版本，必须以 "api" 开头   | `apisys1`, `apitest`     |
+| `apimicro` | API 系统/模块名               | `stock`, `user`, `order` |
+| `apiobj`   | API 对象/控制器名（对应类名） | `StockMine`, `UserInfo`  |
+| `apifun`   | API 方法名                    | `mAdd`, `get`, `mUpdate` |
 
 **注意**：
 - `apifun` 不能以下划线 `_` 开头（私有方法）
-- `apisys` 不能以 "dll" 开头
+- `apimicro` 不能以 "dll" 开头
 
 ---
 
@@ -88,7 +88,7 @@ X-Auth-Token: <token>
 新增一条记录，自动生成 `id`, `upby`, `uptime` 等系统字段。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mAdd" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mAdd" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -119,7 +119,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mAdd" \
 批量新增多条记录。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mAddMany" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mAddMany" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -149,7 +149,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mAddMany" \
 根据 `id` 字段更新记录。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdate" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mUpdate" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -176,7 +176,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdate" \
 根据 `idpk` 主键更新记录。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdateIdpk" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mUpdateIdpk" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -203,7 +203,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdateIdpk" \
 批量更新多条记录，使用 CASE WHEN 语句。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdateMany" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mUpdateMany" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -225,7 +225,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mUpdateMany" \
 根据 `id` 查询记录，存在则更新，不存在则新增。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/m" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/m" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -242,7 +242,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/m" \
 根据 `idpk` 查询记录，存在则更新，不存在则新增。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/midpk" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/midpk" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -259,7 +259,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/midpk" \
 根据 `id` 删除记录。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mdel" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mdel" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -284,7 +284,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mdel" \
 根据 `idpk` 列表批量删除记录。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mdelmany" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mdelmany" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -299,7 +299,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mdelmany" \
 根据条件查询记录，支持分页和排序。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/get" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/get" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -337,7 +337,7 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/get" \
 当第一个字段为唯一键时使用。
 
 ```bash
-curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mByFirstField" \
+curl -X POST "http://localhost:3000/apisys1/stock/StockMine/mByFirstField" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-token-here" \
   -d '{
@@ -352,15 +352,15 @@ curl -X POST "http://localhost:3000/apiv1/stock/StockMine/mByFirstField" \
 
 ### 常见错误码
 
-| HTTP 状态码 | res 值 | 说明 |
-|-------------|--------|------|
-| 200 | 0 | 成功 |
-| 400 | -8888 或其他 | 参数验证失败 |
-| 401 | - | 未授权（认证失败） |
-| 403 | - | 访问被拒绝（方法或权限问题） |
-| 404 | - | API 方法未找到 |
-| 429 | - | 请求过多（防重放攻击） |
-| 500 | -8888 或其他 | 服务器内部错误 |
+| HTTP 状态码 | res 值       | 说明                         |
+| ----------- | ------------ | ---------------------------- |
+| 200         | 0            | 成功                         |
+| 400         | -8888 或其他 | 参数验证失败                 |
+| 401         | -            | 未授权（认证失败）           |
+| 403         | -            | 访问被拒绝（方法或权限问题） |
+| 404         | -            | API 方法未找到               |
+| 429         | -            | 请求过多（防重放攻击）       |
+| 500         | -8888 或其他 | 服务器内部错误               |
 
 ### 错误响应示例
 
@@ -428,7 +428,7 @@ TOKEN="your-auth-token"
 
 # 1. 新增记录
 echo "=== 新增记录 ==="
-curl -X POST "${BASE_URL}/apiv1/stock/StockMine/mAdd" \
+curl -X POST "${BASE_URL}/apisys1/stock/StockMine/mAdd" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN}" \
   -d '{
@@ -438,7 +438,7 @@ curl -X POST "${BASE_URL}/apiv1/stock/StockMine/mAdd" \
 
 # 2. 查询记录
 echo -e "\n=== 查询记录 ==="
-curl -X POST "${BASE_URL}/apiv1/stock/StockMine/get" \
+curl -X POST "${BASE_URL}/apisys1/stock/StockMine/get" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN}" \
   -d '{

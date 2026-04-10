@@ -3,10 +3,10 @@ import { DatabaseService } from '../services/DatabaseService';
 import { CacheService } from '../services/CacheService';
 import { Config } from '../config/Config';
 import { TableSet } from '../config/tableConfig';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { BaseSchema } from './BaseSchema';
 import { QueryBuilder } from '../utils/QueryBuilder';
-import { TsLog78 } from 'tslog78';
+import { MyLogger } from '../utils/mylogger';
 import Elasticsearch78 from '../services/elasticsearch78';
 /**
  * Base78 - 基础控制器类
@@ -37,11 +37,11 @@ interface ShardingConfig {
  */
 export default class Base78<T extends BaseSchema> {
     protected _up?: UpInfo;
-    protected logger: TsLog78;
+    protected logger: MyLogger;
     protected dbname: string;
     protected tbname: string;
     tableConfig: TableSet;
-    protected static lastMaintenanceDate: string;
+    protected static lastMaintenanceDateMap: Map<string, string>;
     protected shardingConfig?: ShardingConfig;
     protected isadmin: boolean;
     constructor();
@@ -74,8 +74,9 @@ export default class Base78<T extends BaseSchema> {
     private _loadConfig;
     protected _setBack(res: number, errmsg: string, kind?: string): void;
     mUpdateMany(colpin?: string[]): Promise<any>;
-    mAdd(colp?: string[]): Promise<string>;
+    mAdd(colp?: string[]): Promise<any>;
     mAddMany(colp?: string[]): Promise<number>;
+    mAddManyByid(colp?: string[]): Promise<number>;
     mUpdateIdpk(colp?: string[]): Promise<string>;
     mUpdate(colp?: string[]): Promise<string>;
     midpk(colp?: string[]): Promise<number | string | {

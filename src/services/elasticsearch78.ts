@@ -1,7 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { injectable } from 'inversify';
 import { Config } from '../config/Config';
-import UpInfo from 'koa78-upinfo';
+import UpInfo from '../UpInfo';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 /**

@@ -6,11 +6,10 @@ require("reflect-metadata");
 const DatabaseService_1 = require("../services/DatabaseService");
 const CacheService_1 = require("../services/CacheService");
 const Config_1 = require("../config/Config");
-const koa78_upinfo_1 = tslib_1.__importDefault(require("koa78-upinfo"));
+const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const QueryBuilder_1 = require("../utils/QueryBuilder");
 const decorators_1 = require("../interfaces/decorators");
-const ContainerManager_1 = require("../ContainerManager");
-const tslog78_1 = require("tslog78");
+const mylogger_1 = require("../utils/mylogger");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
 const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
 /**
@@ -27,9 +26,11 @@ class Base78 {
         this.dbname = "default"; //mysql数据库名（非表名）
         // 新增：标识该表是否为管理员控制的全局表
         this.isadmin = false;
-        // 使用新的日志服务方式，与DatabaseService中完全一致
-        this.logger = ContainerManager_1.ContainerManager.getLogger() || tslog78_1.TsLog78.Instance;
-        this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
+        // 使用 MyLogger，整库所有日志统一在 logs/koa78/base78_日期.log
+        // myname: "base78" 固定，所有模块共用同一个文件
+        // wfname: "koa78"，统一目录名
+        this.logger = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
+        // this.logger.debug(`Base78 constructor called for ${this.constructor.name}`);
         this.tableConfig = this._loadConfig();
         this.tbname = this.constructor.name;
     }
@@ -68,38 +69,72 @@ class Base78 {
             yield this.dbService.m(sqlWithTableName, [], this.up, this.dbname);
         });
     }
-    // 新增：删除指定日期之前的分表
+    // 新增：删除指定日期之前的所有分表
     dropOldShardingTable(daysAgo) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.shardingConfig) {
                 return 0; // 没有配置分表，直接返回
             }
-            let targetDate;
+            let cutoffDate;
+            let dateFormat;
             if (this.shardingConfig.type === 'daily') {
-                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'day').format('YYYYMMDD');
+                cutoffDate = (0, dayjs_1.default)().subtract(daysAgo, 'day');
+                dateFormat = 'YYYYMMDD';
             }
             else if (this.shardingConfig.type === 'monthly') {
-                targetDate = (0, dayjs_1.default)().subtract(daysAgo, 'month').format('YYYYMM');
+                cutoffDate = (0, dayjs_1.default)().subtract(daysAgo, 'month');
+                dateFormat = 'YYYYMM';
             }
             else {
                 return 0; // 不是分表类型，返回
             }
-            const tableName = `${this.tableConfig.tbname}_${targetDate}`;
-            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+            const tablePrefix = `${this.tableConfig.tbname}_`;
+            let deletedCount = 0;
             try {
-                // 先检查表是否存在
-                const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
-                const tableExists = yield this.dbService.get(checkTableSQL, [], this.up, this.dbname);
-                // 如果表不存在，直接返回0
-                if (tableExists.length === 0) {
+                // 查找所有匹配的表
+                const checkTableSQL = `SHOW TABLES LIKE '${tablePrefix}%'`;
+                const tables = yield this.dbService.get(checkTableSQL, [], this.up, this.dbname);
+                if (tables.length === 0) {
                     return 0;
                 }
-                yield this.dbService.m(dropTableSQL, [], this.up, this.dbname);
-                return 1; // 成功删除返回1
+                // 遍历所有匹配的表
+                for (const tableRow of tables) {
+                    const tableName = Object.values(tableRow)[0];
+                    if (!tableName)
+                        continue;
+                    // 提取日期部分
+                    const dateStr = tableName.substring(tablePrefix.length);
+                    // 解析日期
+                    let tableDate;
+                    try {
+                        if (this.shardingConfig.type === 'daily') {
+                            tableDate = (0, dayjs_1.default)(dateStr, 'YYYYMMDD');
+                        }
+                        else {
+                            tableDate = (0, dayjs_1.default)(dateStr, 'YYYYMM');
+                        }
+                    }
+                    catch (e) {
+                        continue; // 日期解析失败，跳过
+                    }
+                    // 检查是否过期
+                    if (tableDate.isValid() && tableDate.isBefore(cutoffDate)) {
+                        try {
+                            const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+                            yield this.dbService.m(dropTableSQL, [], this.up, this.dbname);
+                            deletedCount++;
+                            this.logger.debug(`成功删除过期表: ${tableName}`);
+                        }
+                        catch (error) {
+                            this.logger.error(`删除表 ${tableName} 失败: ${error}`);
+                        }
+                    }
+                }
+                return deletedCount;
             }
             catch (error) {
-                this.logger.error(`删除表 ${tableName} 失败: ${error}`);
-                return 0; // 删除失败返回0
+                this.logger.error(`删除过期分表失败: ${error}`);
+                return 0;
             }
         });
     }
@@ -111,47 +146,35 @@ class Base78 {
             }
             const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
             const retentionDays = this.shardingConfig.retentionDays || 5;
+            const mapKey = this.tableConfig.tbname;
             // 如果今天已经执行过维护任务，则跳过
-            if (Base78.lastMaintenanceDate === today) {
+            if (Base78.lastMaintenanceDateMap.get(mapKey) === today) {
                 return;
             }
             try {
-                // 正常情况下：删除retentionDays天前的分表
-                const dropResult = yield this.dropOldShardingTable(retentionDays);
-                if (dropResult === 1) {
-                    // 如果删除成功，只新建第retentionDays天的表
+                // 1. 确保今天的表存在
+                const todayDateStr = this.shardingConfig.type === 'daily' ?
+                    (0, dayjs_1.default)().format('YYYYMMDD') :
+                    (0, dayjs_1.default)().format('YYYYMM');
+                yield this.createShardingTable(todayDateStr);
+                // 2. 删除retentionDays天前的旧表
+                yield this.dropOldShardingTable(retentionDays);
+                // 3. 创建未来需要的表（从明天到未来retentionDays天）
+                for (let i = 1; i <= retentionDays; i++) {
                     let futureDate;
                     if (this.shardingConfig.type === 'daily') {
-                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'day');
+                        futureDate = (0, dayjs_1.default)().add(i, 'day');
                     }
-                    else { // monthly
-                        futureDate = (0, dayjs_1.default)().add(retentionDays, 'month');
+                    else {
+                        futureDate = (0, dayjs_1.default)().add(i, 'month');
                     }
                     const dateStr = this.shardingConfig.type === 'daily' ?
                         futureDate.format('YYYYMMDD') :
                         futureDate.format('YYYYMM');
                     yield this.createShardingTable(dateStr);
                 }
-                else {
-                    // 如果删除失败，新建从后退(retentionDays-1)天开始到未来retentionDays天的表
-                    const pastDays = retentionDays - 1;
-                    const futureDays = retentionDays;
-                    for (let i = -pastDays; i <= futureDays; i++) {
-                        let date;
-                        if (this.shardingConfig.type === 'daily') {
-                            date = (0, dayjs_1.default)().add(i, 'day');
-                        }
-                        else { // monthly
-                            date = (0, dayjs_1.default)().add(i, 'month');
-                        }
-                        const dateStr = this.shardingConfig.type === 'daily' ?
-                            date.format('YYYYMMDD') :
-                            date.format('YYYYMM');
-                        yield this.createShardingTable(dateStr);
-                    }
-                }
                 // 更新最后维护日期
-                Base78.lastMaintenanceDate = today;
+                Base78.lastMaintenanceDateMap.set(mapKey, today);
             }
             catch (error) {
                 this.logger.error(`执行分表维护任务失败: ${error}`);
@@ -244,7 +267,7 @@ class Base78 {
         const className = this.constructor.name;
         //this.logger.debug(`正在加载类的配置: ${className}`);
         const config = Config_1.Config.getInstance();
-        this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
+        // this.logger.debug(`Config 实例: ${config ? 'exists' : 'undefined'}`);
         if (!config) {
             this.logger.error('Config is not initialized');
             throw new Error('Config is not initialized');
@@ -307,8 +330,13 @@ class Base78 {
             try {
                 const result = yield this.dbService.m(sb, pars, up, this.dbname);
                 if (result.error) {
-                    this._setBack(-1, result.error);
+                    this._setBack(-2003, result.error);
                     return result.error;
+                }
+                // 如果所有更新都成功但 affectedRows 为 0
+                if (result.affectedRows === 0) {
+                    this._setBack(-2003, "批量更新失败：没有记录被更新");
+                    return result;
                 }
                 return result.affectedRows.toString();
             }
@@ -321,12 +349,12 @@ class Base78 {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || (this.up.cols && this.up.cols.length > 0 && this.up.cols[0] !== 'all' ? this.up.cols : this.tableConfig.colsImp);
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const values = this.up.pars.slice(0, colp.length);
-            values.push(koa78_upinfo_1.default.getNewid(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
@@ -335,23 +363,36 @@ class Base78 {
             // 如果返回结果包含错误信息，设置 res 为负值并返回错误信息
             if (result.error) {
                 this._setBack(-1, result.error);
-                return result.error;
+                // 失败时返回 SQL 语句方便调试
+                let sql = query;
+                for (let i = 0; i < values.length; i++) {
+                    const val = values[i];
+                    const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                    sql = sql.replace('?', replacement);
+                }
+                return Object.assign(Object.assign({}, result), { sql });
             }
-            // 返回可直接在SQL客户端执行的完整SQL（带参数值）
-            let sql = query;
-            for (let i = 0; i < values.length; i++) {
-                const val = values[i];
-                const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
-                sql = sql.replace('?', replacement);
+            // 检查 insertId 是否为 0（插入失败）
+            if (result.insertId === 0) {
+                this._setBack(-1001, "插入失败：没有数据被插入");
+                // 失败时返回 SQL 语句方便调试
+                let sql = query;
+                for (let i = 0; i < values.length; i++) {
+                    const val = values[i];
+                    const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
+                    sql = sql.replace('?', replacement);
+                }
+                return Object.assign(Object.assign({}, result), { sql });
             }
-            return sql;
+            // 成功时直接返回 result 对象，包含 insertId 等信息
+            return result;
         });
     }
     mAddMany(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             yield this.performShardingTableMaintenance();
-            colp = colp || this.tableConfig.colsImp;
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
             // 检查是否有足够的数据
             if (this.up.pars.length < colp.length) {
                 throw new Error('insufficient parameters for mAddMany');
@@ -364,7 +405,7 @@ class Base78 {
             }
             // 检查是否有余数（参数数量必须是 colp.length 的整数倍）
             if (totalPars % colp.length !== 0) {
-                throw new Error('parameters count must be multiple of column count');
+                throw new Error(`parameters count must be multiple of column count (got ${totalPars} parameters for ${colp.length} columns: ${colp.join(', ')})`);
             }
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
@@ -380,14 +421,72 @@ class Base78 {
                 // 添加业务字段值
                 values.push(...rowValues);
                 // 为每条记录自动生成 UUID id
-                values.push(koa78_upinfo_1.default.getNewid());
+                values.push(UpInfo_1.default.getNewid());
                 // 添加系统字段值（每行都相同）
                 values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             }
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-1002, result.error);
+                return 0;
+            }
+            // 检查 affectedRows 是否为 0（没有行被插入）
+            if (result.affectedRows === 0) {
+                this._setBack(-1002, "批量插入失败：没有数据被插入");
+                return 0;
+            }
+            return result.affectedRows;
+        });
+    }
+    mAddManyByid(colp) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            this.checkAdminPermission();
+            yield this.performShardingTableMaintenance();
+            colp = colp || this.up.cols || this.tableConfig.colsImp;
+            // 每行用户参数数：colp 字段 + id（客户端提供）
+            const userFieldsPerRow = colp.length + 1;
+            // 检查是否有足够的数据
+            if (this.up.pars.length < userFieldsPerRow) {
+                throw new Error('insufficient parameters for mAddManyByid');
+            }
+            // 计算行数：用户参数数 / (colp.length + 1)
+            const totalPars = this.up.pars.length;
+            const rowCount = Math.floor(totalPars / userFieldsPerRow);
+            if (rowCount === 0) {
+                throw new Error('no data to insert');
+            }
+            // 检查是否有余数
+            if (totalPars % userFieldsPerRow !== 0) {
+                throw new Error(`parameters count must be multiple of column count + id (got ${totalPars} parameters for ${userFieldsPerRow} fields per row: ${colp.join(', ')} + id)`);
+            }
+            // 为所有字段名添加反引号
+            const quotedColp = colp.map(col => `\`${col}\``);
+            // 每行实际需要的参数数：colp 字段 + id + 3个系统字段（upby, uptime, uidcid）
+            const fieldsPerRow = colp.length + 4;
+            // 构建 SQL：和 mAddMany 一样包含 id 字段
+            const query = `INSERT IGNORE INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+            // 构建参数数组
+            const values = [];
+            for (let i = 0; i < rowCount; i++) {
+                const startIndex = i * userFieldsPerRow;
+                const rowValues = this.up.pars.slice(startIndex, startIndex + userFieldsPerRow);
+                // 添加业务字段值（colp 个）
+                values.push(...rowValues.slice(0, colp.length));
+                // 添加客户端提供的 id
+                values.push(rowValues[colp.length]);
+                // 添加系统字段值（每行都相同）
+                values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            }
+            const result = yield this.dbService.m(query, values, this.up, this.dbname);
+            // 如果返回结果包含错误信息，设置 res 为负值并返回受影响行数（0）
+            if (result.error) {
+                this._setBack(-1003, result.error);
+                return 0;
+            }
+            // 检查 affectedRows 是否为 0（没有行被插入）
+            if (result.affectedRows === 0) {
+                this._setBack(-1003, "批量插入失败：没有数据被插入");
                 return 0;
             }
             return result.affectedRows;
@@ -406,12 +505,14 @@ class Base78 {
             values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-2001, result.error);
                 return result.error;
             }
-            if (result.affectedRows == 0)
+            if (result.affectedRows == 0) {
+                this._setBack(-2001, "更新失败：记录不存在或没有数据被修改");
                 return this.up.midpk.toString() + " " + this.tableConfig.uidcid + " "
                     + this.up[this.tableConfig.uidcid] + " " + JSON.stringify(this.up);
+            }
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
         });
     }
@@ -435,8 +536,13 @@ class Base78 {
             values.push(this.up.uname || '', this.up.utime, idpk);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-2002, result.error);
                 return result.error;
+            }
+            // 检查 affectedRows 是否为 0（更新失败）
+            if (result.affectedRows === 0) {
+                this._setBack(-2002, "更新失败：没有记录被更新");
+                return "更新失败：没有记录被更新";
             }
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
         });
@@ -503,10 +609,14 @@ class Base78 {
             const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行删除
             const result = yield this.dbService.m(query, [idpk], this.up, this.dbname);
             if (result.error) {
-                this._setBack(-1, result.error);
+                this._setBack(-3001, result.error);
                 return result.error;
             }
-            return result.affectedRows === 0 ? "err:没有行被修改" : this.up.mid.toString();
+            if (result.affectedRows === 0) {
+                this._setBack(-3001, "删除失败：没有行被删除");
+                return "err:没有行被修改";
+            }
+            return this.up.mid.toString();
         });
     }
     mdelmany() {
@@ -525,8 +635,13 @@ class Base78 {
             try {
                 const result = yield this.dbService.m(query, idpkList, this.up, this.dbname);
                 if (result.error) {
-                    this._setBack(-1, result.error);
+                    this._setBack(-3002, result.error);
                     return result.error;
+                }
+                // 检查 affectedRows 是否为 0（没有行被删除）
+                if (result.affectedRows === 0) {
+                    this._setBack(-3002, "批量删除失败：没有行被删除");
+                    return "0";
                 }
                 return result.affectedRows.toString();
             }
@@ -567,8 +682,8 @@ class Base78 {
         });
     }
 }
-//维护命令一天执行一次
-Base78.lastMaintenanceDate = '';
+//维护命令一天执行一次（每个表独立记录）
+Base78.lastMaintenanceDateMap = new Map();
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -593,6 +708,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Base78.prototype, "mAddMany", null);
+tslib_1.__decorate([
+    (0, decorators_1.ApiMethod)(),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Array]),
+    tslib_1.__metadata("design:returntype", Promise)
+], Base78.prototype, "mAddManyByid", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
