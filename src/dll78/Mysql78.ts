@@ -21,10 +21,12 @@ export default class Mysql78 {
     public isCount: boolean = false;
     private log: MyLogger = MyLogger.getInstance("base78", 3, "koa78");
     private warnHandler: ((info: string, kind: string, up: UpInfo) => Promise<any>) | null = null;
+    private _cleanupTimer: NodeJS.Timeout | null = null;
 
     // 设置重试次数和重试延迟
     private readonly maxRetryAttempts: number = 3;
     private readonly retryDelayMs: number = 1000; // 1秒延迟
+    private readonly statementPerConnectionLimit: number = 1000;
 
     constructor(config: {
         host?: string;
@@ -57,6 +59,10 @@ export default class Mysql78 {
             connectTimeout: 30 * 1000,
             waitForConnections: true,  // 等待连接池中的连接可用
         });
+
+        this._cleanupTimer = setInterval(() => {
+            this._statementCache.clear();
+        }, 8 * 60 * 60 * 1000);
     }
 
 
@@ -135,9 +141,38 @@ export default class Mysql78 {
             return this._statementCache.get(cacheKey)!;
         }
 
+        this._enforcePerConnectionLimit(connection.threadId);
+
         const statement = await connection.prepare(cmdtext);
         this._statementCache.set(cacheKey, statement);
         return statement;
+    }
+
+    private _enforcePerConnectionLimit(threadId: number): void {
+        const prefix = `${threadId}:`;
+        let count = 0;
+        for (const key of this._statementCache.keys()) {
+            if (key.startsWith(prefix)) {
+                count++;
+            }
+        }
+        if (count >= this.statementPerConnectionLimit) {
+            for (const key of this._statementCache.keys()) {
+                if (key.startsWith(prefix)) {
+                    this._statementCache.delete(key);
+                    return;
+                }
+            }
+        }
+    }
+
+    private clearConnectionStatements(threadId: number): void {
+        const prefix = `${threadId}:`;
+        for (const key of this._statementCache.keys()) {
+            if (key.startsWith(prefix)) {
+                this._statementCache.delete(key);
+            }
+        }
     }
 
 
@@ -185,6 +220,7 @@ export default class Mysql78 {
                 const errCode = err?.code || err?.errno;
                 if (connectionLostCodes.includes(errCode) && connection) {
                     this.log.error(`mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
+                    this.clearConnectionStatements(connection.threadId);
                     connection.destroy();
                     connection = null;
                     statement = null;
@@ -301,6 +337,7 @@ export default class Mysql78 {
                 const errCode = err?.code || err?.errno;
                 if (connectionLostCodes.includes(errCode) && connection) {
                     this.log.error(`mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
+                    this.clearConnectionStatements(connection.threadId);
                     connection.destroy();
                     connection = null;
                     statement = null;
@@ -370,6 +407,7 @@ export default class Mysql78 {
                 const errCode = err?.code || err?.errno;
                 if (connectionLostCodes.includes(errCode) && connection) {
                     this.log.error(`mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
+                    this.clearConnectionStatements(connection.threadId);
                     connection.destroy();
                     connection = null;
                     statement = null;
@@ -558,6 +596,11 @@ export default class Mysql78 {
     }
 
     async close() {
+        if (this._cleanupTimer) {
+            clearInterval(this._cleanupTimer);
+            this._cleanupTimer = null;
+        }
+        this._statementCache.clear();
         if (this._pool) {
             await this._pool.end();
         }
