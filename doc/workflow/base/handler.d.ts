@@ -27,7 +27,6 @@ export declare class Handler {
     pricedescription: string;
     upby: string;
     uptime: string | null;
-    idpk: number | null;
     id: string | null;
     remark: string;
     remark2: string;

@@ -32,7 +32,6 @@ export declare class AgentDB {
     pricedescription: string;
     upby: string;
     uptime: Date | null;
-    idpk: number | null;
     id: string | null;
     remark: string;
     remark2: string;

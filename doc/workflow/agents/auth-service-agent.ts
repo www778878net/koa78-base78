@@ -119,14 +119,14 @@ export class AuthServiceAgent extends Agent {
             let cmdtext = `
                 SELECT l.*, la.sid_web_date, la.sid, la.sid_web, c.coname, c.uid as idceo, c.id as cid 
                 FROM lovers l
-                JOIN lovers_auth la ON l.idpk = la.ikuser
+                JOIN lovers_auth la ON l.id = la.ikuser
                 LEFT JOIN companysuser cu ON cu.uid = l.id AND cu.cid = l.idcodef
                 LEFT JOIN companys c ON l.idcodef = c.id
                 WHERE la.sid = ? OR la.sid_web = ?
             `;
             if (dbname != "default")
                 cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,pwd,id,upby,uptime,sid_web_date,  " +
-                    "  idcoDef,openweixin ,truename,idpk   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
+                    "  idcoDef,openweixin ,truename,id   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
                     " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t2.cid=companys.id";
             const values = [up.sid, up.sid];
             // 使用MysqlDatabaseAgent
@@ -147,7 +147,7 @@ export class AuthServiceAgent extends Agent {
             up.idceo = tmp["idceo"];
             up.weixin = tmp["openweixin"];
             up.truename = tmp["truename"];
-            up.idpk = tmp["idpk"];
+            up.id = tmp["id"];
             up.mobile = tmp["mobile"];
 
 
