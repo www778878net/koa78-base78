@@ -12,13 +12,12 @@ export class UpInfoAgent extends Agent {
     // 数据获取非必填字段
     getstart: number = 0;
     getnumber: number = 15;
-    order: string = "idpk";
+    order: string = "id";
     bcid: string = "";
     mid: string = "";
     pars: string[] = [];
     cols: string[] = [];
 
-    midpk: number = 0;
     upid: number = 0;
     type: number = 0;
 
@@ -38,7 +37,6 @@ export class UpInfoAgent extends Agent {
     apimicro: string = "";
     apiobj: string = "";
     apifun: string = "";
-    apimicro: string = "";
     uptime: Date = new Date();
     utime: string = dayjs.utc().format('YYYY-MM-DD HH:mm:ss');
     errmessage: string = "";
@@ -60,7 +58,7 @@ export class UpInfoAgent extends Agent {
     idceo: string = "";
     truename: string = "";
     mobile: string = "";
-    idpk: number = 0;
+    id: string = "";
 
     // 返回用
     res: number = 0;
@@ -84,7 +82,6 @@ export class UpInfoAgent extends Agent {
         this.method = req.path;
 
         if (ctx.params) {
-            this.apimicroro = ctx.paramapimicroicro;
             this.apimicro = ctx.params.apimicro;
             this.apiobj = ctx.params.apiobj;
             this.apifun = ctx.params.apifun;
@@ -99,8 +96,7 @@ export class UpInfoAgent extends Agent {
         } else if (req.method === "SOCK") {
             pars = req.header;
             this.method = req.header["method"];
-            const [apimicroro, apimicro, apiobj, apifun] = this.method.split("/");
-            this.apimicroro apimicroicro;
+            const [apisys, apimicro, apiobj, apifun] = this.method.split("/");
             this.apimicro = apimicro;
             this.apiobj = apiobj;
             this.apifun = apifun;
@@ -121,7 +117,6 @@ export class UpInfoAgent extends Agent {
         this.sid ??= "";
 
         this.mid = pars.mid ?? UpInfoAgent.getNewid();
-        this.midpk = pars.midpk ?? -1;
         this.getnumber = +(pars.getnumber ?? 15);
         this.pcid = req.header?.pcid ?? pars.pcid ?? '';
         this.pcname = req.header?.pcname ?? pars.pcname ?? '';
@@ -129,7 +124,7 @@ export class UpInfoAgent extends Agent {
         this.ip = this.ip.includes("ffff") ? this.ip.substring(this.ip.indexOf("ffff") + 5) : this.ip;
         this.colsn = pars["cols[]"] ?? pars.cols ?? ["all"];
 
-        this.order = pars.order ?? 'idpk desc';
+        this.order = pars.order ?? 'id desc';
 
         this.jsonp = pars.jsonp ?? false;
         this.backtype = pars.backtype ?? "json";
@@ -236,7 +231,7 @@ export class UpInfoAgent extends Agent {
     }
 
     checkCols(cols: string[]): string {
-        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'idpk')) {
+        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'id')) {
             return "checkcolsallok";
         }
         let isback = "checkcolsallok";
@@ -262,10 +257,10 @@ export class UpInfoAgent extends Agent {
             const descIndex = o.indexOf(" desc");
             if (descIndex >= 0 && descIndex === o.length - 5)
                 order = o.substr(0, descIndex);
-            if (order === 'id' || order === 'idpk' || order === 'uptime' || order === 'upby')
+            if (order === 'id' || order === 'uptime' || order === 'upby')
                 continue;
 
-            if (order !== 'id' && order !== 'idpk' && !cols.includes(order)) {
+            if (order !== 'id' && !cols.includes(order)) {
                 return false;
             }
         }
