@@ -5,17 +5,16 @@ const tslib_1 = require("tslib");
 const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
 class UpInfo {
     constructor(ctx) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16;
         // 数据获取非必填字段
         this.getstart = 0;
         this.getnumber = 15;
-        this.order = "idpk";
+        this.order = "id desc";
         this.bcid = "";
         this.mid = "";
         this.pars = [];
         this.cols = [];
-        this.midpk = 0;
-        this.upid = 0;
+        this.upid = "";
         this.type = 0;
         // 调试监控用
         this.debug = false;
@@ -50,7 +49,7 @@ class UpInfo {
         this.idceo = "";
         this.truename = "";
         this.mobile = "";
-        this.idpk = 0;
+        this.id = ""; // 雪花ID主键
         // 返回用
         this.res = 0;
         this.errmsg = "";
@@ -100,35 +99,34 @@ class UpInfo {
         this.sid = (_s = (_r = req.header['sid']) !== null && _r !== void 0 ? _r : pars.sid) !== null && _s !== void 0 ? _s : '';
         (_t = this.sid) !== null && _t !== void 0 ? _t : (this.sid = "");
         this.mid = (_u = pars.mid) !== null && _u !== void 0 ? _u : UpInfo.getNewid();
-        this.midpk = +((_v = pars.midpk) !== null && _v !== void 0 ? _v : -1);
-        this.getnumber = +((_w = pars.getnumber) !== null && _w !== void 0 ? _w : 15);
-        this.pcid = (_y = (_x = req.header['pcid']) !== null && _x !== void 0 ? _x : pars.pcid) !== null && _y !== void 0 ? _y : '';
-        this.pcname = (_0 = (_z = req.header['pcname']) !== null && _z !== void 0 ? _z : pars.pcname) !== null && _0 !== void 0 ? _0 : '';
-        this.ip = (_1 = req.header['x-forwarded-for']) !== null && _1 !== void 0 ? _1 : "";
+        this.getnumber = +((_v = pars.getnumber) !== null && _v !== void 0 ? _v : 15);
+        this.pcid = (_x = (_w = req.header['pcid']) !== null && _w !== void 0 ? _w : pars.pcid) !== null && _x !== void 0 ? _x : '';
+        this.pcname = (_z = (_y = req.header['pcname']) !== null && _y !== void 0 ? _y : pars.pcname) !== null && _z !== void 0 ? _z : '';
+        this.ip = (_0 = req.header['x-forwarded-for']) !== null && _0 !== void 0 ? _0 : "";
         this.ip = this.ip.includes("ffff") ? this.ip.substring(this.ip.indexOf("ffff") + 5) : this.ip;
-        this.colsn = (_3 = (_2 = pars["cols[]"]) !== null && _2 !== void 0 ? _2 : pars.cols) !== null && _3 !== void 0 ? _3 : ["all"];
-        this.order = (_4 = pars.order) !== null && _4 !== void 0 ? _4 : 'idpk desc';
-        this.jsonp = (_5 = pars.jsonp) !== null && _5 !== void 0 ? _5 : false;
-        this.backtype = (_6 = pars.backtype) !== null && _6 !== void 0 ? _6 : "json";
-        this.upid = (_7 = pars.upid) !== null && _7 !== void 0 ? _7 : UpInfo.getNewid();
-        this.cache = (_9 = (_8 = req.header['cache']) !== null && _8 !== void 0 ? _8 : pars.cache) !== null && _9 !== void 0 ? _9 : this.mid;
+        this.colsn = (_2 = (_1 = pars["cols[]"]) !== null && _1 !== void 0 ? _1 : pars.cols) !== null && _2 !== void 0 ? _2 : ["all"];
+        this.order = (_3 = pars.order) !== null && _3 !== void 0 ? _3 : 'id desc';
+        this.jsonp = (_4 = pars.jsonp) !== null && _4 !== void 0 ? _4 : false;
+        this.backtype = (_5 = pars.backtype) !== null && _5 !== void 0 ? _5 : "json";
+        this.upid = (_6 = pars.upid) !== null && _6 !== void 0 ? _6 : UpInfo.getNewid() + '';
+        this.cache = (_8 = (_7 = req.header['cache']) !== null && _7 !== void 0 ? _7 : pars.cache) !== null && _8 !== void 0 ? _8 : this.mid;
         this.cols = typeof this.colsn === 'string' ? JSON.parse(this.colsn) : this.colsn;
-        this.base64 = (_10 = pars.base64) !== null && _10 !== void 0 ? _10 : false;
+        this.base64 = (_9 = pars.base64) !== null && _9 !== void 0 ? _9 : false;
         if (this.v >= 24) {
-            this.json = (_11 = pars.json) !== null && _11 !== void 0 ? _11 : true;
-            this.jsonbase64 = (_12 = pars.jsonbase64) !== null && _12 !== void 0 ? _12 : false;
+            this.json = (_10 = pars.json) !== null && _10 !== void 0 ? _10 : true;
+            this.jsonbase64 = (_11 = pars.jsonbase64) !== null && _11 !== void 0 ? _11 : false;
         }
         else if (this.v >= 17.01) {
-            this.json = (_13 = pars.json) !== null && _13 !== void 0 ? _13 : false;
-            this.jsonbase64 = (_14 = pars.jsonbase64) !== null && _14 !== void 0 ? _14 : true;
-            this.uname = this._decodeBase64((_15 = this.uname) !== null && _15 !== void 0 ? _15 : '');
+            this.json = (_12 = pars.json) !== null && _12 !== void 0 ? _12 : false;
+            this.jsonbase64 = (_13 = pars.jsonbase64) !== null && _13 !== void 0 ? _13 : true;
+            this.uname = this._decodeBase64((_14 = this.uname) !== null && _14 !== void 0 ? _14 : '');
             if (this.pcname !== "") {
                 this.pcname = this._decodeBase64(this.pcname);
             }
         }
         else if (this.v === 17) {
-            this.jsonbase64 = (_16 = pars.jsonbase64) !== null && _16 !== void 0 ? _16 : false;
-            this.cidn = (_17 = pars.cid) !== null && _17 !== void 0 ? _17 : "";
+            this.jsonbase64 = (_15 = pars.jsonbase64) !== null && _15 !== void 0 ? _15 : false;
+            this.cidn = (_16 = pars.cid) !== null && _16 !== void 0 ? _16 : "";
         }
         if (this.parsn === "") {
             this.pars = [];
@@ -206,12 +204,12 @@ class UpInfo {
         return cols.includes(o);
     }
     checkCols(cols) {
-        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'idpk')) {
+        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'id')) {
             return "checkcolsallok";
         }
         let isback = "checkcolsallok";
         // 固定字段豁免：这些字段在所有表中都存在，不需要在 cols 中定义
-        const systemFields = ['id', 'idpk', 'uptime', 'upby', 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'];
+        const systemFields = ['id', 'uptime', 'upby', 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'];
         try {
             this.cols.forEach(item => {
                 if (!cols.includes(item) && !systemFields.includes(item))
@@ -233,9 +231,9 @@ class UpInfo {
             const descIndex = o.indexOf(" desc");
             if (descIndex >= 0 && descIndex === o.length - 5)
                 order = o.substr(0, descIndex);
-            if (order === 'id' || order === 'idpk' || order === 'uptime' || order === 'upby')
+            if (order === 'id' || order === 'uptime' || order === 'upby')
                 continue;
-            if (order !== 'id' && order !== 'idpk' && !cols.includes(order)) {
+            if (order !== 'id' && !cols.includes(order)) {
                 return false;
             }
         }

@@ -7,7 +7,7 @@ export declare class UpInfoAgent extends Agent {
     mid: string;
     pars: string[];
     cols: string[];
-    midpk: number;
+    mid: string;
     upid: number;
     type: number;
     debug: boolean;
@@ -39,7 +39,7 @@ export declare class UpInfoAgent extends Agent {
     idceo: string;
     truename: string;
     mobile: string;
-    idpk: number;
+    id: string;
     res: number;
     errmsg: string;
     backtype: string;

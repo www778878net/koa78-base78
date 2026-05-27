@@ -54,8 +54,7 @@ export class WorkflowDB {
     // 系统字段
     public upby: string = "";
     public uptime: string = new Date().toISOString();  // 更新时间
-    public idpk: number | null = null;  // 自增主键
-    public id: string = "";
+    public id: string = "";  // 雪花ID主键
     public remark: string = "";
     public remark2: string = "";
     public remark3: string = "";

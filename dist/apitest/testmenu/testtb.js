@@ -7,14 +7,14 @@ const path = tslib_1.__importStar(require("path"));
 const protobuf = tslib_1.__importStar(require("protobufjs"));
 // 模拟数据
 const mockData = [
-    { kind: "newdata", item: "itemval", data: "mock_data_1", id: "mock-id-1", idpk: 1 },
-    { kind: "kindval", item: "mock-item", data: "mock_data_2", id: "mock-id-2", idpk: 2 },
+    { kind: "newdata", item: "itemval", data: "mock_data_1", id: "mock-id-1" },
+    { kind: "kindval", item: "mock-item", data: "mock_data_2", id: "mock-id-2" },
     // 可以根据需要添加更多模拟数据
 ];
 class testtb extends Base78_1.CidBase78 {
     health() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            let sb = 'SELECT IDPK FROM testtb limit 1';
+            let sb = 'SELECT id FROM testtb limit 1';
             let tb = yield this.dbService.get(sb, [], this.up);
             if (tb.length == 0) {
                 throw new Error("db error restart");

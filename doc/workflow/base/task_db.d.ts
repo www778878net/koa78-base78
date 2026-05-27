@@ -41,7 +41,6 @@ export declare class TaskDB {
     resourcereq: string;
     upby: string;
     uptime: string;
-    idpk: number | null;
     id: string;
     remark: string;
     remark2: string;

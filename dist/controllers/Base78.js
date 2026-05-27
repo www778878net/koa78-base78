@@ -6,12 +6,12 @@ require("reflect-metadata");
 const DatabaseService_1 = require("../services/DatabaseService");
 const CacheService_1 = require("../services/CacheService");
 const Config_1 = require("../config/Config");
-const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const QueryBuilder_1 = require("../utils/QueryBuilder");
 const decorators_1 = require("../interfaces/decorators");
 const mylogger_1 = require("../utils/mylogger");
 const elasticsearch78_1 = tslib_1.__importDefault(require("../services/elasticsearch78"));
 const dayjs_1 = tslib_1.__importDefault(require("dayjs")); // 导入dayjs
+const snowflake_1 = require("../config/snowflake");
 /**
  * Base78 基础控制器类
  *
@@ -293,20 +293,20 @@ class Base78 {
             // 防注入: 校验cid和uname
             this.checkAdminPermission();
             let colp = colpin || this.up.cols || self.tableConfig.colsImp; // 修改列
-            let num = colp.length + 1; // 每组参数包含：业务字段 + idpk
+            let num = colp.length + 1; // 每组参数包含：业务字段 + id
             // 检查参数数量是否正确
             if (up.pars.length % num !== 0) {
                 throw new Error('参数数量不正确，必须为(业务字段数 + 1)的整数倍');
             }
             const rowCount = up.pars.length / num;
-            let idpkList = []; // 用于存储idpk列表
+            let idList = []; // 用于存储id列表
             let values = []; // 用于存储更新值
             let pars = []; // 最终的查询参数
             // 处理每一组参数并构建更新列表
             for (let i = 0; i < rowCount; i++) {
                 const startIndex = i * num;
                 const rowVals = up.pars.slice(startIndex, startIndex + num);
-                idpkList.push(rowVals[num - 1]); // 获取idpk列表
+                idList.push(rowVals[num - 1]); // 获取id列表
                 values.push(rowVals.slice(0, num - 1)); // 存储业务字段值
             }
             // 构建 SQL 查询
@@ -314,18 +314,18 @@ class Base78 {
             for (let i = 0; i < colp.length; i++) {
                 if (i > 0)
                     sb += `, `;
-                sb += `\`${colp[i]}\` = CASE \`idpk\` `;
-                for (let j = 0; j < idpkList.length; j++) {
+                sb += `\`${colp[i]}\` = CASE \`id\` `;
+                for (let j = 0; j < idList.length; j++) {
                     sb += `WHEN ? THEN ? `;
-                    pars.push(idpkList[j], values[j][i]); // 添加查询参数
+                    pars.push(idList[j], values[j][i]); // 添加查询参数
                 }
                 sb += `END`;
             }
             // 添加 upby 和 uptime 字段
             sb += ", \`upby\` = ?, \`uptime\` = ? ";
             // 添加 where 子句
-            sb += `WHERE \`idpk\` IN (${idpkList.map(() => '?').join(',')})`;
-            pars.push(up.uname, up.utime, ...idpkList);
+            sb += `WHERE \`id\` IN (${idList.map(() => '?').join(',')})`;
+            pars.push(up.uname, up.utime, ...idList);
             // 执行更新操作
             try {
                 const result = yield this.dbService.m(sb, pars, up, this.dbname);
@@ -354,7 +354,7 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const values = this.up.pars.slice(0, colp.length);
-            values.push(this.up.mid, this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
+            values.push((0, snowflake_1.nextIdString)(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             // 为所有字段名添加反引号
             const quotedColp = colp.map(col => `\`${col}\``);
             const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
@@ -420,8 +420,8 @@ class Base78 {
                 const rowValues = this.up.pars.slice(startIndex, startIndex + colp.length);
                 // 添加业务字段值
                 values.push(...rowValues);
-                // 为每条记录自动生成 UUID id
-                values.push(UpInfo_1.default.getNewid());
+                // 为每条记录自动生成雪花ID
+                values.push((0, snowflake_1.nextIdString)());
                 // 添加系统字段值（每行都相同）
                 values.push(this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
             }
@@ -492,7 +492,7 @@ class Base78 {
             return result.affectedRows;
         });
     }
-    mUpdateIdpk(colp) {
+    mUpdateByid(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
             colp = colp || this.up.cols || this.tableConfig.colsImp;
@@ -500,9 +500,9 @@ class Base78 {
                 colp = colp.slice(0, this.up.pars.length);
             }
             const setClause = colp.map(col => `\`${col}\`=?`).join(',');
-            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
+            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
             const values = this.up.pars.slice(0, colp.length);
-            values.push(this.up.uname || '', this.up.utime, this.up.midpk.toString(), this.up[this.tableConfig.uidcid]);
+            values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
                 this._setBack(-2001, result.error);
@@ -510,7 +510,7 @@ class Base78 {
             }
             if (result.affectedRows == 0) {
                 this._setBack(-2001, "更新失败：记录不存在或没有数据被修改");
-                return this.up.midpk.toString() + " " + this.tableConfig.uidcid + " "
+                return this.up.mid + " " + this.tableConfig.uidcid + " "
                     + this.up[this.tableConfig.uidcid] + " " + JSON.stringify(this.up);
             }
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
@@ -523,17 +523,10 @@ class Base78 {
             if (this.up.pars.length < colp.length) {
                 colp = colp.slice(0, this.up.pars.length);
             }
-            // 先查询 idpk，避免死锁
-            const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
-            const idpkResult = yield this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
-            if (idpkResult.length === 0) {
-                return "err:记录不存在";
-            }
-            const idpk = idpkResult[0]["idpk"];
             const setClause = colp.map(col => `\`${col}\`=?`).join(',');
-            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行更新
+            const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用 id 进行更新
             const values = this.up.pars.slice(0, colp.length);
-            values.push(this.up.uname || '', this.up.utime, idpk);
+            values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
             const result = yield this.dbService.m(query, values, this.up, this.dbname);
             if (result.error) {
                 this._setBack(-2002, result.error);
@@ -547,14 +540,13 @@ class Base78 {
             return result.affectedRows === 1 ? this.up.mid.toString() : result.affectedRows.toString();
         });
     }
-    midpk(colp) {
+    mByid(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
-            const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
-            const result = yield this.dbService.get(query, [this.up.midpk, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
+            const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+            const result = yield this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
-                this.up.midpk = result[0]["idpk"];
-                return this.mUpdateIdpk(colp);
+                return this.mUpdateByid(colp);
             }
             else {
                 return yield this.mAdd(colp);
@@ -564,11 +556,10 @@ class Base78 {
     m(colp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
-            const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+            const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.length === 1) {
-                this.up.midpk = result[0]["idpk"];
-                return this.mUpdateIdpk(colp);
+                return this.mUpdateByid(colp);
             }
             else {
                 return yield this.mAdd(colp);
@@ -599,15 +590,8 @@ class Base78 {
     mdel() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.checkAdminPermission();
-            // 先查询 idpk（使用 FOR UPDATE 加锁，避免死锁）
-            const queryIdpk = `SELECT \`idpk\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1 FOR UPDATE`;
-            const idpkResult = yield this.dbService.get(queryIdpk, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
-            if (idpkResult.length === 0) {
-                return "err:记录不存在";
-            }
-            const idpk = idpkResult[0]["idpk"];
-            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\`=? LIMIT 1`; // 使用 idpk 进行删除
-            const result = yield this.dbService.m(query, [idpk], this.up, this.dbname);
+            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用 id 进行删除
+            const result = yield this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             if (result.error) {
                 this._setBack(-3001, result.error);
                 return result.error;
@@ -627,13 +611,13 @@ class Base78 {
             if (this.up.pars.length === 0) {
                 throw new Error('参数不能为空');
             }
-            // up.pars 包含 idpk 数组
-            const idpkList = this.up.pars;
+            // up.pars 包含 id 数组
+            const idList = this.up.pars;
             // 构建 SQL 查询
-            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`idpk\` IN (${idpkList.map(() => '?').join(',')})`;
+            const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\` IN (${idList.map(() => '?').join(',')})`;
             // 执行删除操作
             try {
-                const result = yield this.dbService.m(query, idpkList, this.up, this.dbname);
+                const result = yield this.dbService.m(query, idList, this.up, this.dbname);
                 if (result.error) {
                     this._setBack(-3002, result.error);
                     return result.error;
@@ -668,13 +652,12 @@ class Base78 {
             const firstField = this.tableConfig.cols[0];
             const firstFieldValue = this.up.pars[0];
             //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
-            const query = `SELECT \`id\`,\`idpk\` FROM ${this.getDynamicTableName()} WHERE \`${firstField}\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+            const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`${firstField}\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
             const result = yield this.dbService.get(query, [firstFieldValue, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
             //console.log(`mByFirstField33:` + query + " " + this.up[this.tableConfig.uidcid] + " " + firstFieldValue + " " + JSON.stringify(result))
             if (result.length === 1) {
                 this.up.mid = result[0]["id"];
-                this.up.midpk = result[0]["idpk"];
-                return this.mUpdateIdpk();
+                return this.mUpdateByid();
             }
             else {
                 return yield this.mAdd(colp);
@@ -719,7 +702,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
-], Base78.prototype, "mUpdateIdpk", null);
+], Base78.prototype, "mUpdateByid", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),
@@ -731,7 +714,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Array]),
     tslib_1.__metadata("design:returntype", Promise)
-], Base78.prototype, "midpk", null);
+], Base78.prototype, "mByid", null);
 tslib_1.__decorate([
     (0, decorators_1.ApiMethod)(),
     tslib_1.__metadata("design:type", Function),

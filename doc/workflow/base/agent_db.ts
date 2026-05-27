@@ -47,8 +47,7 @@ export class AgentDB {
     // 系统字段
     public upby: string = "";
     public uptime: Date | null = null;  // 由数据库自动更新
-    public idpk: number | null = null;  // 由数据库自动生成
-    public id: string | null = null;  // 唯一标识符
+    public id: string | null = null;  // 雪花ID主键
 
     // 备注字段
     public remark: string = "";
