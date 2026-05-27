@@ -11,8 +11,10 @@ export default class Mysql78 {
     isCount: boolean;
     private log;
     private warnHandler;
+    private _cleanupTimer;
     private readonly maxRetryAttempts;
     private readonly retryDelayMs;
+    private readonly statementPerConnectionLimit;
     constructor(config: {
         host?: string;
         port?: number;
@@ -33,6 +35,8 @@ export default class Mysql78 {
      * */
     creatTb(up: UpInfo): Promise<string>;
     getStatement(connection: mysql.PoolConnection, cmdtext: string): Promise<mysql.PreparedStatementInfo>;
+    private _enforcePerConnectionLimit;
+    private clearConnectionStatements;
     /**
      * sql get
      * @param cmdtext sql

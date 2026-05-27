@@ -4,9 +4,9 @@ const tslib_1 = require("tslib");
 const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
 const utc_1 = tslib_1.__importDefault(require("dayjs/plugin/utc"));
 const mysql = tslib_1.__importStar(require("mysql2/promise"));
-const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const mylogger_1 = require("../utils/mylogger");
 const md5_1 = tslib_1.__importDefault(require("md5"));
+const snowflake_1 = require("../config/snowflake");
 // 扩展 dayjs 以支持 UTC
 dayjs_1.default.extend(utc_1.default);
 /**
@@ -22,9 +22,11 @@ class Mysql78 {
         this.isCount = false;
         this.log = mylogger_1.MyLogger.getInstance("base78", 3, "koa78");
         this.warnHandler = null;
+        this._cleanupTimer = null;
         // 设置重试次数和重试延迟
         this.maxRetryAttempts = 3;
         this.retryDelayMs = 1000; // 1秒延迟
+        this.statementPerConnectionLimit = 1000;
         if (!config)
             return;
         this._host = (_a = config.host) !== null && _a !== void 0 ? _a : '127.0.0.1';
@@ -44,6 +46,9 @@ class Mysql78 {
             connectTimeout: 30 * 1000,
             waitForConnections: true, // 等待连接池中的连接可用
         });
+        this._cleanupTimer = setInterval(() => {
+            this._statementCache.clear();
+        }, 8 * 60 * 60 * 1000);
     }
     // 延迟函数
     delay(ms) {
@@ -106,8 +111,8 @@ class Mysql78 {
             if (!this._pool) {
                 return 'pool null';
             }
-            const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apimicro` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`)) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
-            const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `idpk` int(11) NOT NULL AUTO_INCREMENT,  `id` varchar(36) NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`idpk`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`,`apimicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+            const cmdtext1 = "CREATE TABLE IF NOT EXISTS `sys_warn` (  `uid` varchar(36) NOT NULL DEFAULT '',  `kind` varchar(100) NOT NULL DEFAULT '',  `apimicro` varchar(100) NOT NULL DEFAULT '',  `apiobj` varchar(100) NOT NULL DEFAULT '',  `content` text NOT NULL,  `upid` varchar(36) NOT NULL DEFAULT '',  `upby` varchar(50) DEFAULT '',  `uptime` datetime NOT NULL,  `id` BIGINT NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+            const cmdtext2 = "CREATE TABLE IF NOT EXISTS `sys_sql` (  `cid` varchar(36) NOT NULL DEFAULT '',  `apisys` varchar(50) NOT NULL DEFAULT '',  `apimicro` varchar(50) NOT NULL DEFAULT '',  `apiobj` varchar(50) NOT NULL DEFAULT '',  `cmdtext` varchar(200) NOT NULL,  `uname` varchar(50) NOT NULL DEFAULT '',  `num` int(11) NOT NULL DEFAULT '0',  `dlong` int(32) NOT NULL DEFAULT '0',  `downlen` bigint NOT NULL DEFAULT '0',  `upby` varchar(50) NOT NULL DEFAULT '',  `cmdtextmd5` varchar(50) NOT NULL DEFAULT '',  `uptime` datetime NOT NULL,  `id` BIGINT NOT NULL,  `remark` varchar(200) NOT NULL DEFAULT '',  `remark2` varchar(200) NOT NULL DEFAULT '',  `remark3` varchar(200) NOT NULL DEFAULT '',  `remark4` varchar(200) NOT NULL DEFAULT '',  `remark5` varchar(200) NOT NULL DEFAULT '',  `remark6` varchar(200) NOT NULL DEFAULT '',  PRIMARY KEY (`id`),  UNIQUE KEY `u_v_sys_obj_cmdtext` (`apisys`,`apimicro`,`apiobj`,`cmdtext`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
             try {
                 yield this._pool.execute(cmdtext1);
                 yield this._pool.execute(cmdtext2);
@@ -125,10 +130,36 @@ class Mysql78 {
             if (this._statementCache.has(cacheKey)) {
                 return this._statementCache.get(cacheKey);
             }
+            this._enforcePerConnectionLimit(connection.threadId);
             const statement = yield connection.prepare(cmdtext);
             this._statementCache.set(cacheKey, statement);
             return statement;
         });
+    }
+    _enforcePerConnectionLimit(threadId) {
+        const prefix = `${threadId}:`;
+        let count = 0;
+        for (const key of this._statementCache.keys()) {
+            if (key.startsWith(prefix)) {
+                count++;
+            }
+        }
+        if (count >= this.statementPerConnectionLimit) {
+            for (const key of this._statementCache.keys()) {
+                if (key.startsWith(prefix)) {
+                    this._statementCache.delete(key);
+                    return;
+                }
+            }
+        }
+    }
+    clearConnectionStatements(threadId) {
+        const prefix = `${threadId}:`;
+        for (const key of this._statementCache.keys()) {
+            if (key.startsWith(prefix)) {
+                this._statementCache.delete(key);
+            }
+        }
     }
     /**
      * sql get
@@ -171,6 +202,7 @@ class Mysql78 {
                     const errCode = (err === null || err === void 0 ? void 0 : err.code) || (err === null || err === void 0 ? void 0 : err.errno);
                     if (connectionLostCodes.includes(errCode) && connection) {
                         this.log.error(`mysql_doGet 连接损坏(${errCode})，销毁连接并重试`);
+                        this.clearConnectionStatements(connection.threadId);
                         connection.destroy();
                         connection = null;
                         statement = null;
@@ -280,6 +312,7 @@ class Mysql78 {
                     const errCode = (err === null || err === void 0 ? void 0 : err.code) || (err === null || err === void 0 ? void 0 : err.errno);
                     if (connectionLostCodes.includes(errCode) && connection) {
                         this.log.error(`mysql_doMBack 连接损坏(${errCode})，销毁连接并重试`);
+                        this.clearConnectionStatements(connection.threadId);
                         connection.destroy();
                         connection = null;
                         statement = null;
@@ -346,6 +379,7 @@ class Mysql78 {
                     const errCode = (err === null || err === void 0 ? void 0 : err.code) || (err === null || err === void 0 ? void 0 : err.errno);
                     if (connectionLostCodes.includes(errCode) && connection) {
                         this.log.error(`mysql_doM 连接损坏(${errCode})，销毁连接并重试`);
+                        this.clearConnectionStatements(connection.threadId);
                         connection.destroy();
                         connection = null;
                         statement = null;
@@ -491,7 +525,7 @@ class Mysql78 {
                 return this.isLog ? 'pool null' : 'isLog is false';
             }
             const cmdtext = 'INSERT INTO sys_warn (`kind`,apimicro,apiobj,`content`,`upby`,`uptime`,`id`,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apimicro, up.apiobj, info, up.uname || '', (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), UpInfo_1.default.getNewid(), up.upid];
+            const values = [kind, up.apimicro, up.apiobj, info, up.uname || '', (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), (0, snowflake_1.nextIdString)(), up.upid];
             try {
                 const [results] = yield this._pool.execute(cmdtext, values);
                 return results.affectedRows;
@@ -520,7 +554,7 @@ class Mysql78 {
                 'ON DUPLICATE KEY UPDATE num=num+1,dlong=dlong+?,downlen=downlen+?';
             try {
                 yield this._pool.execute(sb, [
-                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
+                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, (0, snowflake_1.nextIdString)(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5,
                     dlong, lendown
                 ]);
                 return 'ok';
@@ -533,6 +567,11 @@ class Mysql78 {
     }
     close() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (this._cleanupTimer) {
+                clearInterval(this._cleanupTimer);
+                this._cleanupTimer = null;
+            }
+            this._statementCache.clear();
             if (this._pool) {
                 yield this._pool.end();
             }

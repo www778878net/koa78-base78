@@ -6,10 +6,10 @@ const sqlite3_1 = tslib_1.__importDefault(require("@vscode/sqlite3"));
 const util_1 = require("util");
 const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
 const utc_1 = tslib_1.__importDefault(require("dayjs/plugin/utc"));
-const UpInfo_1 = tslib_1.__importDefault(require("../UpInfo"));
 const mylogger_1 = require("../utils/mylogger");
 // @ts-ignore
 const md5_1 = tslib_1.__importDefault(require("md5"));
+const snowflake_1 = require("../config/snowflake");
 // 扩展 dayjs 以支持 UTC
 dayjs_1.default.extend(utc_1.default);
 /**
@@ -84,8 +84,7 @@ class Sqlite78 {
             upid TEXT NOT NULL DEFAULT '',
             upby TEXT DEFAULT '',
             uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
+            id TEXT NOT NULL PRIMARY KEY,
             remark TEXT NOT NULL DEFAULT '',
             remark2 TEXT NOT NULL DEFAULT '',
             remark3 TEXT NOT NULL DEFAULT '',
@@ -106,8 +105,7 @@ class Sqlite78 {
             upby TEXT NOT NULL DEFAULT '',
             cmdtextmd5 TEXT NOT NULL DEFAULT '',
             uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
+            id TEXT NOT NULL PRIMARY KEY,
             remark TEXT NOT NULL DEFAULT '',
             remark2 TEXT NOT NULL DEFAULT '',
             remark3 TEXT NOT NULL DEFAULT '',
@@ -312,7 +310,7 @@ class Sqlite78 {
                 return this.isLog ? 'database not initialized' : 'isLog is false';
             }
             const cmdtext = 'INSERT INTO sys_warn (kind,apimicro,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-            const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, UpInfo_1.default.getNewid(), up.upid];
+            const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, (0, snowflake_1.nextIdString)(), up.upid];
             try {
                 const result = yield this._run(cmdtext, values);
                 return result.changes;
@@ -340,7 +338,7 @@ class Sqlite78 {
             const sb = `INSERT OR IGNORE INTO sys_sql(apisys,apimicro,apiobj,cmdtext,num,dlong,downlen,id,uptime,cmdtextmd5)VALUES(?,?,?,?,?,?,?,?,?,?)`;
             try {
                 yield this._run(sb, [
-                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo_1.default.getNewid(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
+                    up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, (0, snowflake_1.nextIdString)(), (0, dayjs_1.default)().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
                 ]);
                 // 更新计数器
                 yield this._run('UPDATE sys_sql SET num=num+1,dlong=dlong+?,downlen=downlen+? WHERE cmdtextmd5=?', [dlong, lendown, cmdtextmd5]);

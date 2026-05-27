@@ -18,7 +18,7 @@ import Elasticsearch78 from '../services/elasticsearch78';
  *
  * 修改操作包括：
  * - 新增：mAdd, mAddMany
- * - 更新：mUpdate, mUpdateIdpk, mUpdateMany
+ * - 更新：mUpdate, mUpdateByid, mUpdateMany
  * - 删除：mDel, mDelMany
  */
 interface ShardingConfig {
@@ -77,9 +77,9 @@ export default class Base78<T extends BaseSchema> {
     mAdd(colp?: string[]): Promise<any>;
     mAddMany(colp?: string[]): Promise<number>;
     mAddManyByid(colp?: string[]): Promise<number>;
-    mUpdateIdpk(colp?: string[]): Promise<string>;
+    mUpdateByid(colp?: string[]): Promise<string>;
     mUpdate(colp?: string[]): Promise<string>;
-    midpk(colp?: string[]): Promise<number | string | {
+    mByid(colp?: string[]): Promise<number | string | {
         sql: string;
         values: any[];
     }>;

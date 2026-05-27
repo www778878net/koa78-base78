@@ -51,6 +51,7 @@ export default class UpInfo {
     idceo: string = "";
     truename: string = "";
     mobile: string = "";
+    id: string = "";  // 雪花ID主键
 
     // 返回用
     res: number = 0;

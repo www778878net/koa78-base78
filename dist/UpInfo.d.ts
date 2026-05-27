@@ -6,8 +6,7 @@ export default class UpInfo {
     mid: string;
     pars: string[];
     cols: string[];
-    midpk: number;
-    upid: number;
+    upid: string;
     type: number;
     debug: boolean;
     pcid: string;
@@ -39,7 +38,7 @@ export default class UpInfo {
     idceo: string;
     truename: string;
     mobile: string;
-    idpk: number;
+    id: string;
     res: number;
     errmsg: string;
     backtype: string;
