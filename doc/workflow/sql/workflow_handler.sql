@@ -36,8 +36,7 @@ CREATE TABLE `workflow_handler` (
   
   `upby` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 更新人
   `uptime` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP, -- 更新时间
-  `idpk` int NOT NULL AUTO_INCREMENT, -- 主键ID
-  `id` varchar(36) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL, -- 唯一标识符
+  `id` BIGINT NOT NULL, -- 主键（雪花ID）
   `remark` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 备注1
   `remark2` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 备注2
   `remark3` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 备注3
@@ -45,8 +44,7 @@ CREATE TABLE `workflow_handler` (
   `remark5` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 备注5
   `remark6` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '', -- 备注6
   
-  PRIMARY KEY (`idpk`),
-  UNIQUE KEY `i_id` (`id`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `u_agent_capability_impl` (`idagent`, `capability`, `apisys`, `apimicro`, `apiobj`),
   INDEX `idx_capability` (`capability`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
@@ -77,8 +75,8 @@ CREATE TABLE `workflow_handler` (
 -- pricedescription: 价格描述
 -- upby: 更新人
 -- uptime: 更新时间
--- idpk: 主键ID
--- id: 唯一标识符
+-- idpk: (已移除，改用id雪花ID)
+-- id: 主键（雪花ID）
 -- remark: 备注1
 -- remark2: 备注2
 -- remark3: 备注3
@@ -204,7 +202,7 @@ SET
         THEN (profittotal + (price - actual_cost)) / (costtotal + actual_cost)
         ELSE 0
     END
-WHERE idpk = ?;
+WHERE id = ?;
 6. 工作流关联
 6.1 idworkflow字段的作用
 idworkflow关联到具体的工作流定义

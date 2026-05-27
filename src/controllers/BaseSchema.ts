@@ -1,6 +1,5 @@
 export interface BaseSchema {
     id: string;
-    idpk: number;
     upby: string;
     uptime: Date;
     remark?: string;

@@ -10,6 +10,7 @@ import UpInfo from '../UpInfo';
 import { MyLogger } from '../utils/mylogger';
 // @ts-ignore
 import md5 from 'md5';
+import { nextIdString } from '../config/snowflake';
 
 // 扩展 dayjs 以支持 UTC
 dayjs.extend(utc);
@@ -94,8 +95,7 @@ export default class Sqlite78 {
             upid TEXT NOT NULL DEFAULT '',
             upby TEXT DEFAULT '',
             uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
+            id TEXT NOT NULL PRIMARY KEY,
             remark TEXT NOT NULL DEFAULT '',
             remark2 TEXT NOT NULL DEFAULT '',
             remark3 TEXT NOT NULL DEFAULT '',
@@ -117,8 +117,7 @@ export default class Sqlite78 {
             upby TEXT NOT NULL DEFAULT '',
             cmdtextmd5 TEXT NOT NULL DEFAULT '',
             uptime DATETIME NOT NULL,
-            idpk INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT NOT NULL,
+            id TEXT NOT NULL PRIMARY KEY,
             remark TEXT NOT NULL DEFAULT '',
             remark2 TEXT NOT NULL DEFAULT '',
             remark3 TEXT NOT NULL DEFAULT '',
@@ -335,7 +334,7 @@ export default class Sqlite78 {
         }
 
         const cmdtext = 'INSERT INTO sys_warn (kind,apimicro,apiobj,content,upby,uptime,id,upid)VALUES(?,?,?,?,?,?,?,?)';
-        const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, UpInfo.getNewid(), up.upid];
+        const values = [kind, up.apimicro, up.apiobj, info, up.uname, up.uptime, nextIdString(), up.upid];
 
         try {
             const result = await this._run(cmdtext, values);
@@ -364,7 +363,7 @@ export default class Sqlite78 {
 
         try {
             await this._run(sb, [
-                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, UpInfo.getNewid(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
+                up.apisys, up.apimicro, up.apiobj, cmdtext, 1, dlong, lendown, nextIdString(), dayjs().utc().format('YYYY-MM-DD HH:mm:ss'), cmdtextmd5
             ]);
 
             // 更新计数器

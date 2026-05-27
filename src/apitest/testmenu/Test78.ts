@@ -14,12 +14,11 @@ export default class Test78 extends CidBase78<TableSchemas['Test78']> {
             retentionDays: 5,           // 保留5天的表   
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
-                    id VARCHAR(36) NOT NULL DEFAULT '',
+                    id BIGINT NOT NULL PRIMARY KEY COMMENT '主键（雪花ID）',
                     name VARCHAR(100) NOT NULL DEFAULT '',
                     content TEXT NOT NULL,
                     upby VARCHAR(50) NOT NULL DEFAULT '',
                     uptime DATETIME NOT NULL,
-                    idpk INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                     ${this.tableConfig.uidcid} VARCHAR(36) NOT NULL DEFAULT ''
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3
             `

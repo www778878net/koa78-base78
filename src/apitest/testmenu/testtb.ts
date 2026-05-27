@@ -7,14 +7,14 @@ import * as protobuf from 'protobufjs';
 
 // 模拟数据
 const mockData = [
-    { kind: "newdata", item: "itemval", data: "mock_data_1", id: "mock-id-1", idpk: 1 },
-    { kind: "kindval", item: "mock-item", data: "mock_data_2", id: "mock-id-2", idpk: 2 },
+    { kind: "newdata", item: "itemval", data: "mock_data_1", id: "mock-id-1" },
+    { kind: "kindval", item: "mock-item", data: "mock_data_2", id: "mock-id-2" },
     // 可以根据需要添加更多模拟数据
 ];
 
 export default class testtb extends CidBase78<TableSchemas['testtb']> {
     async health(): Promise<string> {
-        let sb = 'SELECT IDPK FROM testtb limit 1'
+        let sb = 'SELECT id FROM testtb limit 1'
         let tb = await this.dbService.get(sb, [], this.up)
         if (tb.length == 0) {
             throw new Error("db error restart");

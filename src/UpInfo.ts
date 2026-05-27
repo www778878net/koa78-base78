@@ -4,14 +4,13 @@ export default class UpInfo {
     // 数据获取非必填字段
     getstart: number = 0;
     getnumber: number = 15;
-    order: string = "idpk";
+    order: string = "id desc";
     bcid: string = "";
     mid: string = "";
     pars: string[] = [];
     cols: string[] = [];
 
-    midpk: number = 0;
-    upid: number = 0;
+    upid: string = "";
     type: number = 0;
 
     // 调试监控用
@@ -52,7 +51,6 @@ export default class UpInfo {
     idceo: string = "";
     truename: string = "";
     mobile: string = "";
-    idpk: number = 0;
 
     // 返回用
     res: number = 0;
@@ -111,7 +109,6 @@ export default class UpInfo {
         this.sid ??= "";
 
         this.mid = pars.mid ?? UpInfo.getNewid();
-        this.midpk = +(pars.midpk ?? -1);
         this.getnumber = +(pars.getnumber ?? 15);
         this.pcid = req.header['pcid'] ?? pars.pcid ?? '';
         this.pcname = req.header['pcname'] ?? pars.pcname ?? '';
@@ -119,11 +116,11 @@ export default class UpInfo {
         this.ip = this.ip.includes("ffff") ? this.ip.substring(this.ip.indexOf("ffff") + 5) : this.ip;
         this.colsn = pars["cols[]"] ?? pars.cols ?? ["all"];
 
-        this.order = pars.order ?? 'idpk desc';
+        this.order = pars.order ?? 'id desc';
 
         this.jsonp = pars.jsonp ?? false;
         this.backtype = pars.backtype ?? "json";
-        this.upid = pars.upid ?? UpInfo.getNewid();
+        this.upid = pars.upid ?? UpInfo.getNewid() + '';
         this.cache = req.header['cache'] ?? pars.cache ?? this.mid;
 
         this.cols = typeof this.colsn === 'string' ? JSON.parse(this.colsn) : this.colsn;
@@ -227,12 +224,12 @@ export default class UpInfo {
     }
 
     checkCols(cols: string[]): string {
-        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'idpk')) {
+        if (this.cols.length === 1 && (this.cols[0] === 'all' || this.cols[0] === 'id')) {
             return "checkcolsallok";
         }
         let isback = "checkcolsallok";
         // 固定字段豁免：这些字段在所有表中都存在，不需要在 cols 中定义
-        const systemFields = ['id', 'idpk', 'uptime', 'upby', 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'];
+        const systemFields = ['id', 'uptime', 'upby', 'remark', 'remark2', 'remark3', 'remark4', 'remark5', 'remark6'];
         try {
             this.cols.forEach(item => {
                 if (!cols.includes(item) && !systemFields.includes(item))
@@ -255,10 +252,10 @@ export default class UpInfo {
             const descIndex = o.indexOf(" desc");
             if (descIndex >= 0 && descIndex === o.length - 5)
                 order = o.substr(0, descIndex);
-            if (order === 'id' || order === 'idpk' || order === 'uptime' || order === 'upby')
+            if (order === 'id' || order === 'uptime' || order === 'upby')
                 continue;
 
-            if (order !== 'id' && order !== 'idpk' && !cols.includes(order)) {
+            if (order !== 'id' && !cols.includes(order)) {
                 return false;
             }
         }

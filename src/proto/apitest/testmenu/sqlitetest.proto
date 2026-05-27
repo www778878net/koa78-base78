@@ -6,10 +6,9 @@ package apitest_testmenu;
 message sqlitetestItem {
   // 固定字段放在前面
   string id = 1;
-  int32 idpk = 2;
-  string cid = 3;
-  string field1 = 4;
-  string field2 = 5;
+  string cid = 2;
+  string field1 = 3;
+  string field2 = 4;
 }
 
 // 定义包含多项的数据结构

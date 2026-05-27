@@ -7,7 +7,6 @@ message testtbItem {
   string item = 2;
   string data = 3;
   string id = 4;
-  int32 idpk = 5;
 }
 
 message testtb {

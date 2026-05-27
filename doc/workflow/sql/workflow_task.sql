@@ -60,8 +60,7 @@ CREATE TABLE `workflow_task` (
   -- 自动生成的字段
   `upby` varchar(50) NOT NULL DEFAULT '' COMMENT '更新人',
   `uptime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  `idpk` int NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `id` varchar(36) NOT NULL DEFAULT '' COMMENT '全局唯一ID',
+  `id` BIGINT NOT NULL COMMENT '主键（雪花ID）',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '备注1',
   `remark2` varchar(200) NOT NULL DEFAULT '' COMMENT '备注2',
   `remark3` varchar(200) NOT NULL DEFAULT '' COMMENT '备注3',
@@ -83,7 +82,7 @@ CREATE TABLE `workflow_task` (
 -- - 统计：successcount, errorcount, runcount
 -- - 时间：starttime, endtime, lastruntime, lasterrortime, lastoktime
 -- - 错误：lasterrinfo, lastokinfo, errsec
--- - 通用：cid, uid, state, priority, upby, uptime, idpk, id, remark1-6
+-- - 通用：cid, uid, state, priority, upby, uptime, id, remark1-6
 -- 2. workflow_task 特有的字段
 -- 任务特有字段：
 -- - 关联信息：idworkflowinstance, idworkflowdefinition, idtaskdefinition, taskname, handler, idagent

@@ -33,8 +33,7 @@ CREATE TABLE `workflow_definition` (
   -- 自动生成的字段
   `upby` varchar(50) NOT NULL DEFAULT '' COMMENT '更新人',
   `uptime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `idpk` int NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `id` varchar(36) NOT NULL DEFAULT '' COMMENT '全局唯一ID',
+  `id` BIGINT NOT NULL COMMENT '主键（雪花ID）',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '备注1',
   `remark2` varchar(200) NOT NULL DEFAULT '' COMMENT '备注2',
   `remark3` varchar(200) NOT NULL DEFAULT '' COMMENT '备注3',
@@ -42,7 +41,6 @@ CREATE TABLE `workflow_definition` (
   `remark5` varchar(200) NOT NULL DEFAULT '' COMMENT '备注5',
   `remark6` varchar(200) NOT NULL DEFAULT '' COMMENT '备注6',
   
-  PRIMARY KEY (`idpk`),
-  UNIQUE KEY `i_id` (`id`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `u_name_version` (`wfname`, `version`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COMMENT='工作流定义表';

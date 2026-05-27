@@ -13,17 +13,17 @@ export default class workflow_instance extends CidBase78<TableSchemas['workflow_
             retentionDays: 5,        // 保留5天的表  
             tableSQL: `
                 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
-                    idpk INT AUTO_INCREMENT PRIMARY KEY,
+                    id BIGINT NOT NULL PRIMARY KEY COMMENT '主键（雪花ID）',
                     cid VARCHAR(36) NOT NULL DEFAULT '',
                     uid VARCHAR(36) NOT NULL DEFAULT '',
-                    apisys VARCHAR(20) NOT NULL DEFAULT '', -- API 版本 
-                    apimicro VARCHAR(50) NOT NULL DEFAULT '', -- API 系统 
-                    apiobj VARCHAR(100) NOT NULL DEFAULT '', -- API 对象 
+                    apisys VARCHAR(20) NOT NULL DEFAULT '', -- API 版本
+                    apimicro VARCHAR(50) NOT NULL DEFAULT '', -- API 系统
+                    apiobj VARCHAR(100) NOT NULL DEFAULT '', -- API 对象
 
-                    lastoktime DATETIME NULL, -- 最后成功时间 
-                    lasterrinfo VARCHAR(500) NOT NULL DEFAULT '', -- 错误信息 
-                    lastokinfo VARCHAR(500) NOT NULL DEFAULT '', -- 成功信息 
-                    errsec INT NOT NULL DEFAULT 0, -- 多少秒没成功才算失败 
+                    lastoktime DATETIME NULL, -- 最后成功时间
+                    lasterrinfo VARCHAR(500) NOT NULL DEFAULT '', -- 错误信息
+                    lastokinfo VARCHAR(500) NOT NULL DEFAULT '', -- 成功信息
+                    errsec INT NOT NULL DEFAULT 0, -- 多少秒没成功才算失败
                     starttime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     endtime DATETIME NULL,
                     inputdata JSON NOT NULL DEFAULT (JSON_OBJECT()), -- 输入数据，JSON格式
@@ -51,9 +51,7 @@ export default class workflow_instance extends CidBase78<TableSchemas['workflow_
 
                     upby VARCHAR(50) NOT NULL,
                     uptime DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-                    id VARCHAR(36) NOT NULL,
 
-                    UNIQUE KEY i_id (id),
                     INDEX i_workflow_status (idworkflow, state)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC
             `
