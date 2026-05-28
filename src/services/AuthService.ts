@@ -9,8 +9,8 @@ import { Config } from '../config/Config';
 
 export class AuthService {
     private log: any = null;
-    private static _CID_MY: bigint | null = null;
-    public static readonly CID_GUEST: bigint = 318225842662547456n;
+    private static _CID_MY: string | null = null;
+    public static readonly CID_GUEST: string = "318225842662547456";
     private dbService: DatabaseService | null = null;
     private cacheService: CacheService | null = null;
     private static instance: AuthService | null = null;
@@ -53,7 +53,7 @@ export class AuthService {
         }
 
         // 默认值
-        return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
+        return "318225830079631360";
     }
 
     public static getInstance(): AuthService {
