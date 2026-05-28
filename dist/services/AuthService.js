@@ -43,7 +43,7 @@ class AuthService {
             console.warn('Failed to get cidmy from config, using default value:', error);
         }
         // 默认值
-        return "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
+        return "318225830079631360";
     }
     static getInstance() {
         if (!AuthService.instance) {
@@ -58,7 +58,7 @@ class AuthService {
                 return "ok";
             }
             const sidSchema = zod_1.z.string().length(36);
-            const bcidSchema = zod_1.z.string().length(36).refine(val => val.indexOf("-") === 8 && val.indexOf("-", 19) === 23);
+            const bcidSchema = zod_1.z.string().regex(/^\d+$/);
             const midSchema = zod_1.z.string().length(36);
             const numericSchema = zod_1.z.string().regex(/^\d+$/);
             //this.log.detail(`upcheck sid: ${JSON.stringify(up)}`);
@@ -178,6 +178,6 @@ class AuthService {
 }
 exports.AuthService = AuthService;
 AuthService._CID_MY = null;
-AuthService.CID_GUEST = "GUEST000-8888-8888-8888-GUEST00GUEST";
+AuthService.CID_GUEST = "318225842662547456";
 AuthService.instance = null;
 //# sourceMappingURL=AuthService.js.map

@@ -89,7 +89,7 @@ class UpInfo {
         if (!pars)
             return;
         this.type = (_c = pars.type) !== null && _c !== void 0 ? _c : 0;
-        this.bcid = (_d = pars.bcid) !== null && _d !== void 0 ? _d : "d4856531-e9d3-20f3-4c22-fe3c65fb009c";
+        this.bcid = (_d = pars.bcid) !== null && _d !== void 0 ? _d : "318225830079631360";
         this.v = +((_f = (_e = req.header['v']) !== null && _e !== void 0 ? _e : pars.v) !== null && _f !== void 0 ? _f : 24);
         this.getstart = +((_g = pars.getstart) !== null && _g !== void 0 ? _g : 0);
         this.parsn = (_j = (_h = pars["pars[]"]) !== null && _h !== void 0 ? _h : pars.pars) !== null && _j !== void 0 ? _j : "";
@@ -185,8 +185,8 @@ class UpInfo {
         const up2 = new UpInfo(null);
         Object.assign(up2, {
             sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
-            cid: 'GUEST000-8888-8888-8888-GUEST00GUEST',
-            bcid: 'd4856531-e9d3-20f3-4c22-fe3c65fb009c',
+            cid: '318225842662547456',
+            bcid: '318225830079631360',
             mid: this.getNewid(),
             uname: 'guest',
             pars: [],
