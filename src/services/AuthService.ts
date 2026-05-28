@@ -9,8 +9,8 @@ import { Config } from '../config/Config';
 
 export class AuthService {
     private log: any = null;
-    private static _CID_MY: string | null = null;
-    public static readonly CID_GUEST: string = "GUEST000-8888-8888-8888-GUEST00GUEST";
+    private static _CID_MY: bigint | null = null;
+    public static readonly CID_GUEST: bigint = 318225842662547456n;
     private dbService: DatabaseService | null = null;
     private cacheService: CacheService | null = null;
     private static instance: AuthService | null = null;

@@ -49,11 +49,11 @@ mysql -S /run/mysqld/mysqld.sock -u root -prootpassword -e "CREATE USER IF NOT E
 
 # 修改testdb.sql文件中的collation以兼容当前版本的MariaDB
 echo "🔄 修改SQL文件以兼容当前数据库版本..."
-sed -i 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' /workspace/doc/testdb.sql
+sed -i 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' /workspace/other/koa78base/doc/testdb.sql
 
 # 导入数据库结构和数据
 echo "💾 导入数据库结构和数据..."
-mysql -uroot -prootpassword testdb < /workspace/doc/testdb.sql
+mysql -uroot -prootpassword testdb < /workspace/other/koa78base/doc/testdb.sql
 
 echo "✅ 数据库初始化完成！"
 echo "🔗 连接信息："
