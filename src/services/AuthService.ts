@@ -70,7 +70,7 @@ export class AuthService {
 
         const sidSchema = z.string().length(36);
         const bcidSchema = z.string().regex(/^\d+$/);
-        const midSchema = z.string().length(36);
+        const midSchema = z.string().regex(/^\d+$/);
         const numericSchema = z.string().regex(/^\d+$/);
         //this.log.detail(`upcheck sid: ${JSON.stringify(up)}`);
 
