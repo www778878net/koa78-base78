@@ -44,7 +44,9 @@ class Mysql78 {
             database: config.database,
             dateStrings: true,
             connectTimeout: 30 * 1000,
-            waitForConnections: true, // 等待连接池中的连接可用
+            waitForConnections: true,
+            supportBigNumbers: true,
+            bigNumberStrings: true,
         });
         this._cleanupTimer = setInterval(() => {
             this._statementCache.clear();

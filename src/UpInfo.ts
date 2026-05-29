@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { nextIdString } from './config/snowflake';
 
 export default class UpInfo {
     // 数据获取非必填字段
@@ -206,7 +207,7 @@ export default class UpInfo {
             sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
             cid: '318225842662547456',
             bcid: '318225830079631360',
-            mid: this.getNewid(),
+            mid: nextIdString(),
             uname: 'guest',
             pars: [],
             getstart: 0,
