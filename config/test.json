@@ -1,8 +1,8 @@
 {
     "location": "test",
     "host": "localhost",
-    "cidvps": "28401227-bd00-a20f-c561-ddf0def881d9",
-    "cidmy": "318225830079631360",
+    "cidvps": "YOUR_CID_VPS",
+    "cidmy": "YOUR_CID_MY",
     "nodejslog": {
         "issave": false,
         "redis": false
@@ -19,7 +19,7 @@
         "default": {
             "host": "127.0.0.1",
             "port": "3306",
-            "password": "rootpassword",
+            "password": "YOUR_PASSWORD",
             "database": "testdb",
             "user": "root",
             "isLog": true,
