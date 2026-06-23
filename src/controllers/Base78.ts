@@ -132,8 +132,8 @@ export default class Base78<T extends BaseSchema> {
         let deletedCount = 0;
 
         try {
-            // 查找所有匹配的表
-            const checkTableSQL = `SHOW TABLES LIKE '${tablePrefix}%'`;
+            // PostgreSQL 查询所有匹配的表
+            const checkTableSQL = `SELECT tablename FROM pg_tables WHERE tablename LIKE '${tablePrefix}%' AND schemaname = 'public'`;
             const tables = await this.dbService.get(checkTableSQL, [], this.up, this.dbname);
 
             if (tables.length === 0) {
@@ -142,12 +142,12 @@ export default class Base78<T extends BaseSchema> {
 
             // 遍历所有匹配的表
             for (const tableRow of tables) {
-                const tableName = Object.values(tableRow)[0] as string;
+                const tableName = tableRow['tablename'] as string;
                 if (!tableName) continue;
 
                 // 提取日期部分
                 const dateStr = tableName.substring(tablePrefix.length);
-                
+
                 // 解析日期
                 let tableDate: dayjs.Dayjs;
                 try {
@@ -163,7 +163,7 @@ export default class Base78<T extends BaseSchema> {
                 // 检查是否过期
                 if (tableDate.isValid() && tableDate.isBefore(cutoffDate)) {
                     try {
-                        const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+                        const dropTableSQL = `DROP TABLE IF EXISTS "${tableName}"`;
                         await this.dbService.m(dropTableSQL, [], this.up, this.dbname);
                         deletedCount++;
                         this.logger.debug(`成功删除过期表: ${tableName}`);
@@ -248,11 +248,11 @@ export default class Base78<T extends BaseSchema> {
     private async dropOldLogTable(daysAgo: number): Promise<number> {
         const targetDate = dayjs().subtract(daysAgo, 'day').format('YYYYMMDD');
         const tableName = `sys_log_${targetDate}`;
-        const dropTableSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+        const dropTableSQL = `DROP TABLE IF EXISTS "${tableName}"`;
 
         try {
-            // 先检查表是否存在
-            const checkTableSQL = `SHOW TABLES LIKE '${tableName}'`;
+            // PostgreSQL 查询表是否存在
+            const checkTableSQL = `SELECT tablename FROM pg_tables WHERE tablename = '${tableName}' AND schemaname = 'public'`;
             const tableExists = await this.dbService.get(checkTableSQL, [], this.up);
 
             // 如果表不存在，直接返回0
@@ -375,24 +375,25 @@ export default class Base78<T extends BaseSchema> {
             values.push(rowVals.slice(0, num - 1));  // 存储业务字段值
         }
 
-        // 构建 SQL 查询
+        // 构建 SQL 查询 - PostgreSQL 使用双引号
         let sb = `UPDATE ${self.getDynamicTableName()} SET `;
         for (let i = 0; i < colp.length; i++) {
             if (i > 0) sb += `, `;
-            sb += `\`${colp[i]}\` = CASE \`id\` `;
+            sb += `"${colp[i]}" = CASE "id" `;
             for (let j = 0; j < idList.length; j++) {
-                sb += `WHEN ? THEN ? `;
+                sb += `WHEN $${pars.length + 1} THEN $${pars.length + 2} `;
                 pars.push(idList[j], values[j][i]);  // 添加查询参数
             }
             sb += `END`;
         }
 
         // 添加 upby 和 uptime 字段
-        sb += ", \`upby\` = ?, \`uptime\` = ? ";
+        sb += `, "upby" = $${pars.length + 1}, "uptime" = $${pars.length + 2} `;
+        pars.push(up.uname, up.utime);
 
         // 添加 where 子句
-        sb += `WHERE \`id\` IN (${idList.map(() => '?').join(',')})`;
-        pars.push(up.uname, up.utime, ...idList);
+        sb += `WHERE "id" IN (${idList.map((_, idx) => `$${pars.length + idx + 1}`).join(',')})`;
+        pars.push(...idList);
 
         // 执行更新操作
         try {
@@ -426,9 +427,10 @@ export default class Base78<T extends BaseSchema> {
         const values = this.up.pars.slice(0, colp.length);
         values.push(nextIdString(), this.up.uname || '', this.up.utime, this.up[this.tableConfig.uidcid]);
 
-        // 为所有字段名添加反引号
-        const quotedColp = colp.map(col => `\`${col}\``);
-        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES (${new Array(colp.length + 4).fill('?').join(',')})`; // 使用动态表名
+        // PostgreSQL 使用双引号和 $1, $2... 占位符
+        const quotedColp = colp.map(col => `"${col}"`);
+        const placeholders = values.map((_, idx) => `$${idx + 1}`).join(',');
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},"id","upby","uptime","${this.tableConfig.uidcid}") VALUES (${placeholders}) RETURNING "id"`; // 使用动态表名
 
         // 执行插入操作
         const result = await this.dbService.mAdd(query, values, this.up, this.dbname);
@@ -441,7 +443,7 @@ export default class Base78<T extends BaseSchema> {
             for (let i = 0; i < values.length; i++) {
                 const val = values[i];
                 const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
-                sql = sql.replace('?', replacement);
+                sql = sql.replace(`$${i + 1}`, replacement);
             }
             return { ...result, sql };
         }
@@ -454,7 +456,7 @@ export default class Base78<T extends BaseSchema> {
             for (let i = 0; i < values.length; i++) {
                 const val = values[i];
                 const replacement = typeof val === 'string' ? `'${val.replace(/'/g, "''")}'` : val;
-                sql = sql.replace('?', replacement);
+                sql = sql.replace(`$${i + 1}`, replacement);
             }
             return { ...result, sql };
         }
@@ -488,14 +490,25 @@ export default class Base78<T extends BaseSchema> {
             throw new Error(`parameters count must be multiple of column count (got ${totalPars} parameters for ${colp.length} columns: ${colp.join(', ')})`);
         }
 
-        // 为所有字段名添加反引号
-        const quotedColp = colp.map(col => `\`${col}\``);
+        // PostgreSQL 使用双引号
+        const quotedColp = colp.map(col => `"${col}"`);
 
         // 每行实际需要的参数数：业务字段 + id + 3个系统字段（upby, uptime, uidcid）
         const fieldsPerRow = colp.length + 4;
 
-        // 构建 SQL：自动添加 id 字段
-        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+        // 构建 SQL：自动添加 id 字段，使用 $1, $2... 占位符
+        let placeholderIndex = 1;
+        const rowPlaceholders = [];
+        for (let i = 0; i < rowCount; i++) {
+            const rowValues = [];
+            for (let j = 0; j < fieldsPerRow; j++) {
+                rowValues.push(`$${placeholderIndex}`);
+                placeholderIndex++;
+            }
+            rowPlaceholders.push(`(${rowValues.join(',')})`);
+        }
+
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},"id","upby","uptime","${this.tableConfig.uidcid}") VALUES ${rowPlaceholders.join(',')}`;
 
         // 构建参数数组
         const values: any[] = [];
@@ -559,14 +572,25 @@ export default class Base78<T extends BaseSchema> {
             throw new Error(`parameters count must be multiple of column count + id (got ${totalPars} parameters for ${userFieldsPerRow} fields per row: ${colp.join(', ')} + id)`);
         }
 
-        // 为所有字段名添加反引号
-        const quotedColp = colp.map(col => `\`${col}\``);
+        // PostgreSQL 使用双引号
+        const quotedColp = colp.map(col => `"${col}"`);
 
         // 每行实际需要的参数数：colp 字段 + id + 3个系统字段（upby, uptime, uidcid）
         const fieldsPerRow = colp.length + 4;
 
-        // 构建 SQL：和 mAddMany 一样包含 id 字段
-        const query = `INSERT IGNORE INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},\`id\`,\`upby\`,\`uptime\`,\`${this.tableConfig.uidcid}\`) VALUES ${new Array(rowCount).fill(`(${new Array(fieldsPerRow).fill('?').join(',')})`).join(',')}`;
+        // 构建 SQL：使用 ON CONFLICT DO NOTHING 替代 INSERT IGNORE
+        let placeholderIndex = 1;
+        const rowPlaceholders = [];
+        for (let i = 0; i < rowCount; i++) {
+            const rowValues = [];
+            for (let j = 0; j < fieldsPerRow; j++) {
+                rowValues.push(`$${placeholderIndex}`);
+                placeholderIndex++;
+            }
+            rowPlaceholders.push(`(${rowValues.join(',')})`);
+        }
+
+        const query = `INSERT INTO ${this.getDynamicTableName()} (${quotedColp.join(',')},"id","upby","uptime","${this.tableConfig.uidcid}") VALUES ${rowPlaceholders.join(',')} ON CONFLICT ("id") DO NOTHING`;
 
         // 构建参数数组
         const values: any[] = [];
@@ -610,8 +634,9 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
 
-        const setClause = colp.map(col => `\`${col}\`=?`).join(',');
-        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用动态表名
+        // PostgreSQL 使用双引号和 $1, $2... 占位符
+        const setClause = colp.map((col, idx) => `"${col}"=$${idx + 1}`).join(',');
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, "upby"=$${colp.length + 1}, "uptime"=$${colp.length + 2} WHERE "id"=$${colp.length + 3} AND "${this.tableConfig.uidcid}"=$${colp.length + 4}`; // 使用动态表名
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
@@ -637,8 +662,9 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
 
-        const setClause = colp.map(col => `\`${col}\`=?`).join(',');
-        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, \`upby\`=?, \`uptime\`=? WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用 id 进行更新
+        // PostgreSQL 使用双引号和 $1, $2... 占位符
+        const setClause = colp.map((col, idx) => `"${col}"=$${idx + 1}`).join(',');
+        const query = `UPDATE ${this.getDynamicTableName()} SET ${setClause}, "upby"=$${colp.length + 1}, "uptime"=$${colp.length + 2} WHERE "id"=$${colp.length + 3} AND "${this.tableConfig.uidcid}"=$${colp.length + 4}`; // 使用 id 进行更新
 
         const values = this.up.pars.slice(0, colp.length);
         values.push(this.up.uname || '', this.up.utime, this.up.mid, this.up[this.tableConfig.uidcid]);
@@ -662,7 +688,7 @@ export default class Base78<T extends BaseSchema> {
     @ApiMethod()
     async mByid(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
         this.checkAdminPermission();
-        const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+        const query = `SELECT "id" FROM ${this.getDynamicTableName()} WHERE "id"=$1 AND "${this.tableConfig.uidcid}"=$2`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -675,7 +701,7 @@ export default class Base78<T extends BaseSchema> {
     @ApiMethod()
     async m(colp?: string[]): Promise<number | string | { sql: string, values: any[] }> {
         this.checkAdminPermission();
-        const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+        const query = `SELECT "id" FROM ${this.getDynamicTableName()} WHERE "id"=$1 AND "${this.tableConfig.uidcid}"=$2`; // 使用动态表名
         const result = await this.dbService.get(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.length === 1) {
@@ -696,24 +722,26 @@ export default class Base78<T extends BaseSchema> {
             colp = colp.slice(0, this.up.pars.length);
         }
 
-        let whereClause = `\`${this.tableConfig.uidcid}\`=?`;
+        let whereClause = `"${this.tableConfig.uidcid}"=$1`;
         let queryParams = [this.up[this.tableConfig.uidcid]];
+        let placeholderIndex = 2;
 
         if (colp && this.up.pars && colp.length > 0) {
             for (let i = 0; i < colp.length; i++) {
-                whereClause += ` AND \`${colp[i]}\`=?`;
+                whereClause += ` AND "${colp[i]}"=$${placeholderIndex}`;
                 queryParams.push(this.up.pars[i]);
+                placeholderIndex++;
             }
         }
 
-        const query = `SELECT *    FROM ${this.getDynamicTableName()} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getstart}, ${this.up.getnumber}`; // 使用动态表名
+        const query = `SELECT * FROM ${this.getDynamicTableName()} WHERE ${whereClause} ORDER BY ${this.up.order} LIMIT ${this.up.getnumber} OFFSET ${this.up.getstart}`; // PostgreSQL 使用 OFFSET 替代 LIMIT offset,limit
 
         return this.dbService.get(query, queryParams, this.up, this.dbname);
     }
     @ApiMethod()
     async mdel(): Promise<string> {
         this.checkAdminPermission();
-        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\`=? AND \`${this.tableConfig.uidcid}\`=? LIMIT 1`; // 使用 id 进行删除
+        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE "id"=$1 AND "${this.tableConfig.uidcid}"=$2`; // PostgreSQL 不支持 LIMIT，使用其他方式确保只删除一条
         const result = await this.dbService.m(query, [this.up.mid, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
 
         if (result.error) {
@@ -742,8 +770,9 @@ export default class Base78<T extends BaseSchema> {
         // up.pars 包含 id 数组
         const idList = this.up.pars;
 
-        // 构建 SQL 查询
-        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE \`id\` IN (${idList.map(() => '?').join(',')})`;
+        // 构建 SQL 查询 - PostgreSQL 使用 $1, $2... 占位符
+        const placeholders = idList.map((_, idx) => `$${idx + 1}`).join(',');
+        const query = `DELETE FROM ${this.getDynamicTableName()} WHERE "id" IN (${placeholders})`;
 
         // 执行删除操作
         try {
@@ -784,7 +813,7 @@ export default class Base78<T extends BaseSchema> {
         const firstField = this.tableConfig.cols[0];
         const firstFieldValue = this.up.pars[0];
         //console.log(`mByFirstField:` + this.up.debug + " " + this.up.uname + "  " + this.up.cid)
-        const query = `SELECT \`id\` FROM ${this.getDynamicTableName()} WHERE \`${firstField}\`=? AND \`${this.tableConfig.uidcid}\`=?`; // 使用动态表名
+        const query = `SELECT "id" FROM ${this.getDynamicTableName()} WHERE "${firstField}"=$1 AND "${this.tableConfig.uidcid}"=$2`; // 使用动态表名
         const result = await this.dbService.get(query, [firstFieldValue, this.up[this.tableConfig.uidcid]], this.up, this.dbname);
         //console.log(`mByFirstField33:` + query + " " + this.up[this.tableConfig.uidcid] + " " + firstFieldValue + " " + JSON.stringify(result))
         if (result.length === 1) {
