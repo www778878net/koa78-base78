@@ -5,12 +5,13 @@ import { z } from 'zod';
 import { injectable, inject } from 'inversify';
 import { ContainerManager } from '../ContainerManager';
 import { Config } from '../config/Config';
+import { CID_DEFAULT, CONAME_DEFAULT, CID_ADMIN } from '../config/accountConstants';
 
 
 export class AuthService {
     private log: any = null;
     private static _CID_MY: string | null = null;
-    public static readonly CID_GUEST: string = "318225842662547456";
+    public static readonly CID_GUEST: string = CID_DEFAULT;
     private dbService: DatabaseService | null = null;
     private cacheService: CacheService | null = null;
     private static instance: AuthService | null = null;
@@ -53,7 +54,7 @@ export class AuthService {
         }
 
         // 默认值
-        return "318225830079631360";
+        return CID_ADMIN;
     }
 
     public static getInstance(): AuthService {
@@ -120,7 +121,7 @@ export class AuthService {
             up.uid = 'GUEST';
             up.uname = 'guest';
             up.cid = AuthService.CID_GUEST;
-            up.coname = '测试帐套';
+            up.coname = CONAME_DEFAULT;
             up.bcid = up.bcid || up.cid;
             up.errmsg = "ok";
             return "ok";

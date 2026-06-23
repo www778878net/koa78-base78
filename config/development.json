@@ -9,6 +9,14 @@
         "redis": true
     },
     "iplog": true,
+    "account": {
+        "cid_admin": "318225830079631360",
+        "cid_test": "318225842662547456",
+        "cid_default": "318225842662547456",
+        "coname_default": "测试帐套",
+        "test_internal_userid": "TestInternalUser",
+        "test_external_userid": "TestExternalUser"
+    },
     "mysqls": {
         "default": {
             "host": "localhost",

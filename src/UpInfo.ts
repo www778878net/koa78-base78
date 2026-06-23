@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { nextIdString } from './config/snowflake';
+import { CONAME_DEFAULT, CID_DEFAULT, CID_ADMIN } from './config/accountConstants';
 
 export default class UpInfo {
     // 数据获取非必填字段
@@ -44,7 +45,7 @@ export default class UpInfo {
     sid: string = "";
     cid: string = "";
     uid: string = "";
-    coname: string = '测试帐套';
+    coname: string = CONAME_DEFAULT;
     uname: string | undefined;
 
     pwd: string = "";
@@ -100,7 +101,7 @@ export default class UpInfo {
 
         this.type = pars.type ?? 0;
 
-        this.bcid = pars.bcid ?? "318225830079631360";
+        this.bcid = pars.bcid ?? CID_ADMIN;
         this.v = +(req.header['v'] ?? pars.v ?? 24);
         this.getstart = +(pars.getstart ?? 0);
         this.parsn = pars["pars[]"] ?? pars.pars ?? "";
@@ -205,8 +206,8 @@ export default class UpInfo {
         const up2 = new UpInfo(null);
         Object.assign(up2, {
             sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
-            cid: '318225842662547456',
-            bcid: '318225830079631360',
+            cid: CID_DEFAULT,
+            bcid: CID_ADMIN,
             mid: nextIdString(),
             uname: 'guest',
             pars: [],
