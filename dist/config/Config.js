@@ -129,7 +129,16 @@ let Config = Config_1 = class Config {
     }
     // 静态方法，方便调用
     static getAccountValue(key) {
-        return Config_1.getInstance().getAccount(key);
+        try {
+            const instance = Config_1.getInstance();
+            if (instance.configObject) {
+                return instance.getAccount(key);
+            }
+        }
+        catch (error) {
+            // Config 未初始化时使用默认值
+        }
+        return Config_1.DEFAULT_ACCOUNT[key] || '';
     }
     loadExternalConfig(filePath) {
         try {

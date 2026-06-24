@@ -153,7 +153,15 @@ export class Config {
 
     // 静态方法，方便调用
     public static getAccountValue(key: string): string {
-        return Config.getInstance().getAccount(key);
+        try {
+            const instance = Config.getInstance();
+            if (instance.configObject) {
+                return instance.getAccount(key);
+            }
+        } catch (error) {
+            // Config 未初始化时使用默认值
+        }
+        return Config.DEFAULT_ACCOUNT[key] || '';
     }
 
     private loadExternalConfig(filePath: string): void {
