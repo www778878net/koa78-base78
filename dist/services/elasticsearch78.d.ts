@@ -46,18 +46,14 @@ export default class Elasticsearch78 {
      */
     upsertData(index: string, id: string, data: object, updateFields: {
         [key: string]: any;
-    }): Promise<import("@elastic/elasticsearch/lib/api/types").UpdateResponse<unknown> | null>;
-    add(index: string, data: object, id?: string, refresh?: boolean): Promise<import("@elastic/elasticsearch/lib/api/types").WriteResponseBase | null>;
-    addIfNotExists(index: string, data: object, id: string, refresh?: boolean): Promise<import("@elastic/elasticsearch/lib/api/types").WriteResponseBase | {
-        result: string;
-    } | null>;
-    get(index: string, body: object, size?: number, isdebug?: boolean): Promise<{
-        id: string | undefined;
-    }[] | null>;
+    }): Promise<any>;
+    add(index: string, data: object, id?: string, refresh?: boolean): Promise<any>;
+    addIfNotExists(index: string, data: object, id: string, refresh?: boolean): Promise<any>;
+    get(index: string, body: object, size?: number, isdebug?: boolean): Promise<any>;
     updateById(index: string, id: string, newData: object, refresh?: boolean, updateTimestamp?: boolean): Promise<any>;
-    updateByQuerySize(index: string | string[], body: object, size?: number): Promise<import("@elastic/elasticsearch/lib/api/types").UpdateByQueryResponse | null>;
-    updateByQuery(index: string | string[], body: object): Promise<import("@elastic/elasticsearch/lib/api/types").UpdateByQueryResponse | null>;
-    deleteByQuery(index: string | string[], body: object): Promise<import("@elastic/elasticsearch/lib/api/types").DeleteByQueryResponse | null>;
-    delete(index: string, id: string): Promise<import("@elastic/elasticsearch/lib/api/types").WriteResponseBase | null>;
+    updateByQuerySize(index: string | string[], body: object, size?: number): Promise<any>;
+    updateByQuery(index: string | string[], body: object): Promise<any>;
+    deleteByQuery(index: string | string[], body: object): Promise<any>;
+    delete(index: string, id: string): Promise<any>;
 }
 export { Elasticsearch78 };
