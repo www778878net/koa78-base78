@@ -4,10 +4,11 @@ import { CacheService } from './CacheService';
 export declare class AuthService {
     private log;
     private static _CID_MY;
-    static readonly CID_GUEST: string;
+    private static _CID_GUEST;
     private dbService;
     private cacheService;
     private static instance;
+    static get CID_GUEST(): string;
     constructor();
     init(dbService: DatabaseService, cacheService: CacheService): void;
     static get CID_MY(): string;

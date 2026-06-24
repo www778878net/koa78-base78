@@ -125,6 +125,37 @@ export class Config {
         return config.has(key);
     }
 
+    // 默认 account 值
+    private static DEFAULT_ACCOUNT = {
+        cid_default: '318225842662547456',
+        coname_default: '测试帐套',
+        cid_admin: '318225830079631360',
+        cid_test: '318225842662547456'
+    };
+
+    // 缓存 account 值
+    private accountCache: Record<string, string> = {};
+
+    /**
+     * 获取 account 配置项
+     * @param key account 配置键名 (cid_default, coname_default, cid_admin, cid_test)
+     */
+    public getAccount(key: string): string {
+        if (this.accountCache[key]) return this.accountCache[key];
+        
+        const account = this.configObject?.account;
+        if (account && account[key]) {
+            this.accountCache[key] = account[key];
+            return account[key];
+        }
+        return Config.DEFAULT_ACCOUNT[key] || '';
+    }
+
+    // 静态方法，方便调用
+    public static getAccountValue(key: string): string {
+        return Config.getInstance().getAccount(key);
+    }
+
     private loadExternalConfig(filePath: string): void {
         try {
             delete require.cache[require.resolve(filePath)];

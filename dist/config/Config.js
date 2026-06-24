@@ -10,6 +10,8 @@ const path = tslib_1.__importStar(require("path"));
 const tableConfig_1 = require("./tableConfig");
 let Config = Config_1 = class Config {
     constructor() {
+        // 缓存 account 值
+        this.accountCache = {};
         // 构造函数中不再自动加载配置，等待显式调用init方法
     }
     /**
@@ -110,6 +112,25 @@ let Config = Config_1 = class Config {
     has(key) {
         return config_1.default.has(key);
     }
+    /**
+     * 获取 account 配置项
+     * @param key account 配置键名 (cid_default, coname_default, cid_admin, cid_test)
+     */
+    getAccount(key) {
+        var _a;
+        if (this.accountCache[key])
+            return this.accountCache[key];
+        const account = (_a = this.configObject) === null || _a === void 0 ? void 0 : _a.account;
+        if (account && account[key]) {
+            this.accountCache[key] = account[key];
+            return account[key];
+        }
+        return Config_1.DEFAULT_ACCOUNT[key] || '';
+    }
+    // 静态方法，方便调用
+    static getAccountValue(key) {
+        return Config_1.getInstance().getAccount(key);
+    }
     loadExternalConfig(filePath) {
         try {
             delete require.cache[require.resolve(filePath)];
@@ -126,6 +147,13 @@ let Config = Config_1 = class Config {
     }
 };
 Config.instance = null;
+// 默认 account 值
+Config.DEFAULT_ACCOUNT = {
+    cid_default: '318225842662547456',
+    coname_default: '测试帐套',
+    cid_admin: '318225830079631360',
+    cid_test: '318225842662547456'
+};
 Config = Config_1 = tslib_1.__decorate([
     (0, inversify_1.injectable)(),
     tslib_1.__metadata("design:paramtypes", [])

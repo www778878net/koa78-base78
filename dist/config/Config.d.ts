@@ -17,5 +17,13 @@ export declare class Config {
     get(key: string): any;
     getTable(tableName: string): TableSet | undefined;
     has(key: string): boolean;
+    private static DEFAULT_ACCOUNT;
+    private accountCache;
+    /**
+     * 获取 account 配置项
+     * @param key account 配置键名 (cid_default, coname_default, cid_admin, cid_test)
+     */
+    getAccount(key: string): string;
+    static getAccountValue(key: string): string;
     private loadExternalConfig;
 }

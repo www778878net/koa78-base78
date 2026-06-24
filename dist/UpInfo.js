@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const dayjs_1 = tslib_1.__importDefault(require("dayjs"));
 const snowflake_1 = require("./config/snowflake");
-const accountConstants_1 = require("./config/accountConstants");
+const Config_1 = require("./config/Config");
 class UpInfo {
     constructor(ctx) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16;
@@ -45,7 +45,7 @@ class UpInfo {
         this.sid = "";
         this.cid = "";
         this.uid = "";
-        this.coname = accountConstants_1.CONAME_DEFAULT;
+        this.coname = Config_1.Config.getAccountValue('coname_default');
         this.pwd = "";
         this.weixin = "";
         this.idceo = "";
@@ -91,7 +91,7 @@ class UpInfo {
         if (!pars)
             return;
         this.type = (_c = pars.type) !== null && _c !== void 0 ? _c : 0;
-        this.bcid = (_d = pars.bcid) !== null && _d !== void 0 ? _d : accountConstants_1.CID_ADMIN;
+        this.bcid = (_d = pars.bcid) !== null && _d !== void 0 ? _d : Config_1.Config.getAccountValue('cid_admin');
         this.v = +((_f = (_e = req.header['v']) !== null && _e !== void 0 ? _e : pars.v) !== null && _f !== void 0 ? _f : 24);
         this.getstart = +((_g = pars.getstart) !== null && _g !== void 0 ? _g : 0);
         this.parsn = (_j = (_h = pars["pars[]"]) !== null && _h !== void 0 ? _h : pars.pars) !== null && _j !== void 0 ? _j : "";
@@ -187,8 +187,8 @@ class UpInfo {
         const up2 = new UpInfo(null);
         Object.assign(up2, {
             sid: 'GUEST888-8888-8888-8888-GUEST88GUEST',
-            cid: accountConstants_1.CID_DEFAULT,
-            bcid: accountConstants_1.CID_ADMIN,
+            cid: Config_1.Config.getAccountValue('cid_default'),
+            bcid: Config_1.Config.getAccountValue('cid_admin'),
             mid: (0, snowflake_1.nextIdString)(),
             uname: 'guest',
             pars: [],

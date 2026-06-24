@@ -5,8 +5,14 @@ const tslib_1 = require("tslib");
 const zod_1 = require("zod");
 const ContainerManager_1 = require("../ContainerManager");
 const Config_1 = require("../config/Config");
-const accountConstants_1 = require("../config/accountConstants");
 class AuthService {
+    // 动态获取 CID_GUEST
+    static get CID_GUEST() {
+        if (AuthService._CID_GUEST === null) {
+            AuthService._CID_GUEST = Config_1.Config.getAccountValue('cid_default');
+        }
+        return AuthService._CID_GUEST;
+    }
     constructor() {
         this.log = null;
         this.dbService = null;
@@ -44,7 +50,7 @@ class AuthService {
             console.warn('Failed to get cidmy from config, using default value:', error);
         }
         // 默认值
-        return accountConstants_1.CID_ADMIN;
+        return Config_1.Config.getAccountValue('cid_admin');
     }
     static getInstance() {
         if (!AuthService.instance) {
@@ -107,7 +113,7 @@ class AuthService {
                 up.uid = 'GUEST';
                 up.uname = 'guest';
                 up.cid = AuthService.CID_GUEST;
-                up.coname = accountConstants_1.CONAME_DEFAULT;
+                up.coname = Config_1.Config.getAccountValue('coname_default');
                 up.bcid = up.bcid || up.cid;
                 up.errmsg = "ok";
                 return "ok";
@@ -179,6 +185,6 @@ class AuthService {
 }
 exports.AuthService = AuthService;
 AuthService._CID_MY = null;
-AuthService.CID_GUEST = accountConstants_1.CID_DEFAULT;
+AuthService._CID_GUEST = null;
 AuthService.instance = null;
 //# sourceMappingURL=AuthService.js.map

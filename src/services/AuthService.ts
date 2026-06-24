@@ -5,16 +5,23 @@ import { z } from 'zod';
 import { injectable, inject } from 'inversify';
 import { ContainerManager } from '../ContainerManager';
 import { Config } from '../config/Config';
-import { CID_DEFAULT, CONAME_DEFAULT, CID_ADMIN } from '../config/accountConstants';
 
 
 export class AuthService {
     private log: any = null;
     private static _CID_MY: string | null = null;
-    public static readonly CID_GUEST: string = CID_DEFAULT;
+    private static _CID_GUEST: string | null = null;
     private dbService: DatabaseService | null = null;
     private cacheService: CacheService | null = null;
     private static instance: AuthService | null = null;
+
+    // 动态获取 CID_GUEST
+    public static get CID_GUEST(): string {
+        if (AuthService._CID_GUEST === null) {
+            AuthService._CID_GUEST = Config.getAccountValue('cid_default');
+        }
+        return AuthService._CID_GUEST;
+    }
 
     constructor() {
         // 使用新的日志服务方式
@@ -54,7 +61,7 @@ export class AuthService {
         }
 
         // 默认值
-        return CID_ADMIN;
+        return Config.getAccountValue('cid_admin');
     }
 
     public static getInstance(): AuthService {
@@ -121,7 +128,7 @@ export class AuthService {
             up.uid = 'GUEST';
             up.uname = 'guest';
             up.cid = AuthService.CID_GUEST;
-            up.coname = CONAME_DEFAULT;
+            up.coname = Config.getAccountValue('coname_default');
             up.bcid = up.bcid || up.cid;
             up.errmsg = "ok";
             return "ok";
