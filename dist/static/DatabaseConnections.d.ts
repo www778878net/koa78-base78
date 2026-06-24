@@ -1,17 +1,7 @@
-import Mysql78 from '../dll78/Mysql78';
 import MemCache78 from 'memcache78';
 import Redis78 from 'redis78';
 import Sqlite78 from '../dll78/Sqlite78';
-export interface MySQLConfig {
-    host?: string;
-    port?: number;
-    max?: number;
-    user?: string;
-    password: string;
-    database: string;
-    isLog?: boolean;
-    isCount?: boolean;
-}
+import Postgres78 from '../dll78/Postgres78';
 export interface PostgreSQLConfig {
     host?: string;
     port?: number;
@@ -42,15 +32,15 @@ export interface RedisConfig {
 }
 export declare class DatabaseConnections {
     private static instance;
-    private mysqlConnections;
+    private postgresConnections;
     private sqliteConnections;
     memcache?: MemCache78;
     redis?: Redis78;
-    constructor(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig, sqlites?: Record<string, SQLiteConfig>);
-    static getInstance(mysqls: Record<string, MySQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig, sqlites?: Record<string, SQLiteConfig>): DatabaseConnections;
-    getMySQLConnection(name?: string): Mysql78 | undefined;
+    constructor(postgress: Record<string, PostgreSQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig, sqlites?: Record<string, SQLiteConfig>);
+    static getInstance(postgress: Record<string, PostgreSQLConfig>, memcachedConfig: MemcachedConfig, redisConfig: RedisConfig, sqlites?: Record<string, SQLiteConfig>): DatabaseConnections;
+    getPostgreSQLConnection(name?: string): Postgres78 | undefined;
     getSQLiteConnection(name?: string): Sqlite78 | undefined;
-    getAllMySQLConnections(): Map<string, Mysql78>;
+    getAllPostgreSQLConnections(): Map<string, Postgres78>;
     getAllSQLiteConnections(): Map<string, Sqlite78>;
-    get mysql1(): Mysql78 | undefined;
+    get postgres1(): Postgres78 | undefined;
 }

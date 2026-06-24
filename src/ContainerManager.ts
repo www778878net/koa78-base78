@@ -142,13 +142,13 @@ export class ContainerManager {
             this.initializeLogger();
 
             // 获取数据库和缓存配置
-            const mysqlConfig = config.get('mysqls');
+            const postgresConfig = config.get('postgresqls');
             const memcachedConfig = config.get('memcached');
             const redisConfig = config.get('redis');
             const sqliteConfig = config.get('sqlites');
 
             // 初始化数据库连接
-            const dbConnections = DatabaseConnections.getInstance(mysqlConfig, memcachedConfig, redisConfig, sqliteConfig);//, sqliteConfig
+            const dbConnections = DatabaseConnections.getInstance(postgresConfig, memcachedConfig, redisConfig, sqliteConfig);//, sqliteConfig
 
             // 使用 toConstantValue 绑定已存在的实例
             // 这种方式适用于:

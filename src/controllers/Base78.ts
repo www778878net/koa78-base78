@@ -498,9 +498,9 @@ export default class Base78<T extends BaseSchema> {
 
         // 构建 SQL：自动添加 id 字段，使用 $1, $2... 占位符
         let placeholderIndex = 1;
-        const rowPlaceholders = [];
+        const rowPlaceholders: string[] = [];
         for (let i = 0; i < rowCount; i++) {
-            const rowValues = [];
+            const rowValues: string[] = [];
             for (let j = 0; j < fieldsPerRow; j++) {
                 rowValues.push(`$${placeholderIndex}`);
                 placeholderIndex++;
@@ -580,9 +580,9 @@ export default class Base78<T extends BaseSchema> {
 
         // 构建 SQL：使用 ON CONFLICT DO NOTHING 替代 INSERT IGNORE
         let placeholderIndex = 1;
-        const rowPlaceholders = [];
+        const rowPlaceholders: string[] = [];
         for (let i = 0; i < rowCount; i++) {
-            const rowValues = [];
+            const rowValues: string[] = [];
             for (let j = 0; j < fieldsPerRow; j++) {
                 rowValues.push(`$${placeholderIndex}`);
                 placeholderIndex++;

@@ -1,10 +1,9 @@
-import Mysql78 from '../dll78/Mysql78';
 import MemCache78 from 'memcache78';
 import Redis78 from 'redis78';
 import Sqlite78 from '../dll78/Sqlite78';
 import Postgres78 from '../dll78/Postgres78';
 
-export interface MySQLConfig {
+export interface PostgreSQLConfig {
     host?: string;
     port?: number;
     max?: number;
@@ -15,7 +14,7 @@ export interface MySQLConfig {
     isCount?: boolean;
 }
 
-export interface PostgreSQLConfig {
+export interface MySQLConfig {
     host?: string;
     port?: number;
     max?: number;
@@ -49,35 +48,30 @@ export interface RedisConfig {
 
 export class DatabaseConnections {
     private static instance: DatabaseConnections;
-    private mysqlConnections: Map<string, Mysql78> = new Map();
-    private sqliteConnections: Map<string, Sqlite78> = new Map(); // 注释掉Sqlite78相关代码
+    private postgresConnections: Map<string, Postgres78> = new Map();
+    private sqliteConnections: Map<string, Sqlite78> = new Map();
     public memcache?: MemCache78;
     public redis?: Redis78;
 
     public constructor(
-        mysqls: Record<string, MySQLConfig>,
+        postgress: Record<string, PostgreSQLConfig>,
         memcachedConfig: MemcachedConfig,
         redisConfig: RedisConfig,
-        sqlites?: Record<string, SQLiteConfig>  // 注释掉Sqlite78相关参数
+        sqlites?: Record<string, SQLiteConfig>
     ) {
-        console.log('DatabaseConnections constructor called with mysqls:', JSON.stringify(mysqls, null, 2));
+        console.log('DatabaseConnections constructor called with postgress:', JSON.stringify(postgress, null, 2));
 
-        // 允许空的mysql配置
-        const mysqlEntries = mysqls ? Object.entries(mysqls) : [];
-
-        for (const [name, mysqlConfig] of mysqlEntries) {
-            console.warn(`Creating MySQL connection [${name}] with host:${mysqlConfig.host} db:${mysqlConfig.database} user:${mysqlConfig.user} password:${mysqlConfig.password}`);
-            this.mysqlConnections.set(name, new Mysql78(mysqlConfig));
+        const postgresEntries = postgress ? Object.entries(postgress) : [];
+        for (const [name, pgConfig] of postgresEntries) {
+            console.warn(`Creating PostgreSQL connection [${name}] with host:${pgConfig.host} db:${pgConfig.database} user:${pgConfig.user}`);
+            this.postgresConnections.set(name, new Postgres78(pgConfig));
         }
-
-        // 初始化SQLite连接 - 注释掉这部分代码
 
         if (sqlites) {
             const sqliteEntries = Object.entries(sqlites);
             for (const [name, sqliteConfig] of sqliteEntries) {
                 console.warn(`SQLite ${name} ${sqliteConfig.filename}`);
                 const sqliteInstance = new Sqlite78(sqliteConfig);
-                // 初始化连接
                 sqliteInstance.initialize().catch(err => {
                     console.error(`Failed to initialize SQLite connection ${name}:`, err);
                 });
@@ -85,8 +79,6 @@ export class DatabaseConnections {
             }
         }
 
-
-        // 只有当配置存在且为对象时才创建memcache和redis实例
         if (memcachedConfig && typeof memcachedConfig === 'object') {
             this.memcache = new MemCache78(memcachedConfig);
         }
@@ -99,35 +91,34 @@ export class DatabaseConnections {
     }
 
     public static getInstance(
-        mysqls: Record<string, MySQLConfig>,
+        postgress: Record<string, PostgreSQLConfig>,
         memcachedConfig: MemcachedConfig,
         redisConfig: RedisConfig,
-        sqlites?: Record<string, SQLiteConfig> // 注释掉Sqlite78相关参数
+        sqlites?: Record<string, SQLiteConfig>
     ): DatabaseConnections {
         if (!DatabaseConnections.instance) {
-            // DatabaseConnections.instance = new DatabaseConnections(mysqls, memcachedConfig, redisConfig, sqlites);
-            DatabaseConnections.instance = new DatabaseConnections(mysqls, memcachedConfig, redisConfig, sqlites); // 移除sqlites参数
+            DatabaseConnections.instance = new DatabaseConnections(postgress, memcachedConfig, redisConfig, sqlites);
         }
         return DatabaseConnections.instance;
     }
 
-    public getMySQLConnection(name: string = "default"): Mysql78 | undefined {
-        return this.mysqlConnections.get(name);
+    public getPostgreSQLConnection(name: string = "default"): Postgres78 | undefined {
+        return this.postgresConnections.get(name);
     }
 
-    public getSQLiteConnection(name: string = "default"): Sqlite78 | undefined { // 注释掉Sqlite78相关方法
+    public getSQLiteConnection(name: string = "default"): Sqlite78 | undefined {
         return this.sqliteConnections.get(name);
     }
 
-    public getAllMySQLConnections(): Map<string, Mysql78> {
-        return this.mysqlConnections;
+    public getAllPostgreSQLConnections(): Map<string, Postgres78> {
+        return this.postgresConnections;
     }
 
-    public getAllSQLiteConnections(): Map<string, Sqlite78> { // 注释掉Sqlite78相关方法
+    public getAllSQLiteConnections(): Map<string, Sqlite78> {
         return this.sqliteConnections;
     }
 
-    get mysql1(): Mysql78 | undefined {
-        return this.getMySQLConnection("default");
+    get postgres1(): Postgres78 | undefined {
+        return this.getPostgreSQLConnection("default");
     }
 }

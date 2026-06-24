@@ -24,13 +24,13 @@ export class DatabaseService {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
         }
-        const mysql = this.dbConnections.getMySQLConnection(dbName);
-        if (!mysql) {
-            this.log.error('Default MySQL connection not found' + dbName);
-            throw new Error('Default MySQL connection not found' + dbName);
+        const pg = this.dbConnections.getPostgreSQLConnection(dbName);
+        if (!pg) {
+            this.log.error('Default PostgreSQL connection not found ' + dbName);
+            throw new Error('Default PostgreSQL connection not found ' + dbName);
         }
         try {
-            return await mysql.doGet(sql, values, up);
+            return await pg.doGet(sql, values, up);
         } catch (error) {
             this.log.error(dbName + 'Error in DatabaseService.get:', error);
             throw error;
@@ -42,13 +42,13 @@ export class DatabaseService {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
         }
-        const mysql = this.dbConnections.getMySQLConnection(dbName);
-        if (!mysql) {
-            this.log.error('Default MySQL connection not found');
-            throw new Error('Default MySQL connection not found');
+        const pg = this.dbConnections.getPostgreSQLConnection(dbName);
+        if (!pg) {
+            this.log.error('Default PostgreSQL connection not found');
+            throw new Error('Default PostgreSQL connection not found');
         }
         try {
-            const result = await mysql.doM(sql, values, up);
+            const result = await pg.doM(sql, values, up);
 
             // 如果受影响行数为0，使用up对象记录错误
             if (result.affectedRows === 0) {
@@ -71,13 +71,13 @@ export class DatabaseService {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
         }
-        const mysql = this.dbConnections.getMySQLConnection(dbName);
-        if (!mysql) {
-            this.log.error('Default MySQL connection not found');
-            throw new Error('Default MySQL connection not found');
+        const pg = this.dbConnections.getPostgreSQLConnection(dbName);
+        if (!pg) {
+            this.log.error('Default PostgreSQL connection not found');
+            throw new Error('Default PostgreSQL connection not found');
         }
         try {
-            return await mysql.doT(cmds, values, errtexts, logtext, logvalue, up);
+            return await pg.doT(cmds, values, errtexts, logtext, logvalue, up);
         } catch (error) {
             this.log.error(dbName + 'Error in DatabaseService.doT:', error);
             throw error;
@@ -89,20 +89,20 @@ export class DatabaseService {
             this.log.error('DatabaseConnections not initialized');
             throw new Error('DatabaseConnections not initialized');
         }
-        const mysql = this.dbConnections.getMySQLConnection(dbName);
-        if (!mysql) {
-            this.log.error('Default MySQL connection not found');
-            throw new Error('Default MySQL connection not found');
+        const pg = this.dbConnections.getPostgreSQLConnection(dbName);
+        if (!pg) {
+            this.log.error('Default PostgreSQL connection not found');
+            throw new Error('Default PostgreSQL connection not found');
         }
         try {
-            return await mysql.doMAdd(sql, values, up);
+            return await pg.doMAdd(sql, values, up);
         } catch (error) {
             this.log.error(dbName + 'Error in DatabaseService.mAdd:', error);
             throw error;
         }
     }
 
-    // SQLite相关方法
+    // SQLite 方法（保留，不影响 PostgreSQL 改造）
     async sqliteGet(sql: string, values: any[], up: UpInfo, dbName: string = "default"): Promise<any> {
         if (!this.dbConnections) {
             this.log.error('DatabaseConnections not initialized');
@@ -174,6 +174,4 @@ export class DatabaseService {
             throw error;
         }
     }
-
-    // Add other methods...
 }
