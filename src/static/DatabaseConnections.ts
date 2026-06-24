@@ -2,8 +2,20 @@ import Mysql78 from '../dll78/Mysql78';
 import MemCache78 from 'memcache78';
 import Redis78 from 'redis78';
 import Sqlite78 from '../dll78/Sqlite78';
+import Postgres78 from '../dll78/Postgres78';
 
 export interface MySQLConfig {
+    host?: string;
+    port?: number;
+    max?: number;
+    user?: string;
+    password: string;
+    database: string;
+    isLog?: boolean;
+    isCount?: boolean;
+}
+
+export interface PostgreSQLConfig {
     host?: string;
     port?: number;
     max?: number;
