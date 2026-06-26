@@ -37,4 +37,16 @@ else
     exit 1
 fi
 
+# 启动PostgreSQL服务
+echo "🚀 启动PostgreSQL服务..."
+service postgresql start
+sleep 2
+
+if service postgresql status > /dev/null; then
+    echo "✅ PostgreSQL服务启动成功"
+else
+    echo "❌ PostgreSQL服务启动失败"
+    exit 1
+fi
+
 echo "🎉 所有服务均已启动完成！"
