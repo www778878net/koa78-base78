@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 测试 - simple_downcenter</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f172a;color:#e2e8f0;padding:30px;max-width:800px;margin:0 auto}
+h1{color:#38bdf8;margin-bottom:24px;font-size:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border:1px solid #334155;border-radius:10px;padding:16px;background:#1e293b}
+.card h3{color:#94a3b8;font-size:14px;margin-bottom:8px}
+.card .label{font-size:11px;color:#64748b}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600;margin-top:8px;transition:.15s}
+.btn-add{background:#16a34a;color:#fff}
+.btn-add:hover{background:#15803d}
+.btn-get{background:#2563eb;color:#fff}
+.btn-get:hover{background:#1d4ed8}
+.btn-upd{background:#d97706;color:#fff}
+.btn-upd:hover{background:#b45309}
+.btn-del{background:#dc2626;color:#fff}
+.btn-del:hover{background:#b91c1c}
+.log{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;margin-top:16px;max-height:500px;overflow:auto}
+.log pre{white-space:pre-wrap;word-break:break-all;font-size:13px;color:#94a3b8;font-family:Consolas,monospace}
+.log .ok{color:#4ade80}
+.log .err{color:#f87171}
+.log .info{color:#38bdf8;font-size:12px;margin-bottom:6px}
+.btn-clear{margin-top:12px;padding:8px 16px;background:#475569;color:#cbd5e1;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+</style>
+</head>
+<body>
+
+<h1>文件中心 simple_downcenter 接口测试</h1>
+
+<div class="grid">
+  <div class="card">
+    <h3>1. 新增文件 <span class="label">/mAdd</span></h3>
+    <button class="btn btn-add" onclick="testAdd()">新增测试文件</button>
+    <button class="btn btn-add" style="margin-top:6px" onclick="testAdd2()">再新增一个</button>
+  </div>
+  <div class="card">
+    <h3>2. 查询列表 <span class="label">/get</span></h3>
+    <button class="btn btn-get" onclick="testQuery()">查询全部</button>
+  </div>
+  <div class="card">
+    <h3>3. 更新文件 <span class="label">/mUpdateByid</span></h3>
+    <button class="btn btn-upd" onclick="testUpdate()" id="btnUpd" disabled>先查询才有 ID</button>
+  </div>
+  <div class="card">
+    <h3>4. 删除文件 <span class="label">/mdel</span></h3>
+    <button class="btn btn-del" onclick="testDelete()" id="btnDel" disabled>先查询才有 ID</button>
+  </div>
+</div>
+
+<button class="btn-clear" onclick="clearLog()">清空日志</button>
+
+<div class="log" id="log"><div class="info">等待操作...</div></div>
+
+<script>
+var BASE = '/apiexhibitor/simple/simple_downcenter';
+var lastId = null;
+
+function log(msg, css) {
+  var d = document.getElementById('log');
+  var t = new Date().toTimeString().slice(0,8);
+  d.innerHTML += '<pre class="'+(css||'')+'">['+t+'] '+msg+'</pre>';
+  d.scrollTop = d.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('log').innerHTML = '<div class="info">已清空</div>';
+}
+
+function post(action, body) {
+  log('→ '+action+' '+JSON.stringify(body), 'info');
+  return fetch(BASE+'/'+action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', sid: 'GUEST888-8888-8888-8888-GUEST88GUEST', uname: encodeURIComponent('guest') },
+    body: new URLSearchParams({ sid: 'GUEST888-8888-8888-8888-GUEST88GUEST', mid: '0', v: 24, json: 1, uname: 'guest', ...body }).toString()
+  }).then(function(r){ return r.text(); }).then(function(t){
+    try { var j = JSON.parse(t); log(JSON.stringify(j, null, 2), 'ok'); return j; }
+    catch(e) { log(t, 'ok'); return t; }
+  }).catch(function(e){ log('请求失败: ' + e, 'err'); });
+}
+
+function testAdd() {
+  post('mAdd', { pars: JSON.stringify(['测试文件.pdf', 'pdf', 2048576, 'https://cdn.example.com/test.pdf', '2026-07-01 10:00:00', 0]), cols: JSON.stringify(['filename','fileformat','filesize','fileurl','uploadtime','state']) });
+}
+
+function testAdd2() {
+  post('mAdd', { pars: JSON.stringify(['数据报表.xlsx', 'xlsx', 512000, 'https://cdn.example.com/report.xlsx', '2026-07-02 08:30:00', 0]), cols: JSON.stringify(['filename','fileformat','filesize','fileurl','uploadtime','state']) });
+}
+
+function testQuery() {
+  post('get', { pars: JSON.stringify([]), cols: JSON.stringify(['all']), getstart: '0', getnumber: '10' }).then(function(r){
+    var items = (r && r.back) || [];
+    if (items.length) { lastId = items[0].id; document.getElementById('btnUpd').disabled = false; document.getElementById('btnUpd').textContent = '更新 ID='+lastId; document.getElementById('btnDel').disabled = false; document.getElementById('btnDel').textContent = '删除 ID='+lastId; }
+  });
+}
+
+function testUpdate() {
+  if (!lastId) return log('请先查询获取 ID', 'err');
+  post('mUpdateByid', { pars: JSON.stringify([lastId, '改名后的文件.pdf']), cols: JSON.stringify(['id','filename']) });
+}
+
+function testDelete() {
+  if (!lastId) return log('请先查询获取 ID', 'err');
+  if (!confirm('确认删除 ID=' + lastId + ' ？')) return;
+  post('mdel', { pars: JSON.stringify([lastId]), cols: JSON.stringify(['id']) });
+}
+</script>
+</body>
+</html>
