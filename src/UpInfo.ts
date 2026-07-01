@@ -111,7 +111,7 @@ export default class UpInfo {
         this.sid = req.header['sid'] ?? pars.sid ?? '';
         this.sid ??= "";
 
-        this.mid = pars.mid ?? UpInfo.getNewid();
+        this.mid = pars.mid ?? nextIdString();
         this.getnumber = +(pars.getnumber ?? 15);
         this.pcid = req.header['pcid'] ?? pars.pcid ?? '';
         this.pcname = req.header['pcname'] ?? pars.pcname ?? '';

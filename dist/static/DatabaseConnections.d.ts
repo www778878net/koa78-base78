@@ -12,6 +12,16 @@ export interface PostgreSQLConfig {
     isLog?: boolean;
     isCount?: boolean;
 }
+export interface MySQLConfig {
+    host?: string;
+    port?: number;
+    max?: number;
+    user?: string;
+    password: string;
+    database: string;
+    isLog?: boolean;
+    isCount?: boolean;
+}
 export interface SQLiteConfig {
     filename: string;
     isLog?: boolean;

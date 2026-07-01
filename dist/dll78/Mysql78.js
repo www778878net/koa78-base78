@@ -562,7 +562,8 @@ class Mysql78 {
                 return 'ok';
             }
             catch (err) {
-                this.log.error('_saveLog error', err);
+                const errMsg = err instanceof Error ? err.message : String(err);
+                this.log.error(`_saveLog error: ${errMsg} | sql: ${sb} | dlong: ${dlong} | cmdtext: ${cmdtext.substring(0, 200)}`, err);
                 return 'error';
             }
         });

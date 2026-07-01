@@ -100,7 +100,7 @@ class UpInfo {
         this.pwd = (_q = (_p = req.header['pwd']) !== null && _p !== void 0 ? _p : pars.pwd) !== null && _q !== void 0 ? _q : '';
         this.sid = (_s = (_r = req.header['sid']) !== null && _r !== void 0 ? _r : pars.sid) !== null && _s !== void 0 ? _s : '';
         (_t = this.sid) !== null && _t !== void 0 ? _t : (this.sid = "");
-        this.mid = (_u = pars.mid) !== null && _u !== void 0 ? _u : UpInfo.getNewid();
+        this.mid = (_u = pars.mid) !== null && _u !== void 0 ? _u : (0, snowflake_1.nextIdString)();
         this.getnumber = +((_v = pars.getnumber) !== null && _v !== void 0 ? _v : 15);
         this.pcid = (_x = (_w = req.header['pcid']) !== null && _w !== void 0 ? _w : pars.pcid) !== null && _x !== void 0 ? _x : '';
         this.pcname = (_z = (_y = req.header['pcname']) !== null && _y !== void 0 ? _y : pars.pcname) !== null && _z !== void 0 ? _z : '';
