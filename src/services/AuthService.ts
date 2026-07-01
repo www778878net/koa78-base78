@@ -149,11 +149,11 @@ export class AuthService {
                 JOIN lovers_auth la ON l.id = la.ikuser
                 LEFT JOIN companysuser cu ON cu.uid = l.id AND cu.cid = l.idcodef
                 LEFT JOIN companys c ON l.idcodef = c.id
-                WHERE la.sid = ? OR la.sid_web = ?
+                WHERE la.sid = $1 OR la.sid_web = $2
             `;
             if (dbname != "default")
                 cmdtext = "select t1.* ,companys.coname,companys.uid as idceo,companys.id as cid  from    (SELECT uname,pwd,id,upby,uptime,sid_web_date,  " +
-                    "  idcoDef,openweixin ,truename   FROM lovers Where sid=? or sid_web=?)as t1 LEFT JOIN `companysuser` as t2 on" +
+                    "  idcoDef,openweixin ,truename   FROM lovers Where sid=$1 or sid_web=$2)as t1 LEFT JOIN `companysuser` as t2 on" +
                     " t2.uid=t1.id and t2.cid=t1.idcodef left join companys    on t2.cid=companys.id";
             const values = [up.sid, up.sid];
             const result = await this.dbService?.get(cmdtext, values, up, dbname);
