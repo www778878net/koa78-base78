@@ -711,6 +711,50 @@ export default class Base78<T extends BaseSchema> {
         }
     }
 
+    /**
+     * 按帐套公开查询（无权限校验）
+     * 需要在表配置中设置 allowBcid: true 才能调用
+     */
+    @ApiMethod()
+    async getbyBcid(colp?: string[]): Promise<object> {
+        if (!this.tableConfig.allowBcid) {
+            this._setBack(-403, "getbyBcid not allowed for this table");
+            return [];
+        }
+        const bcid = this.up.bcid;
+        if (!bcid) {
+            this._setBack(-2, "bcid missing");
+            return [];
+        }
+
+        colp = colp || this.up.cols || this.tableConfig.cols;
+        if (this.up.pars.length < colp.length) {
+            colp = colp.slice(0, this.up.pars.length);
+        }
+
+        let queryParams = [bcid];
+        let placeholderIndex = 2;
+        let whereClause = '"cid"=$1';
+
+        if (colp && this.up.pars && colp.length > 0) {
+            for (let i = 0; i < colp.length; i++) {
+                if (this.up.pars[i] !== undefined && this.up.pars[i] !== null && this.up.pars[i] !== "") {
+                    whereClause += ` AND "${colp[i]}"=$${placeholderIndex}`;
+                    queryParams.push(this.up.pars[i]);
+                    placeholderIndex++;
+                }
+            }
+        }
+
+        queryParams.push(this.up.getnumber || 15);
+        const limitPlaceholder = placeholderIndex++;
+        queryParams.push(this.up.getstart || 0);
+        const offsetPlaceholder = placeholderIndex++;
+
+        const query = `SELECT * FROM "${this.getDynamicTableName()}" WHERE ${whereClause} ORDER BY uptime DESC LIMIT $${limitPlaceholder} OFFSET $${offsetPlaceholder}`;
+        return await this.dbService.get(query, queryParams, this.up);
+    }
+
     @ApiMethod()
     async get(colp?: string[]): Promise<object> {
         // colp现在控制WHERE条件字段名

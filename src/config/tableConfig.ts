@@ -5,6 +5,7 @@ export interface TableSet {
     cols: string[];
     colsImp: string[];
     uidcid: 'cid' | 'uid';
+    allowBcid?: boolean;
 }
 
 export interface TableConfig {
